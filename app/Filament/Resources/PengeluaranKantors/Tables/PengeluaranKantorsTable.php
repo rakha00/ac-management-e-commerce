@@ -63,9 +63,6 @@ class PengeluaranKantorsTable
                         ->action(fn (Collection $records) => $records->each->delete()),
                 ]),
             ])
-            ->headerActions([
-                CreateAction::make(),
-            ])
             ->defaultSort('tanggal', 'desc');
     }
 }
