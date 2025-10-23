@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('pengeluaran', 15, 2)->nullable();
             $table->string('keterangan_pengeluaran')->nullable();
             $table->string('bukti_pembayaran')->nullable(); // Tambahan kolom foto
-            $table->timestamps(); 
+            $table->timestamps();
             $table->softDeletes();
         });
     }

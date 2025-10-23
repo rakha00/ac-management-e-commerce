@@ -2,16 +2,11 @@
 
 namespace App\Filament\Resources\Karyawans\Tables;
 
-use App\Models\Karyawan;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction as ExcelExportAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use pxlrbt\FilamentExcel\Columns\Column;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -19,6 +14,9 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction as ExcelExportAction;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class KaryawansTable
 {
@@ -31,7 +29,7 @@ class KaryawansTable
                     ->sortable(),
                 TextColumn::make('jabatan')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'admin' => 'danger',
                         'gudang' => 'warning',
                         'helper' => 'info',
@@ -84,7 +82,7 @@ class KaryawansTable
                 Filter::make('aktif')
                     ->label('Status Aktif')
                     ->default()
-                    ->query(fn(Builder $query): Builder => $query->where('status_aktif', true)),
+                    ->query(fn (Builder $query): Builder => $query->where('status_aktif', true)),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -105,7 +103,7 @@ class KaryawansTable
                                 Column::make('created_at'),
                             ])
                             ->withWriterType(\Maatwebsite\Excel\Excel::XLSX)
-                            ->withFilename(fn() => 'karyawans_' . now()->format('Ymd_His'))
+                            ->withFilename(fn () => 'karyawans_'.now()->format('Ymd_His'))
                             ->askForFilename()
                             ->askForWriterType(),
                     ]),

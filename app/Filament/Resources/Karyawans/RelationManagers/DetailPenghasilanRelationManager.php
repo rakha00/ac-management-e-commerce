@@ -2,9 +2,6 @@
 
 namespace App\Filament\Resources\Karyawans\RelationManagers;
 
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction as ExcelExportAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use pxlrbt\FilamentExcel\Columns\Column;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -19,12 +16,17 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction as ExcelExportAction;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class DetailPenghasilanRelationManager extends RelationManager
 {
     protected static string $relationship = 'detailPenghasilan';
 
     protected static ?string $recordTitleAttribute = 'tanggal';
+
+    protected static ?string $pluralLabel = 'detail penghasilan karyawan';
 
     public function form(Schema $schema): Schema
     {
@@ -87,11 +89,11 @@ class DetailPenghasilanRelationManager extends RelationManager
                         return $query
                             ->when(
                                 $data['from'] ?? null,
-                                fn(Builder $q, $date): Builder => $q->whereDate('tanggal', '>=', $date)
+                                fn (Builder $q, $date): Builder => $q->whereDate('tanggal', '>=', $date)
                             )
                             ->when(
                                 $data['until'] ?? null,
-                                fn(Builder $q, $date): Builder => $q->whereDate('tanggal', '<=', $date)
+                                fn (Builder $q, $date): Builder => $q->whereDate('tanggal', '<=', $date)
                             );
                     }),
             ])
@@ -116,7 +118,7 @@ class DetailPenghasilanRelationManager extends RelationManager
                                 Column::make('keterangan'),
                             ])
                             ->withWriterType(\Maatwebsite\Excel\Excel::XLSX)
-                            ->withFilename(fn($resource) => 'detail_penghasilan_' . now()->format('Ymd_His'))
+                            ->withFilename(fn ($resource) => 'detail_penghasilan_'.now()->format('Ymd_His'))
                             ->askForFilename()
                             ->askForWriterType(),
                     ]),

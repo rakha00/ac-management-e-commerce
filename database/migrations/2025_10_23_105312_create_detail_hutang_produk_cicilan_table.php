@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pengeluaran_kantors', function (Blueprint $table) {
+        Schema::create('detail_hutang_produk_cicilan', function (Blueprint $table) {
             $table->id();
-            $table->date('tanggal');
-            $table->decimal('pengeluaran', 15, 2)->nullable();
-            $table->string('keterangan_pengeluaran')->nullable();
-            $table->string('bukti_pembayaran')->nullable(); // Tambahan kolom foto
+            $table->foreignId('hutang_produk_id')->constrained('hutang_produk')->onDelete('cascade');
+            $table->integer('nominal_cicilan');
+            $table->date('tanggal_cicilan');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pengeluaran_kantors');
+        Schema::dropIfExists('detail_hutang_produk_cicilan');
     }
 };
