@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Karyawan;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -22,17 +22,17 @@ class DatabaseSeeder extends Seeder
         foreach ($roles as $role) {
             $user = User::query()->create([
                 'name' => $role,
-                'email' => $role . '@gmail.com',
+                'email' => $role.'@gmail.com',
                 'password' => bcrypt($role),
             ]);
 
             Karyawan::query()->create([
                 'user_id' => $user->id,
-                'nama' => ucfirst($role) . ' User',
+                'nama' => ucfirst($role).' User',
                 'jabatan' => $role,
-                'no_hp' => '08' . rand(100000000, 999999999),
+                'no_hp' => '08'.rand(100000000, 999999999),
                 'gaji_pokok' => 5000000,
-                'alamat' => 'Alamat ' . ucfirst($role),
+                'alamat' => 'Alamat '.ucfirst($role),
                 'foto_ktp' => 'N/A',
                 'dokumen_tambahan' => 'N/A',
                 'kontak_darurat_serumah' => '081234567890',

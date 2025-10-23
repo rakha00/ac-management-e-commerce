@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Karyawan extends Model
 {
@@ -27,8 +28,22 @@ class Karyawan extends Model
         'tanggal_terakhir_aktif',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'gaji_pokok' => 'integer',
+            'status_aktif' => 'boolean',
+            'tanggal_terakhir_aktif' => 'date',
+        ];
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function detailPenghasilan(): HasMany
+    {
+        return $this->hasMany(DetailPenghasilanKaryawan::class);
     }
 }

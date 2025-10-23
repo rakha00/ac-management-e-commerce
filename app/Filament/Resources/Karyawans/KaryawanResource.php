@@ -22,14 +22,15 @@ class KaryawanResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    /**
-     * Hide navigation for non-admin users.
-     */
+    protected static ?string $pluralModelLabel = 'karyawan';
+
+    protected static ?string $slug = 'karyawan';
+
     public static function shouldRegisterNavigation(): bool
     {
         $user = auth()->user();
 
-        if (!$user || !$user->karyawan) {
+        if (! $user || ! $user->karyawan) {
             return false;
         }
 
@@ -49,7 +50,7 @@ class KaryawanResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DetailPenghasilanRelationManager::class,
         ];
     }
 
