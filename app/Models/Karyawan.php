@@ -42,7 +42,7 @@ class Karyawan extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function detailPenghasilan(): HasMany
+    public function detailPenghasilanKaryawan(): HasMany
     {
         return $this->hasMany(DetailPenghasilanKaryawan::class);
     }

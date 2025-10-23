@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Karyawans\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -46,9 +47,11 @@ class KaryawansTable
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('kontak_darurat_serumah')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('kontak_darurat_tidak_serumah')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('status_aktif')
                     ->boolean(),
                 TextColumn::make('created_at')
@@ -66,8 +69,6 @@ class KaryawansTable
             ])
             ->filters([
                 TrashedFilter::make(),
-
-                // Filter jabatan
                 SelectFilter::make('jabatan')
                     ->options([
                         'admin' => 'Admin',
@@ -77,8 +78,6 @@ class KaryawansTable
                         'staff' => 'Staff',
                         'sales' => 'Sales',
                     ]),
-
-                // Filter status_aktif
                 Filter::make('aktif')
                     ->label('Status Aktif')
                     ->default()
@@ -86,6 +85,7 @@ class KaryawansTable
             ])
             ->recordActions([
                 EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 ExcelExportAction::make('export_excel')

@@ -50,7 +50,7 @@ class KaryawanResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\DetailPenghasilanRelationManager::class,
+            RelationManagers\DetailPenghasilanKaryawanRelationManager::class,
         ];
     }
 
