@@ -19,5 +19,4 @@ class UnitAC extends Model
         'stock_keluar',
         'remarks',
     ];
-
 }
