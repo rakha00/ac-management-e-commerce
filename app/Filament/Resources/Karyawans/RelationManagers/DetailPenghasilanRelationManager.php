@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Karyawans\RelationManagers;
 
-use Filament\Actions\Action;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction as ExcelExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -85,11 +87,11 @@ class DetailPenghasilanRelationManager extends RelationManager
                         return $query
                             ->when(
                                 $data['from'] ?? null,
-                                fn (Builder $q, $date): Builder => $q->whereDate('tanggal', '>=', $date)
+                                fn(Builder $q, $date): Builder => $q->whereDate('tanggal', '>=', $date)
                             )
                             ->when(
                                 $data['until'] ?? null,
-                                fn (Builder $q, $date): Builder => $q->whereDate('tanggal', '<=', $date)
+                                fn(Builder $q, $date): Builder => $q->whereDate('tanggal', '<=', $date)
                             );
                     }),
             ])
@@ -101,68 +103,23 @@ class DetailPenghasilanRelationManager extends RelationManager
                 CreateAction::make(),
             ])
             ->toolbarActions([
-                Action::make('export_excel')
+                ExcelExportAction::make('export_excel')
                     ->label('Export Excel')
-                    ->form([
-                        DatePicker::make('from')->label('Tanggal dari'),
-                        DatePicker::make('until')->label('Tanggal sampai'),
-                    ])
-                    ->action(function (array $data) {
-                        $owner = $this->getOwnerRecord();
-
-                        $query = $owner->detailPenghasilan()
-                            ->when(
-                                $data['from'] ?? null,
-                                fn (Builder $q, $date) => $q->whereDate('tanggal', '>=', $date)
-                            )
-                            ->when(
-                                $data['until'] ?? null,
-                                fn (Builder $q, $date) => $q->whereDate('tanggal', '<=', $date)
-                            );
-
-                        $rows = $query->get([
-                            'tanggal',
-                            'kasbon',
-                            'lembur',
-                            'bonus',
-                            'potongan',
-                            'keterangan',
-                        ]);
-
-                        $filename = 'detail_penghasilan_'.($owner->nama ?? 'karyawan').'_'.now()->format('Ymd_His').'.csv';
-
-                        $handle = fopen('php://temp', 'r+');
-
-                        // Header
-                        fputcsv($handle, [
-                            'tanggal',
-                            'kasbon',
-                            'lembur',
-                            'bonus',
-                            'potongan',
-                            'keterangan',
-                        ]);
-
-                        foreach ($rows as $row) {
-                            fputcsv($handle, [
-                                optional($row->tanggal)->format('Y-m-d'),
-                                $row->kasbon,
-                                $row->lembur,
-                                $row->bonus,
-                                $row->potongan,
-                                $row->keterangan,
-                            ]);
-                        }
-
-                        rewind($handle);
-
-                        return response()->streamDownload(function () use ($handle) {
-                            fpassthru($handle);
-                            fclose($handle);
-                        }, $filename, [
-                            'Content-Type' => 'text/csv',
-                        ]);
-                    }),
+                    ->exports([
+                        ExcelExport::make('table')
+                            ->withColumns([
+                                Column::make('tanggal'),
+                                Column::make('kasbon'),
+                                Column::make('lembur'),
+                                Column::make('bonus'),
+                                Column::make('potongan'),
+                                Column::make('keterangan'),
+                            ])
+                            ->withWriterType(\Maatwebsite\Excel\Excel::XLSX)
+                            ->withFilename(fn($resource) => 'detail_penghasilan_' . now()->format('Ymd_His'))
+                            ->askForFilename()
+                            ->askForWriterType(),
+                    ]),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
