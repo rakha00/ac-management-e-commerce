@@ -14,6 +14,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\Indicator;
@@ -66,16 +67,20 @@ class DetailPenghasilanKaryawanRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('kasbon')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total Kasbon')->numeric()),
                 TextColumn::make('lembur')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total Lembur')->numeric()),
                 TextColumn::make('bonus')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total Bonus')->numeric()),
                 TextColumn::make('potongan')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->label('Total Potongan')->numeric()),
                 TextColumn::make('keterangan')
                     ->limit(30)
                     ->wrap(),
