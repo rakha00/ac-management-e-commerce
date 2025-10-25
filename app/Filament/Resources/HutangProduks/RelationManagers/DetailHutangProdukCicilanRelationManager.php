@@ -36,7 +36,41 @@ class DetailHutangProdukCicilanRelationManager extends RelationManager
                 TextInput::make('nominal_cicilan')
                     ->numeric()
                     ->required()
-                    ->default(0),
+                    ->default(0)
+                    ->prefix('Rp')
+                    ->minValue(1)
+                    ->maxValue(function () {
+                        $owner = $this->getOwnerRecord();
+                        if (! $owner) {
+                            return null;
+                        }
+                        $total = (int) ($owner->total_hutang ?? 0);
+                        $paid = (int) $owner->detailHutangProdukCicilan()->sum('nominal_cicilan');
+
+                        return max($total - $paid, 0);
+                    })
+                    ->rules(function () {
+                        $owner = $this->getOwnerRecord();
+                        if (! $owner) {
+                            return ['numeric', 'min:1'];
+                        }
+                        $total = (int) ($owner->total_hutang ?? 0);
+                        $paid = (int) $owner->detailHutangProdukCicilan()->sum('nominal_cicilan');
+                        $sisa = max($total - $paid, 0);
+
+                        return ['numeric', 'min:1', 'max:'.$sisa];
+                    })
+                    ->helperText(function () {
+                        $owner = $this->getOwnerRecord();
+                        if (! $owner) {
+                            return null;
+                        }
+                        $total = (int) ($owner->total_hutang ?? 0);
+                        $paid = (int) $owner->detailHutangProdukCicilan()->sum('nominal_cicilan');
+                        $sisa = max($total - $paid, 0);
+
+                        return 'Max: Rp '.number_format($sisa, 0, ',', '.');
+                    }),
                 DatePicker::make('tanggal_cicilan')
                     ->required(),
             ])
