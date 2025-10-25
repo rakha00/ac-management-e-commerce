@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 
 class UnitAC extends Model
 {
@@ -42,8 +42,8 @@ class UnitAC extends Model
     {
         static::saving(function ($unitAc) {
             // Hitung stock_akhir sebelum disimpan ke database
-            $unitAc->stock_akhir = ($unitAc->stock_awal ?? 0) 
-                                 + ($unitAc->stock_masuk ?? 0) 
+            $unitAc->stock_akhir = ($unitAc->stock_awal ?? 0)
+                                 + ($unitAc->stock_masuk ?? 0)
                                  - ($unitAc->stock_keluar ?? 0);
         });
     }

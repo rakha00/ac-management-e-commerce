@@ -11,6 +11,7 @@ class BarangMasuk extends Model
         'tanggal',
         'nomor_barang_masuk',
     ];
+
     public function barangMasukDetails()
     {
         return $this->hasMany(BarangMasukDetail::class);

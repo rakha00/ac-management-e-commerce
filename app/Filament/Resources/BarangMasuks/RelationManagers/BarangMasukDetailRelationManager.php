@@ -2,25 +2,26 @@
 
 namespace App\Filament\Resources\BarangMasuks\RelationManagers;
 
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Schema;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\BulkActionGroup;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+
 class BarangMasukDetailRelationManager extends RelationManager
 {
     protected static string $relationship = 'barangMasukDetails';
@@ -49,26 +50,26 @@ class BarangMasukDetailRelationManager extends RelationManager
                         }
                     })
                     ->columnSpanFull(),
-                
+
                 TextInput::make('sku')
                     ->label('SKU')
                     ->disabled()
                     ->dehydrated()
                     ->required(),
-                
+
                 TextInput::make('nama_unit')
                     ->label('Nama Unit')
                     ->disabled()
                     ->dehydrated()
                     ->required(),
-                
+
                 TextInput::make('jumlah_barang_masuk')
                     ->label('Jumlah Barang Masuk')
                     ->required()
                     ->numeric()
                     ->minValue(1)
                     ->default(1),
-                
+
                 Textarea::make('remarks')
                     ->label('Catatan')
                     ->maxLength(65535)
@@ -85,28 +86,28 @@ class BarangMasukDetailRelationManager extends RelationManager
                     ->label('SKU')
                     ->searchable()
                     ->sortable(),
-                
+
                 TextColumn::make('nama_unit')
                     ->label('Nama Unit')
                     ->searchable()
                     ->sortable(),
-                
+
                 TextColumn::make('unitAc.nama_merk')
                     ->label('Unit AC')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
-                
+
                 TextColumn::make('jumlah_barang_masuk')
                     ->label('Jumlah')
                     ->numeric()
                     ->sortable(),
-                
+
                 TextColumn::make('remarks')
                     ->label('Catatan')
                     ->limit(50)
                     ->toggleable(),
-                
+
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime()

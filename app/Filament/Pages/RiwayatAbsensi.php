@@ -3,16 +3,27 @@
 namespace App\Filament\Pages;
 
 use App\Models\Absensi;
+use BackedEnum;
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
 
-class RiwayatAbsensi extends Page
+class RiwayatAbsensi extends Page implements HasTable
 {
+    use InteractsWithTable;
+
     protected string $view = 'filament.pages.riwayat-absensi';
 
-    // Navigasi hanya untuk non-admin (karyawan)
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
     public static function shouldRegisterNavigation(): bool
     {
         $jabatan = auth()->user()?->karyawan?->jabatan;
+
         return in_array($jabatan, ['gudang', 'helper', 'teknisi', 'staff', 'sales']);
     }
 
@@ -21,18 +32,41 @@ class RiwayatAbsensi extends Page
         return 'Riwayat Absensi';
     }
 
-    // Sediakan data riwayat untuk Blade
-    public function getViewData(): array
+    public function table(Table $table): Table
     {
-        $karyawan = auth()->user()?->karyawan;
+        $karyawanId = auth()->user()?->karyawan?->id ?? 0;
 
-        $items = Absensi::query()
-            ->where('karyawan_id', $karyawan?->id)
-            ->orderByDesc('tanggal')
-            ->orderByDesc('waktu_absen')
-            ->limit(60)
-            ->get();
+        return $table
+            ->query(
+                Absensi::query()
+                    ->where('karyawan_id', $karyawanId)
+                    ->orderByDesc('tanggal')
+                    ->orderByDesc('waktu_absen')
+            )
+            ->columns([
+                TextColumn::make('tanggal')
+                    ->label('Tanggal')
+                    ->date()
+                    ->sortable(),
 
-        return compact('items');
+                TextColumn::make('waktu_absen')
+                    ->label('Waktu')
+                    ->dateTime('H:i:s')
+                    ->sortable(),
+
+                IconColumn::make('telat')
+                    ->label('Telat')
+                    ->boolean(),
+
+                TextColumn::make('keterangan')
+                    ->label('Keterangan')
+                    ->wrap(),
+
+                IconColumn::make('terkonfirmasi')
+                    ->label('Terkonfirmasi')
+                    ->boolean(),
+            ])
+            ->paginated([10, 25, 50])
+            ->defaultPaginationPageOption(10);
     }
 }

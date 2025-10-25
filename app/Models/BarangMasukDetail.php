@@ -1,4 +1,5 @@
 <?php
+
 // App/Models/BarangMasukDetail.php
 
 namespace App\Models;
@@ -60,7 +61,7 @@ class BarangMasukDetail extends Model
                 $barangMasukDetail->updateStockUnitAc($oldJumlah, 'decrement', $oldUnitAcId);
                 // Tambah stock ke unit AC baru
                 $barangMasukDetail->updateStockUnitAc($newJumlah, 'increment', $newUnitAcId);
-            } 
+            }
             // Jika hanya jumlah yang berubah
             else {
                 $selisih = $newJumlah - $oldJumlah;
@@ -92,8 +93,8 @@ class BarangMasukDetail extends Model
     private function updateStockUnitAc(int $jumlah, string $action, ?int $unitAcId = null)
     {
         $unitAc = UnitAc::find($unitAcId ?? $this->unit_ac_id);
-        
-        if (!$unitAc) {
+
+        if (! $unitAc) {
             return;
         }
 

@@ -15,13 +15,13 @@ class AbsensiController extends Controller
 
         // Validasi token harian (Asia/Jakarta) berbasis APP_KEY
         $expected = hash_hmac('sha256', now('Asia/Jakarta')->format('Y-m-d'), config('app.key'));
-        if (!hash_equals($expected, (string) $request->input('token'))) {
+        if (! hash_equals($expected, (string) $request->input('token'))) {
             abort(403, 'Token tidak valid / tidak sesuai hari ini.');
         }
 
         $user = $request->user();
         $karyawan = $user?->karyawan;
-        if (!$karyawan) {
+        if (! $karyawan) {
             abort(403, 'Profil karyawan tidak ditemukan.');
         }
 
@@ -33,7 +33,7 @@ class AbsensiController extends Controller
         $telat = $waktu->greaterThan($jamMasuk->clone()->addMinutes(15));
 
         // Simpan absen (hindari duplikasi per karyawan per tanggal)
-        Absensi::firstOrCreate(
+        $absensi = Absensi::firstOrCreate(
             ['karyawan_id' => $karyawan->id, 'tanggal' => $tanggal],
             [
                 'waktu_absen' => $waktu,
@@ -43,6 +43,17 @@ class AbsensiController extends Controller
             ]
         );
 
-        return redirect()->back()->with('status', 'Absen tercatat.');
+        // Jika request AJAX (fetch dari halaman scan), kembalikan JSON agar UI bisa menampilkan modal sesuai kondisi
+        if ($request->ajax()) {
+            return response()->json([
+                'ok' => true,
+                'created' => $absensi->wasRecentlyCreated, // true = berhasil baru, false = sudah pernah absen hari ini
+            ]);
+        }
+
+        // Fallback non-AJAX: redirect back dengan pesan sesuai status
+        $message = $absensi->wasRecentlyCreated ? 'Absen tercatat.' : 'Anda sudah melakukan absensi hari ini.';
+
+        return redirect()->back()->with('status', $message);
     }
 }

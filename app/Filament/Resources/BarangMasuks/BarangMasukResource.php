@@ -5,6 +5,7 @@ namespace App\Filament\Resources\BarangMasuks;
 use App\Filament\Resources\BarangMasuks\Pages\CreateBarangMasuk;
 use App\Filament\Resources\BarangMasuks\Pages\EditBarangMasuk;
 use App\Filament\Resources\BarangMasuks\Pages\ListBarangMasuks;
+use app\Filament\Resources\BarangMasuks\RelationManagers\BarangMasukDetailRelationManager;
 use App\Filament\Resources\BarangMasuks\Schemas\BarangMasukForm;
 use App\Filament\Resources\BarangMasuks\Tables\BarangMasuksTable;
 use App\Models\BarangMasuk;
@@ -13,7 +14,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use app\Filament\Resources\BarangMasuks\RelationManagers\BarangMasukDetailRelationManager;
 
 class BarangMasukResource extends Resource
 {

@@ -2,11 +2,22 @@
 
 namespace App\Filament\Pages;
 
+use BackedEnum;
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class DataAbsensi extends Page
 {
     protected string $view = 'filament.pages.data-absensi';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Absensi';
+
+    protected static ?int $navigationSort = 2;
+
+    protected static ?string $navigationLabel = 'QR Absensi Harian';
 
     public ?string $tokenHarian = null;
 

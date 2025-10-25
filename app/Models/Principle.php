@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Principle extends Model
 {
-        protected $fillable = [
+    protected $fillable = [
         'nama',
         'sales',
         'no_hp',

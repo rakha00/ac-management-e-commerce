@@ -7,6 +7,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class AbsensiForm
@@ -15,21 +16,46 @@ class AbsensiForm
     {
         return $schema
             ->components([
-                Select::make('karyawan_id')
-                    ->relationship('karyawan', 'id')
-                    ->required(),
-                DatePicker::make('tanggal')
-                    ->required(),
-                DateTimePicker::make('waktu_absen')
-                    ->required(),
-                Toggle::make('telat')
-                    ->required(),
-                TextInput::make('keterangan'),
-                Toggle::make('terkonfirmasi')
-                    ->required(),
-                TextInput::make('dikonfirmasi_oleh')
-                    ->numeric(),
-                DateTimePicker::make('waktu_konfirmasi'),
+                Section::make('Informasi Absensi')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('karyawan_id')
+                            ->relationship('karyawan', 'nama')
+                            ->required()
+                            ->disabled(fn ($record) => filled($record)),
+                        DatePicker::make('tanggal')
+                            ->required(),
+                        DateTimePicker::make('waktu_absen')
+                            ->required(),
+                    ]),
+                Section::make('Status')
+                    ->columns(2)
+                    ->schema([
+                        Toggle::make('telat')
+                            ->label('Telat')
+                            ->required(),
+                        Select::make('keterangan')
+                            ->label('Keterangan')
+                            ->options([
+                                'Telat' => 'Telat',
+                                'Tepat waktu' => 'Tepat waktu',
+                            ])
+                            ->native(false),
+                    ]),
+                Section::make('Konfirmasi')
+                    ->columns(2)
+                    ->schema([
+                        Toggle::make('terkonfirmasi')
+                            ->label('Terkonfirmasi')
+                            ->required(),
+                        TextInput::make('dikonfirmasi_oleh')
+                            ->label('Dikonfirmasi Oleh')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->formatStateUsing(fn ($state, $record) => optional($record?->dikonfirmasiOleh)->name ?? '—'),
+                        DateTimePicker::make('waktu_konfirmasi')
+                            ->label('Waktu Konfirmasi'),
+                    ]),
             ]);
     }
 }

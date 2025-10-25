@@ -2,16 +2,13 @@
 
 namespace App\Filament\Resources\BarangMasuks\Schemas;
 
-use App\Models\Principle;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
+use App\Models\BarangMasuk;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Placeholder;
-use Illuminate\Support\Str;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use App\Models\BarangMasuk;
 
 class BarangMasukForm
 {
@@ -31,24 +28,27 @@ class BarangMasukForm
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                        if (! $state) return;
-                   
+                        if (! $state) {
+                            return;
+                        }
+
                         $tanggal = Carbon::parse($state);
-                        $d       = $tanggal->format('dmY');
-                   
+                        $d = $tanggal->format('dmY');
+
                         $lastNumber = BarangMasuk::whereDate('tanggal', $tanggal)
-                        ->get()
-                        ->map(function ($item) {
-                            if (preg_match('/-(\d+)$/', $item->no_invoice, $matches)) {
-                                return (int) $matches[1];
-                            }
-                            return 0;
-                        })
-                        ->max();
-                   
+                            ->get()
+                            ->map(function ($item) {
+                                if (preg_match('/-(\d+)$/', $item->no_invoice, $matches)) {
+                                    return (int) $matches[1];
+                                }
+
+                                return 0;
+                            })
+                            ->max();
+
                         $newNumber = $lastNumber + 1;
-                   
-                        $set('nomor_barang_masuk',     "BM/{$d}-{$newNumber}");
+
+                        $set('nomor_barang_masuk', "BM/{$d}-{$newNumber}");
                     }),
 
                 TextInput::make('nomor_barang_masuk')
@@ -69,7 +69,8 @@ class BarangMasukForm
 
                         $tanggal = $get('tanggal') ?? now()->format('Ymd');
                         $nextId = ($record?->id ?? \App\Models\BarangMasuk::max('id') + 1);
-                        return 'BM-' . str_replace('-', '', $tanggal) . '-' . $nextId;
+
+                        return 'BM-'.str_replace('-', '', $tanggal).'-'.$nextId;
                     }),
             ]);
     }
