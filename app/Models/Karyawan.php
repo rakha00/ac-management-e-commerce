@@ -17,15 +17,17 @@ class Karyawan extends Model
         'user_id',
         'nama',
         'jabatan',
-        'no_hp',
+        'nomor_hp',
         'gaji_pokok',
         'alamat',
-        'foto_ktp',
-        'dokumen_tambahan',
+        'path_foto_ktp',
+        'path_dokumen_tambahan',
         'kontak_darurat_serumah',
         'kontak_darurat_tidak_serumah',
         'status_aktif',
         'tanggal_terakhir_aktif',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
@@ -34,6 +36,8 @@ class Karyawan extends Model
             'gaji_pokok' => 'integer',
             'status_aktif' => 'boolean',
             'tanggal_terakhir_aktif' => 'date',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
         ];
     }
 
@@ -42,13 +46,45 @@ class Karyawan extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function detailPenghasilanKaryawan(): HasMany
+    public function createdBy(): BelongsTo
     {
-        return $this->hasMany(DetailPenghasilanKaryawan::class);
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function karyawanPenghasilanDetail(): HasMany
+    {
+        return $this->hasMany(KaryawanPenghasilanDetail::class);
     }
 
     public function absensi(): HasMany
     {
         return $this->hasMany(Absensi::class);
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function booted(): void
+    {
+        // On soft delete: delete related User first; FK is SET NULL so user_id becomes null automatically.
+        static::deleting(function (self $karyawan): void {
+            if (! $karyawan->isForceDeleting()) {
+                // Snapshot related user before any FK side effects
+                $user = $karyawan->user()->first();
+                if ($user) {
+                    $user->delete(); // hard delete user so email can be reused and account can't login
+                }
+            }
+        });
+
+        // On permanent delete: ensure user is removed if still present (defensive)
+        static::forceDeleted(function (self $karyawan): void {
+            $karyawan->user?->delete();
+        });
     }
 }

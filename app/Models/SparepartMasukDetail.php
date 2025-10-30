@@ -6,17 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * SparepartMasukDetail represents individual incoming sparepart lines (stock in).
- * - Updates Sparepart stock_masuk and stock_akhir via model events
- * - Triggers parent total recalculation after changes
- * - Uses soft deletes; restore/force delete will adjust stock accordingly
- */
 class SparepartMasukDetail extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'sparepart_masuk_details';
+    protected $table = 'sparepart_masuk_detail';
 
     protected $fillable = [
         'sparepart_masuk_id',
@@ -24,16 +18,19 @@ class SparepartMasukDetail extends Model
         'kode_sparepart',
         'nama_sparepart',
         'jumlah_masuk',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
     {
         return [
             'jumlah_masuk' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
         ];
     }
 
-    // ============ RELATIONSHIPS ============
     public function sparepartMasuk(): BelongsTo
     {
         return $this->belongsTo(SparepartMasuk::class, 'sparepart_masuk_id');
@@ -44,7 +41,19 @@ class SparepartMasukDetail extends Model
         return $this->belongsTo(Sparepart::class, 'sparepart_id');
     }
 
-    // ============ MODEL EVENTS ============
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Boot the model to handle events.
+     */
     protected static function boot()
     {
         parent::boot();
@@ -66,7 +75,7 @@ class SparepartMasukDetail extends Model
 
         // When a new detail is created
         static::created(function (SparepartMasukDetail $detail) {
-            $detail->updateStockSparepart((int) $detail->jumlah_masuk, 'in');
+            $detail->updateStokSparepart((int) $detail->jumlah_masuk, 'in');
             $detail->recalculateParent();
         });
 
@@ -80,16 +89,16 @@ class SparepartMasukDetail extends Model
             // If the Sparepart has changed, revert from old and apply to new
             if ($oldSparepartId != $newSparepartId) {
                 if ($oldSparepartId) {
-                    $detail->updateStockSparepart($oldJumlah, 'revert', $oldSparepartId);
+                    $detail->updateStokSparepart($oldJumlah, 'revert', $oldSparepartId);
                 }
                 if ($newSparepartId) {
-                    $detail->updateStockSparepart($newJumlah, 'in', $newSparepartId);
+                    $detail->updateStokSparepart($newJumlah, 'in', $newSparepartId);
                 }
             } else {
                 // Sparepart unchanged, adjust by difference
                 $diff = $newJumlah - $oldJumlah;
                 if ($diff !== 0) {
-                    $detail->updateStockSparepart(abs($diff), $diff > 0 ? 'in' : 'revert', $newSparepartId);
+                    $detail->updateStokSparepart(abs($diff), $diff > 0 ? 'in' : 'revert', $newSparepartId);
                 }
             }
 
@@ -108,39 +117,36 @@ class SparepartMasukDetail extends Model
             $detail->recalculateParent();
         });
 
-        // On soft delete, revert stock (return stock back)
+        // On soft delete, revert stok (return stok back)
         static::deleted(function (SparepartMasukDetail $detail) {
-            $detail->updateStockSparepart((int) $detail->jumlah_masuk, 'revert');
+            $detail->updateStokSparepart((int) $detail->jumlah_masuk, 'revert');
             $detail->recalculateParent();
         });
 
-        // On restore, re-apply stock in
+        // On restore, re-apply stok in
         static::restored(function (SparepartMasukDetail $detail) {
-            $detail->updateStockSparepart((int) $detail->jumlah_masuk, 'in');
+            $detail->updateStokSparepart((int) $detail->jumlah_masuk, 'in');
             $detail->recalculateParent();
         });
     }
 
-    // ============ HELPERS ============
     /**
-     * Update Sparepart stocks for 'in' (incoming) or 'revert' (undo incoming).
-     * - 'in': increment stock_masuk, increment stock_akhir
-     * - 'revert': decrement stock_masuk, decrement stock_akhir
+     * Update Sparepart stoks for 'in' (incoming) or 'revert' (undo incoming).
      */
-    private function updateStockSparepart(int $jumlah, string $action, ?int $sparepartId = null): void
+    private function updateStokSparepart(int $jumlah, string $action, ?int $sparepartId = null): void
     {
         $sp = Sparepart::find($sparepartId ?? $this->sparepart_id);
 
-        if (!$sp || $jumlah <= 0) {
+        if (! $sp || $jumlah <= 0) {
             return;
         }
 
         if ($action === 'in') {
-            $sp->increment('stock_masuk', $jumlah);
-            $sp->increment('stock_akhir', $jumlah);
+            $sp->increment('stok_masuk', $jumlah);
+            $sp->increment('stok_akhir', $jumlah);
         } else {
-            $sp->decrement('stock_masuk', $jumlah);
-            $sp->decrement('stock_akhir', $jumlah);
+            $sp->decrement('stok_masuk', $jumlah);
+            $sp->decrement('stok_akhir', $jumlah);
         }
     }
 

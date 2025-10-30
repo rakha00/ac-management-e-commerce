@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -12,14 +13,13 @@ return new class extends Migration {
     {
         Schema::create('distributor_spareparts', function (Blueprint $table) {
             $table->id();
-
-            // Basic distributor master data (Indonesian field names as requested)
-            $table->string('nama_distributor'); // distributor name
-            $table->string('kontak')->nullable(); // optional contact info
-            $table->text('alamat')->nullable(); // optional address
-
+            $table->string('nama_distributor');
+            $table->string('kontak')->nullable();
+            $table->text('alamat')->nullable();
             $table->timestamps();
-            $table->softDeletes(); // enable soft deletes for master data
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->softDeletes();
         });
     }
 

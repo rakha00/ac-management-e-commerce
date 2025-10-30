@@ -11,7 +11,7 @@ class DataAbsensi extends Page
 {
     protected string $view = 'filament.pages.data-absensi';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQrCode;
 
     protected static string|UnitEnum|null $navigationGroup = 'Absensi';
 
@@ -21,11 +21,26 @@ class DataAbsensi extends Page
 
     public ?string $tokenHarian = null;
 
+    public ?string $jamMasuk = null;
+
+    public ?string $waktuTelat = null;
+
     public function mount(): void
     {
         // Token harian berbasis APP_KEY + tanggal (zona Asia/Jakarta)
         $today = now('Asia/Jakarta')->format('Y-m-d');
         $this->tokenHarian = hash_hmac('sha256', $today, config('app.key'));
+
+        // Ambil jam masuk dan toleransi telat dari konfigurasi
+        $jamMasukConfig = config('absensi.jam_masuk');
+        $toleransiTelatMenit = config('absensi.toleransi_telat_menit');
+
+        // Hitung waktu telat
+        $jamMasuk = now('Asia/Jakarta')->startOfDay()->setTime(...explode(':', $jamMasukConfig));
+        $waktuTelat = $jamMasuk->clone()->addMinutes((int) $toleransiTelatMenit);
+
+        $this->jamMasuk = $jamMasuk->format('H:i');
+        $this->waktuTelat = $waktuTelat->format('H:i');
     }
 
     // Tampilkan di navigasi hanya untuk admin

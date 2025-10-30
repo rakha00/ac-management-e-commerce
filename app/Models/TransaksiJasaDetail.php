@@ -3,19 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * TransaksiJasaDetail represents individual service transaction lines.
- * - Triggers parent totals recalculation after changes
- * - Uses soft deletes; restore/force delete will adjust totals accordingly
- */
 class TransaksiJasaDetail extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'transaksi_jasa_details';
+    protected $table = 'transaksi_jasa_detail';
 
     protected $fillable = [
         'transaksi_jasa_id',
@@ -25,24 +20,43 @@ class TransaksiJasaDetail extends Model
         'keterangan_jasa',
         'pengeluaran_jasa',
         'keterangan_pengeluaran',
+        'subtotal_pendapatan',
+        'subtotal_keuntungan',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
     {
         return [
             'qty' => 'integer',
-            'harga_jasa' => 'decimal:2',
-            'pengeluaran_jasa' => 'decimal:2',
+            'harga_jasa' => 'integer',
+            'pengeluaran_jasa' => 'integer',
+            'subtotal_pendapatan' => 'integer',
+            'subtotal_keuntungan' => 'integer',
+            'created_by' => 'string',
+            'updated_by' => 'string',
         ];
     }
 
-    // ============ RELATIONSHIPS ============
     public function transaksiJasa(): BelongsTo
     {
         return $this->belongsTo(TransaksiJasa::class, 'transaksi_jasa_id');
     }
 
-    // ============ MODEL EVENTS ============
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Boot the model to handle events.
+     */
     protected static function boot()
     {
         parent::boot();
@@ -63,9 +77,17 @@ class TransaksiJasaDetail extends Model
         static::restored(function (TransaksiJasaDetail $detail) {
             $detail->recalculateParent();
         });
+
+        static::saving(function (TransaksiJasaDetail $detail) {
+            $qty = (int) ($detail->qty ?? 0);
+            $hargaJasa = (float) ($detail->harga_jasa ?? 0);
+            $pengeluaranJasa = (float) ($detail->pengeluaran_jasa ?? 0);
+
+            $detail->subtotal_pendapatan = $qty * $hargaJasa;
+            $detail->subtotal_keuntungan = $detail->subtotal_pendapatan - $pengeluaranJasa;
+        });
     }
 
-    // ============ HELPERS ============
     /**
      * Recalculate parent totals based on current non-trashed details.
      */

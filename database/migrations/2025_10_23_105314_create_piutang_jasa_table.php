@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('piutang_jasa', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('transaksi_jasa_id')->constrained('transaksi_jasa')->onDelete('cascade');
-            $table->string('no_kode_jasa'); // nomor kode jasa dari TransaksiJasa
-            $table->integer('total_piutang'); // total piutang dari TransaksiJasa
-            $table->integer('sisa_piutang');
+            $table->foreignId('transaksi_jasa_id')->constrained('transaksi_jasa')->onDelete('cascade');
+            $table->integer('total_piutang')->default(0);
             $table->string('status_pembayaran');
             $table->date('jatuh_tempo');
             $table->text('keterangan')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
             $table->softDeletes();
         });

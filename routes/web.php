@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Pages\ScanAbsensi;
 use App\Http\Controllers\AbsensiController;
 use Illuminate\Support\Facades\Route;
 
@@ -8,11 +9,11 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    // Alias ke halaman ScanAbsensi (agar URL mudah di-refer dari QR)
-    Route::get('/scan-absensi', fn () => redirect(\App\Filament\Pages\ScanAbsensi::getUrl()))
+    // Alias to the ScanAbsensi page (to make the URL easy to reference from QR)
+    Route::get('/scan-absensi', fn () => redirect(ScanAbsensi::getUrl()))
         ->name('absensi.scan.page');
 
-    // Endpoint submit token hasil scan untuk pencatatan absensi
+    // Endpoint to submit the scanned token for attendance recording
     Route::post('/absensi/submit', [AbsensiController::class, 'store'])
         ->name('absensi.submit');
 });

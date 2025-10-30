@@ -4,15 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
-/**
- * Sparepart master model.
- * - Holds basic sparepart info (code, name, base cost).
- * - Maintains stock fields; stock_akhir is computed.
- * - Uses soft deletes for historical integrity.
- */
 class Sparepart extends Model
 {
     use SoftDeletes;
@@ -23,33 +19,61 @@ class Sparepart extends Model
         'kode_sparepart',
         'nama_sparepart',
         'harga_modal',
-        'stock_awal',
-        'stock_masuk',
-        'stock_keluar',
+        'stok_awal',
+        'stok_masuk',
+        'stok_keluar',
         'keterangan',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
     {
         return [
-            'harga_modal' => 'decimal:2',
-            'stock_awal' => 'integer',
-            'stock_masuk' => 'integer',
-            'stock_keluar' => 'integer',
+            'harga_modal' => 'integer',
+            'stok_awal' => 'integer',
+            'stok_masuk' => 'integer',
+            'stok_keluar' => 'integer',
+            'created_by' => 'string',
+            'updated_by' => 'string',
         ];
     }
 
-    // Expose computed stock_akhir in JSON responses
-    protected $appends = ['stock_akhir'];
+    public function sparepartMasukDetails(): HasMany
+    {
+        return $this->hasMany(SparepartMasukDetail::class, 'sparepart_id');
+    }
+
+    public function sparepartKeluarDetails(): HasMany
+    {
+        return $this->hasMany(SparepartKeluarDetail::class, 'sparepart_id');
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function hargaHistory(): HasMany
+    {
+        return $this->hasMany(HargaSparepartHistory::class, 'sparepart_id');
+    }
+
+    protected $appends = ['stok_akhir'];
 
     /**
-     * Accessor for stock_akhir.
-     * Computed as: stock_awal + stock_masuk - stock_keluar
+     * Accessor for stok_akhir.
+     * Computed as: stok_awal + stok_masuk - stok_keluar
      */
-    protected function stockAkhir(): Attribute
+    protected function stokAkhir(): Attribute
     {
         return Attribute::make(
-            get: fn() => (int) ($this->stock_awal ?? 0) + (int) ($this->stock_masuk ?? 0) - (int) ($this->stock_keluar ?? 0),
+            get: fn () => (int) ($this->stok_awal ?? 0) + (int) ($this->stok_masuk ?? 0) - (int) ($this->stok_keluar ?? 0),
         );
     }
 
@@ -60,20 +84,16 @@ class Sparepart extends Model
     protected static function booted(): void
     {
         static::saving(function (Sparepart $sp) {
-            $sp->stock_akhir = (int) ($sp->stock_awal ?? 0)
-                + (int) ($sp->stock_masuk ?? 0)
-                - (int) ($sp->stock_keluar ?? 0);
+            $sp->stok_akhir = (int) ($sp->stok_awal ?? 0)
+                + (int) ($sp->stok_masuk ?? 0)
+                - (int) ($sp->stok_keluar ?? 0);
+
+            if ($sp->isDirty('harga_modal') && $sp->exists) {
+                $sp->hargaHistory()->create([
+                    'harga_modal' => $sp->harga_modal,
+                    'karyawan_id' => Auth::id(),
+                ]);
+            }
         });
-    }
-
-    // ============ RELATIONSHIPS ============
-    public function sparepartMasukDetails(): HasMany
-    {
-        return $this->hasMany(SparepartMasukDetail::class, 'sparepart_id');
-    }
-
-    public function sparepartKeluarDetails(): HasMany
-    {
-        return $this->hasMany(SparepartKeluarDetail::class, 'sparepart_id');
     }
 }

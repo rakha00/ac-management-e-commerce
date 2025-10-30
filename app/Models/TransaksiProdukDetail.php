@@ -3,20 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * TransaksiProdukDetail represents individual product transaction lines (stock out).
- * - Updates UnitAC stock_keluar and stock_akhir via model events
- * - Triggers parent totals recalculation after changes
- * - Uses soft deletes; restore/force delete will adjust stock accordingly
- */
 class TransaksiProdukDetail extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'transaksi_produk_details';
+    protected $table = 'transaksi_produk_detail';
 
     protected $fillable = [
         'transaksi_produk_id',
@@ -30,32 +24,47 @@ class TransaksiProdukDetail extends Model
         'harga_modal',
         'harga_jual',
         'keterangan',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
     {
         return [
-            'harga_dealer' => 'decimal:2',
-            'harga_ecommerce' => 'decimal:2',
-            'harga_retail' => 'decimal:2',
-            'harga_modal' => 'decimal:2',
-            'harga_jual' => 'decimal:2',
+            'harga_dealer' => 'integer',
+            'harga_ecommerce' => 'integer',
+            'harga_retail' => 'integer',
+            'harga_modal' => 'integer',
+            'harga_jual' => 'integer',
             'jumlah_keluar' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
         ];
     }
 
-    // ============ RELATIONSHIPS ============
     public function transaksiProduk(): BelongsTo
     {
         return $this->belongsTo(TransaksiProduk::class, 'transaksi_produk_id');
     }
 
-    public function unitAc(): BelongsTo
+    public function unitAC()
     {
-        return $this->belongsTo(UnitAC::class, 'unit_ac_id');
+        return $this->belongsTo(UnitAC::class, 'unit_ac_id')->withTrashed();
     }
 
-    // ============ MODEL EVENTS ============
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Boot the model.
+     */
     protected static function boot()
     {
         parent::boot();
@@ -64,7 +73,7 @@ class TransaksiProdukDetail extends Model
         static::creating(function (TransaksiProdukDetail $detail) {
             // Fill denormalized SKU, name, and pricing if missing
             if ($detail->unit_ac_id && (empty($detail->sku) || empty($detail->nama_unit) || $detail->harga_dealer === null || $detail->harga_ecommerce === null || $detail->harga_retail === null)) {
-                $unit = UnitAC::find($detail->unit_ac_id);
+                $unit = UnitAC::withTrashed()->find($detail->unit_ac_id);
                 if ($unit) {
                     if (empty($detail->sku)) {
                         $detail->sku = $unit->sku;
@@ -72,14 +81,29 @@ class TransaksiProdukDetail extends Model
                     if (empty($detail->nama_unit)) {
                         $detail->nama_unit = $unit->nama_merk;
                     }
-                    if ($detail->harga_dealer === null) {
-                        $detail->harga_dealer = $unit->harga_dealer;
-                    }
-                    if ($detail->harga_ecommerce === null) {
-                        $detail->harga_ecommerce = $unit->harga_ecommerce;
-                    }
-                    if ($detail->harga_retail === null) {
-                        $detail->harga_retail = $unit->harga_retail;
+
+                    // Retrieve historical prices
+                    if ($detail->transaksiProduk) {
+                        $hargaHistory = $unit->hargaHistory()
+                            ->where('created_at', '<=', $detail->transaksiProduk->created_at)
+                            ->latest()
+                            ->first();
+
+                        if ($hargaHistory) {
+                            $detail->harga_dealer = $hargaHistory->harga_dealer;
+                            $detail->harga_ecommerce = $hargaHistory->harga_ecommerce;
+                            $detail->harga_retail = $hargaHistory->harga_retail;
+                        } else {
+                            // Fallback to current prices if no history found
+                            $detail->harga_dealer = $unit->current_harga_dealer ?? 0;
+                            $detail->harga_ecommerce = $unit->current_harga_ecommerce ?? 0;
+                            $detail->harga_retail = $unit->current_harga_retail ?? 0;
+                        }
+                    } else {
+                        // Fallback to current prices if no TransaksiProduk (should not happen)
+                        $detail->harga_dealer = $unit->current_harga_dealer ?? 0;
+                        $detail->harga_ecommerce = $unit->current_harga_ecommerce ?? 0;
+                        $detail->harga_retail = $unit->current_harga_retail ?? 0;
                     }
                 }
             }
@@ -87,84 +111,61 @@ class TransaksiProdukDetail extends Model
 
         // When a new detail is created
         static::created(function (TransaksiProdukDetail $detail) {
-            $detail->updateStockUnitAc((int) $detail->jumlah_keluar, 'out');
-            $detail->recalculateParent();
+            $detail->updateStokUnitAC((int) $detail->jumlah_keluar, 'out');
         });
 
         // Before a detail is updated (handle change in qty or unit)
         static::updating(function (TransaksiProdukDetail $detail) {
             $oldJumlah = (int) $detail->getOriginal('jumlah_keluar');
             $newJumlah = (int) $detail->jumlah_keluar;
-            $oldUnitAcId = $detail->getOriginal('unit_ac_id');
-            $newUnitAcId = $detail->unit_ac_id;
+            $oldUnitACId = $detail->getOriginal('unit_ac_id');
+            $newUnitACId = $detail->unit_ac_id;
 
             // If the Unit AC has changed, revert from old and apply to new
-            if ($oldUnitAcId != $newUnitAcId) {
-                if ($oldUnitAcId) {
-                    $detail->updateStockUnitAc($oldJumlah, 'revert', $oldUnitAcId);
+            if ($oldUnitACId != $newUnitACId) {
+                if ($oldUnitACId) {
+                    $detail->updateStokUnitAC($oldJumlah, 'revert', $oldUnitACId);
                 }
-                if ($newUnitAcId) {
-                    $detail->updateStockUnitAc($newJumlah, 'out', $newUnitAcId);
+                if ($newUnitACId) {
+                    $detail->updateStokUnitAC($newJumlah, 'out', $newUnitACId);
                 }
             } else {
                 // Unit unchanged, adjust by difference
                 $diff = $newJumlah - $oldJumlah;
                 if ($diff !== 0) {
-                    $detail->updateStockUnitAc(abs($diff), $diff > 0 ? 'out' : 'revert', $newUnitAcId);
+                    $detail->updateStokUnitAC(abs($diff), $diff > 0 ? 'out' : 'revert', $newUnitACId);
                 }
             }
         });
 
-        // After update, keep parent totals in sync
-        static::updated(function (TransaksiProdukDetail $detail) {
-            $detail->recalculateParent();
-        });
-
-        // On soft delete, revert stock (return stock back)
+        // On soft delete, revert stok (return stok back)
         static::deleted(function (TransaksiProdukDetail $detail) {
-            $detail->updateStockUnitAc((int) $detail->jumlah_keluar, 'revert');
-            $detail->recalculateParent();
+            $detail->updateStokUnitAC((int) $detail->jumlah_keluar, 'revert');
         });
 
-        // On restore, re-apply stock out
+        // On restore, re-apply stok out
         static::restored(function (TransaksiProdukDetail $detail) {
-            $detail->updateStockUnitAc((int) $detail->jumlah_keluar, 'out');
-            $detail->recalculateParent();
+            $detail->updateStokUnitAC((int) $detail->jumlah_keluar, 'out');
         });
     }
 
-    // ============ HELPERS ============
     /**
-     * Update UnitAC stocks for 'out' (sale) or 'revert' (undo sale).
-     * - 'out': increment stock_keluar, decrement stock_akhir
-     * - 'revert': decrement stock_keluar, increment stock_akhir
+     * Update stok UnitAC based on the transaction detail.
      */
-    private function updateStockUnitAc(int $jumlah, string $action, ?int $unitAcId = null): void
+    private function updateStokUnitAC(int $jumlah, string $action, ?int $unitACId = null): void
     {
-        $unitAc = UnitAC::find($unitAcId ?? $this->unit_ac_id);
+        $unitAC = UnitAC::find($unitACId ?? $this->unit_ac_id);
 
-        if (!$unitAc || $jumlah <= 0) {
+        if (! $unitAC || $jumlah <= 0) {
             return;
         }
 
         if ($action === 'out') {
-            $unitAc->increment('stock_keluar', $jumlah);
-            $unitAc->decrement('stock_akhir', $jumlah);
+            $unitAC->increment('stok_keluar', $jumlah);
+            $unitAC->decrement('stok_akhir', $jumlah);
         } else {
-            $unitAc->decrement('stock_keluar', $jumlah);
-            $unitAc->increment('stock_akhir', $jumlah);
-        }
-    }
-
-    /**
-     * Recalculate parent totals based on current non-trashed details.
-     */
-    private function recalculateParent(): void
-    {
-        $parent = $this->transaksiProduk;
-        if ($parent instanceof TransaksiProduk) {
-            // Delegate to parent's method for consistent aggregation
-            $parent->recalcFromDetails();
+            $unitAC->decrement('stok_keluar', $jumlah);
+            $unitAC->increment('stok_akhir', $jumlah);
         }
     }
 }

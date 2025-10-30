@@ -10,7 +10,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 
 class SparepartsTable
 {
@@ -34,23 +33,23 @@ class SparepartsTable
                     ->money('IDR', locale: 'id_ID')
                     ->sortable(),
 
-                TextColumn::make('stock_awal')
-                    ->label('Stock Awal')
+                TextColumn::make('stok_awal')
+                    ->label('Stok Awal')
                     ->numeric()
                     ->sortable(),
 
-                TextColumn::make('stock_masuk')
-                    ->label('Stock Masuk')
+                TextColumn::make('stok_masuk')
+                    ->label('Stok Masuk')
                     ->numeric()
                     ->sortable(),
 
-                TextColumn::make('stock_keluar')
-                    ->label('Stock Keluar')
+                TextColumn::make('stok_keluar')
+                    ->label('Stok Keluar')
                     ->numeric()
                     ->sortable(),
 
-                TextColumn::make('stock_akhir')
-                    ->label('Stock Akhir')
+                TextColumn::make('stok_akhir')
+                    ->label('Stok Akhir')
                     ->numeric()
                     ->sortable(),
             ])
@@ -66,11 +65,11 @@ class SparepartsTable
                         return $query
                             ->when(
                                 $data['created_from'] ?? null,
-                                fn(Builder $q, $date): Builder => $q->whereDate('created_at', '>=', $date),
+                                fn (Builder $q, $date): Builder => $q->whereDate('created_at', '>=', $date),
                             )
                             ->when(
                                 $data['created_until'] ?? null,
-                                fn(Builder $q, $date): Builder => $q->whereDate('created_at', '<=', $date),
+                                fn (Builder $q, $date): Builder => $q->whereDate('created_at', '<=', $date),
                             );
                     }),
             ])
@@ -78,10 +77,6 @@ class SparepartsTable
                 EditAction::make(),
             ])
             ->toolbarActions([
-                ExportAction::make()
-                    ->label('Export Excel')
-                    ->fileName(fn() => 'sparepart-master-' . now()->format('Ymd-His'))
-                    ->fromTable(),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

@@ -13,14 +13,32 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class PettyCashResource extends Resource
 {
     protected static ?string $model = PettyCash::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
-    protected static ?string $recordTitleAttribute = 'Petty Cash';
+    protected static string|UnitEnum|null $navigationGroup = 'Keuangan';
+
+    protected static ?int $navigationSort = 4;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user || ! $user->karyawan) {
+            return false;
+        }
+
+        return $user->karyawan->jabatan === 'admin';
+    }
+
+    protected static ?string $recordTitleAttribute = 'tanggal';
 
     public static function form(Schema $schema): Schema
     {
@@ -46,5 +64,13 @@ class PettyCashResource extends Resource
             'create' => CreatePettyCash::route('/create'),
             'edit' => EditPettyCash::route('/{record}/edit'),
         ];
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }

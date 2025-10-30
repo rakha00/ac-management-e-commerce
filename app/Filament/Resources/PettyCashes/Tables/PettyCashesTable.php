@@ -2,16 +2,19 @@
 
 namespace App\Filament\Resources\PettyCashes\Tables;
 
-use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms;
-use Filament\Tables;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 
 class PettyCashesTable
 {
@@ -19,39 +22,35 @@ class PettyCashesTable
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('tanggal')
+                TextColumn::make('tanggal')
                     ->label('Tanggal')
                     ->date('d M Y')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('pemasukan')
+                TextColumn::make('pemasukan')
                     ->label('Pemasukan')
-                    ->money('IDR')
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('pengeluaran')
+                TextColumn::make('pengeluaran')
                     ->label('Pengeluaran')
-                    ->money('IDR')
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
-
-                Tables\Columns\TextColumn::make('keterangan_pemasukan')
+                TextColumn::make('keterangan_pemasukan')
                     ->label('Ket. Pemasukan')
                     ->limit(30),
-
-                Tables\Columns\TextColumn::make('keterangan_pengeluaran')
+                TextColumn::make('keterangan_pengeluaran')
                     ->label('Ket. Pengeluaran')
                     ->limit(30),
-
-                Tables\Columns\ImageColumn::make('bukti_pembayaran')
+                ImageColumn::make('path_bukti_pembayaran')
                     ->label('Bukti')
                     ->square()
                     ->size(50),
             ])
             ->filters([
-                Tables\Filters\Filter::make('tanggal')
+                TrashedFilter::make(),
+                Filter::make('tanggal')
                     ->form([
-                        Forms\Components\DatePicker::make('from')->label('Dari'),
-                        Forms\Components\DatePicker::make('until')->label('Sampai'),
+                        DatePicker::make('from')->label('Dari'),
+                        DatePicker::make('until')->label('Sampai'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -60,15 +59,14 @@ class PettyCashesTable
                     }),
             ])
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    BulkAction::make('delete')
-                        ->requiresConfirmation()
-                        ->action(fn (Collection $records) => $records->each->delete()),
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ])
             ->defaultSort('tanggal', 'desc');

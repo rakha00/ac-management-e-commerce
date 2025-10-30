@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\BarangMasuk;
 use App\Models\BarangMasukDetail;
-use App\Models\Principle;
+use App\Models\Principal;
 use App\Models\UnitAC;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -12,57 +12,57 @@ use Illuminate\Support\Carbon;
 class BarangMasukSeeder extends Seeder
 {
     /**
-     * Jalankan seeder BarangMasuk beserta details.
+     * Seed the application's database.
      */
     public function run(): void
     {
-        // Pastikan minimal dua principle tersedia.
-        $principleA = Principle::firstOrCreate(
+        $principalA = Principal::firstOrCreate(
             ['nama' => 'PT. Sejuk Abadi'],
             [
                 'sales' => 'Budi',
-                'no_hp' => '081234567890',
-                'remarks' => 'Autocreated by BarangMasukSeeder',
+                'nomor_hp' => '081234567890',
+                'keterangan' => 'Autocreated by BarangMasukSeeder',
             ]
         );
 
-        $principleB = Principle::firstOrCreate(
+        $principalB = Principal::firstOrCreate(
             ['nama' => 'PT. Dingin Sejahtera'],
             [
                 'sales' => 'Susi',
-                'no_hp' => '081298765432',
-                'remarks' => 'Autocreated by BarangMasukSeeder',
+                'nomor_hp' => '081298765432',
+                'keterangan' => 'Autocreated by BarangMasukSeeder',
             ]
         );
 
-        // Pastikan minimal dua Unit AC tersedia (untuk relasi detail).
         $unitA = UnitAC::firstOrCreate(
             ['sku' => 'AC-SKU-001'],
             [
-                'nama_merk' => 'CoolBrand A',
+                'nama_unit' => 'CoolBrand A',
                 'foto_produk' => null,
                 'harga_dealer' => 3500000,
                 'harga_ecommerce' => 3700000,
                 'harga_retail' => 4000000,
-                'stock_awal' => 0,
-                'stock_masuk' => 0,
-                'stock_keluar' => 0,
-                'remarks' => 'Seeder unit',
+                'stok_awal' => 15,
+                'stok_akhir' => 15,
+                'stok_masuk' => 3,
+                'stok_keluar' => 0,
+                'keterangan' => 'Seeder unit',
             ]
         );
 
         $unitB = UnitAC::firstOrCreate(
             ['sku' => 'AC-SKU-002'],
             [
-                'nama_merk' => 'CoolBrand B',
+                'nama_unit' => 'CoolBrand B',
                 'foto_produk' => null,
                 'harga_dealer' => 4500000,
                 'harga_ecommerce' => 4700000,
                 'harga_retail' => 5000000,
-                'stock_awal' => 0,
-                'stock_masuk' => 0,
-                'stock_keluar' => 0,
-                'remarks' => 'Seeder unit',
+                'stok_awal' => 10,
+                'stok_akhir' => 10,
+                'stok_masuk' => 6,
+                'stok_keluar' => 0,
+                'keterangan' => 'Seeder unit',
             ]
         );
 
@@ -71,34 +71,33 @@ class BarangMasukSeeder extends Seeder
         $yesterday = $today->copy()->subDay();
         $dy = $yesterday->format('dmY');
 
-        // Contoh data Barang Masuk (2 record)
         $payloads = [
             [
-                'principle_id' => (int) $principleA->id,
+                'principal_id' => (int) $principalA->id,
                 'tanggal' => $today,
                 'nomor_barang_masuk' => "BM/{$d}-1",
-                'details' => [
+                'barangMasukDetail' => [
                     [
                         'unit' => $unitA,
                         'jumlah' => 3,
-                        'remarks' => 'Barang Masuk A-1',
+                        'keterangan' => 'Barang Masuk A-1',
                     ],
                     [
                         'unit' => $unitB,
                         'jumlah' => 2,
-                        'remarks' => 'Barang Masuk B-1',
+                        'keterangan' => 'Barang Masuk B-1',
                     ],
                 ],
             ],
             [
-                'principle_id' => (int) $principleB->id,
+                'principal_id' => (int) $principalB->id,
                 'tanggal' => $yesterday,
                 'nomor_barang_masuk' => "BM/{$dy}-1",
-                'details' => [
+                'barangMasukDetail' => [
                     [
                         'unit' => $unitB,
                         'jumlah' => 4,
-                        'remarks' => 'Barang Masuk B-2',
+                        'keterangan' => 'Barang Masuk B-2',
                     ],
                 ],
             ],
@@ -111,13 +110,13 @@ class BarangMasukSeeder extends Seeder
                     'nomor_barang_masuk' => $data['nomor_barang_masuk'],
                 ],
                 [
-                    'principle_id' => $data['principle_id'],
+                    'principal_id' => $data['principal_id'],
                     'tanggal' => $data['tanggal'],
                 ]
             );
 
             // Create detail entries for this BarangMasuk
-            foreach ($data['details'] as $detail) {
+            foreach ($data['barangMasukDetail'] as $detail) {
                 $unit = $detail['unit'];
 
                 BarangMasukDetail::firstOrCreate(
@@ -125,11 +124,11 @@ class BarangMasukSeeder extends Seeder
                         'barang_masuk_id' => (int) $bm->id,
                         'unit_ac_id' => (int) $unit->id,
                         'sku' => $unit->sku,
-                        'nama_unit' => $unit->nama_merk,
+                        'nama_unit' => $unit->nama_unit,
                     ],
                     [
                         'jumlah_barang_masuk' => (int) $detail['jumlah'],
-                        'remarks' => $detail['remarks'],
+                        'keterangan' => $detail['keterangan'],
                     ]
                 );
             }

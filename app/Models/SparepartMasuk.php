@@ -3,23 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
-/**
- * SparepartMasuk model for incoming spareparts (stock in).
- * - Generates unique sequential "nomor_sparepart_masuk" per date
- * - Syncs distributor_nama from DistributorSparepart
- * - Aggregates total_qty from details
- * - Uses soft deletes (for historical accuracy)
- */
 class SparepartMasuk extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'sparepart_masuks';
+    protected $table = 'sparepart_masuk';
 
     protected $fillable = [
         'tanggal_masuk',
@@ -28,6 +21,8 @@ class SparepartMasuk extends Model
         'distributor_nama',
         'total_qty',
         'keterangan',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
@@ -35,10 +30,11 @@ class SparepartMasuk extends Model
         return [
             'tanggal_masuk' => 'date',
             'total_qty' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
         ];
     }
 
-    // ============ RELATIONSHIPS ============
     public function distributor(): BelongsTo
     {
         return $this->belongsTo(DistributorSparepart::class, 'distributor_sparepart_id');
@@ -49,7 +45,19 @@ class SparepartMasuk extends Model
         return $this->hasMany(SparepartMasukDetail::class, 'sparepart_masuk_id');
     }
 
-    // ============ MODEL EVENTS ============
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Boot the model to handle events.
+     */
     protected static function boot()
     {
         parent::boot();
@@ -57,7 +65,6 @@ class SparepartMasuk extends Model
         static::creating(function (SparepartMasuk $model) {
             // Ensure date exists
             $date = $model->tanggal_masuk ? Carbon::parse($model->tanggal_masuk)->toDateString() : Carbon::now()->toDateString();
-            $model->tanggal_masuk = $date;
 
             // Sync distributor_nama if distributor selected
             if ($model->distributor_sparepart_id && empty($model->distributor_nama)) {
@@ -87,7 +94,6 @@ class SparepartMasuk extends Model
         });
     }
 
-    // ============ HELPERS ============
     /**
      * Generate sequential number per date with format PREFIX-YYYYMMDD-####.
      */
@@ -114,7 +120,7 @@ class SparepartMasuk extends Model
         }
 
         $next = $max + 1;
-        $seqStr = str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+        $seqStr = str_pad((string) $next, 0, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$ymd}-{$seqStr}";
     }
@@ -124,11 +130,11 @@ class SparepartMasuk extends Model
      */
     protected static function extractSequence(?string $no, string $prefix, string $ymd): int
     {
-        if (!$no) {
+        if (! $no) {
             return 0;
         }
 
-        $pattern = '/^' . preg_quote($prefix, '/') . '-' . preg_quote($ymd, '/') . '-(\d{4})$/';
+        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{4})$/';
         if (preg_match($pattern, $no, $m)) {
             return (int) $m[1];
         }

@@ -4,6 +4,8 @@ namespace App\Filament\Resources\PettyCashes\Pages;
 
 use App\Filament\Resources\PettyCashes\PettyCashResource;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditPettyCash extends EditRecord
@@ -14,6 +16,8 @@ class EditPettyCash extends EditRecord
     {
         return [
             DeleteAction::make(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
         ];
     }
 }

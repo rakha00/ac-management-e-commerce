@@ -3,49 +3,39 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
-/**
- * SparepartKeluar model for outgoing spareparts (stock out).
- * - Generates unique sequential "nomor_invoice" per date
- * - Syncs konsumen_nama from KonsumenSparepart
- * - Aggregates totals (modal, penjualan, keuntungan) from details
- * - Uses soft deletes
- */
 class SparepartKeluar extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'sparepart_keluars';
+    protected $table = 'sparepart_keluar';
 
     protected $fillable = [
         'tanggal_keluar',
         'nomor_invoice',
-        'konsumen_sparepart_id',
         'konsumen_nama',
         'total_modal',
         'total_penjualan',
         'total_keuntungan',
         'keterangan',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal_keluar' => 'date',
-            'total_modal' => 'decimal:2',
-            'total_penjualan' => 'decimal:2',
-            'total_keuntungan' => 'decimal:2',
+            'total_modal' => 'integer',
+            'total_penjualan' => 'integer',
+            'total_keuntungan' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
         ];
-    }
-
-    // ============ RELATIONSHIPS ============
-    public function konsumen(): BelongsTo
-    {
-        return $this->belongsTo(KonsumenSparepart::class, 'konsumen_sparepart_id');
     }
 
     public function detailSparepartKeluar(): HasMany
@@ -53,7 +43,19 @@ class SparepartKeluar extends Model
         return $this->hasMany(SparepartKeluarDetail::class, 'sparepart_keluar_id');
     }
 
-    // ============ MODEL EVENTS ============
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     *  Boot the model to handle events.
+     */
     protected static function boot()
     {
         parent::boot();
@@ -61,28 +63,11 @@ class SparepartKeluar extends Model
         static::creating(function (SparepartKeluar $model) {
             // Ensure date exists
             $date = $model->tanggal_keluar ? Carbon::parse($model->tanggal_keluar)->toDateString() : Carbon::now()->toDateString();
-            $model->tanggal_keluar = $date;
-
-            // Sync konsumen_nama if konsumen selected
-            if ($model->konsumen_sparepart_id && empty($model->konsumen_nama)) {
-                $cust = KonsumenSparepart::find($model->konsumen_sparepart_id);
-                if ($cust) {
-                    $model->konsumen_nama = $cust->nama_konsumen;
-                }
-            }
 
             // Generate nomor_invoice if not set
             if (empty($model->nomor_invoice)) {
                 // Use INVSP prefix to distinguish from Produk invoices
                 $model->nomor_invoice = static::generateSequentialNumber($date, 'INVSP');
-            }
-        });
-
-        static::updating(function (SparepartKeluar $model) {
-            // Keep konsumen name in sync when konsumen changes
-            if ($model->isDirty('konsumen_sparepart_id')) {
-                $cust = $model->konsumen_sparepart_id ? KonsumenSparepart::find($model->konsumen_sparepart_id) : null;
-                $model->konsumen_nama = $cust ? $cust->nama_konsumen : null;
             }
         });
 
@@ -92,7 +77,6 @@ class SparepartKeluar extends Model
         });
     }
 
-    // ============ HELPERS ============
     /**
      * Generate sequential number per date with format PREFIX-YYYYMMDD-####.
      */
@@ -119,7 +103,7 @@ class SparepartKeluar extends Model
         }
 
         $next = $max + 1;
-        $seqStr = str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+        $seqStr = str_pad((string) $next, 0, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$ymd}-{$seqStr}";
     }
@@ -129,11 +113,11 @@ class SparepartKeluar extends Model
      */
     protected static function extractSequence(?string $no, string $prefix, string $ymd): int
     {
-        if (!$no) {
+        if (! $no) {
             return 0;
         }
 
-        $pattern = '/^' . preg_quote($prefix, '/') . '-' . preg_quote($ymd, '/') . '-(\d{4})$/';
+        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{4})$/';
         if (preg_match($pattern, $no, $m)) {
             return (int) $m[1];
         }

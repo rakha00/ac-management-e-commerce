@@ -3,23 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use App\Models\Karyawan;
 
-/**
- * TransaksiProduk model for product transactions (stock out).
- * - Generates unique sequential invoice & surat jalan numbers per date
- * - Maintains aggregated totals based on details
- * - Uses soft deletes as requested
- */
 class TransaksiProduk extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'transaksi_produks';
+    protected $table = 'transaksi_produk';
 
     protected $fillable = [
         'tanggal_transaksi',
@@ -28,34 +21,38 @@ class TransaksiProduk extends Model
         'sales_karyawan_id',
         'sales_nama',
         'toko_konsumen',
-        'total_modal',
-        'total_penjualan',
-        'total_keuntungan',
         'keterangan',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal_transaksi' => 'date',
-            'total_modal' => 'decimal:2',
-            'total_penjualan' => 'decimal:2',
-            'total_keuntungan' => 'decimal:2',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
         ];
     }
 
-    // ============ RELATIONSHIPS ============
-    public function salesKaryawan(): BelongsTo
-    {
-        return $this->belongsTo(Karyawan::class, 'sales_karyawan_id');
-    }
-
-    public function detailTransaksiProduk(): HasMany
+    public function transaksiProdukDetail(): HasMany
     {
         return $this->hasMany(TransaksiProdukDetail::class, 'transaksi_produk_id');
     }
 
-    // ============ MODEL EVENTS ============
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Always set tanggal_transaksi to current date if not provided.
+     */
     protected static function boot()
     {
         parent::boot();
@@ -63,7 +60,6 @@ class TransaksiProduk extends Model
         static::creating(function (TransaksiProduk $model) {
             // Ensure transaction date exists
             $date = $model->tanggal_transaksi ? Carbon::parse($model->tanggal_transaksi)->toDateString() : Carbon::now()->toDateString();
-            $model->tanggal_transaksi = $date;
 
             // Auto-fill sales_nama from Karyawan when provided
             if ($model->sales_karyawan_id && empty($model->sales_nama)) {
@@ -73,13 +69,8 @@ class TransaksiProduk extends Model
                 }
             }
 
-            // Generate invoice & surat jalan if not set
-            if (empty($model->nomor_invoice)) {
-                $model->nomor_invoice = static::generateSequentialNumber($date, 'INV');
-            }
-            if (empty($model->nomor_surat_jalan)) {
-                $model->nomor_surat_jalan = static::generateSequentialNumber($date, 'SJ');
-            }
+            $model->nomor_invoice = self::generateNomorInvoice($date);
+            $model->nomor_surat_jalan = self::generateNomorSuratJalan($date);
         });
 
         static::updating(function (TransaksiProduk $model) {
@@ -89,88 +80,47 @@ class TransaksiProduk extends Model
                 $model->sales_nama = $sales ? $sales->nama : null;
             }
         });
-
-        static::saved(function (TransaksiProduk $model) {
-            // Keep totals in sync whenever parent is saved
-            $model->recalcFromDetails();
-        });
     }
 
-    // ============ HELPERS ============
-    /**
-     * Generate sequential number per date with format PREFIX-YYYYMMDD-####.
-     */
-    public static function generateSequentialNumber(string $date, string $prefix): string
+    public static function generateNomorInvoice(string $date): string
     {
-        $ymd = Carbon::parse($date)->format('Ymd');
+        $tanggal = Carbon::parse($date);
+        $ymd = $tanggal->format('Ymd');
 
-        // Include trashed to avoid reusing numbers that exist in soft-deleted rows (unique constraint applies)
-        $builder = static::withTrashed()->whereDate('tanggal_transaksi', Carbon::parse($date));
+        $lastInvoice = self::whereDate('tanggal_transaksi', $tanggal)
+            ->get()
+            ->map(function ($item) {
+                if (preg_match('/INV-(\d{8})-(\d{4})$/', $item->nomor_invoice, $matches)) {
+                    return (int) $matches[2];
+                }
 
-        // Choose appropriate column based on prefix
-        $column = $prefix === 'INV' ? 'nomor_invoice' : 'nomor_surat_jalan';
+                return 0;
+            })
+            ->max();
 
-        // Get existing numbers for the given date and prefix
-        $existing = $builder
-            ->where($column, 'like', "{$prefix}-{$ymd}-%")
-            ->pluck($column)
-            ->filter();
+        $nextInvoice = ($lastInvoice ?? 0) + 1;
 
-        $max = 0;
-        foreach ($existing as $no) {
-            $seq = static::extractSequence($no, $prefix, $ymd);
-            if ($seq > $max) {
-                $max = $seq;
-            }
-        }
-
-        $next = $max + 1;
-        $seqStr = str_pad((string) $next, 4, '0', STR_PAD_LEFT);
-
-        return "{$prefix}-{$ymd}-{$seqStr}";
+        return "INV-{$ymd}-".str_pad($nextInvoice, 0, '0', STR_PAD_LEFT);
     }
 
-    /**
-     * Extract sequence integer from formatted number.
-     */
-    protected static function extractSequence(?string $no, string $prefix, string $ymd): int
+    public static function generateNomorSuratJalan(string $date): string
     {
-        if (!$no) {
-            return 0;
-        }
+        $tanggal = Carbon::parse($date);
+        $ymd = $tanggal->format('Ymd');
 
-        $pattern = '/^' . preg_quote($prefix, '/') . '-' . preg_quote($ymd, '/') . '-(\d{4})$/';
-        if (preg_match($pattern, $no, $m)) {
-            return (int) $m[1];
-        }
+        $lastSuratJalan = self::whereDate('tanggal_transaksi', $tanggal)
+            ->get()
+            ->map(function ($item) {
+                if (preg_match('/SJ-(\d{8})-(\d{4})$/', $item->nomor_surat_jalan, $matches)) {
+                    return (int) $matches[2];
+                }
 
-        return 0;
-    }
+                return 0;
+            })
+            ->max();
 
-    /**
-     * Recalculate totals from non-trashed details.
-     */
-    public function recalcFromDetails(): void
-    {
-        $details = $this->detailTransaksiProduk()->get();
+        $nextSuratJalan = ($lastSuratJalan ?? 0) + 1;
 
-        $totalModal = 0.0;
-        $totalPenjualan = 0.0;
-
-        foreach ($details as $d) {
-            $qty = (int) ($d->jumlah_keluar ?? 0);
-            $modal = (float) ($d->harga_modal ?? 0);
-            $jual = (float) ($d->harga_jual ?? 0);
-
-            $totalModal += $modal * $qty;
-            $totalPenjualan += $jual * $qty;
-        }
-
-        $this->forceFill([
-            'total_modal' => $totalModal,
-            'total_penjualan' => $totalPenjualan,
-            'total_keuntungan' => max($totalPenjualan - $totalModal, 0),
-        ])->saveQuietly();
+        return "SJ-{$ymd}-".str_pad($nextSuratJalan, 0, '0', STR_PAD_LEFT);
     }
 }
-

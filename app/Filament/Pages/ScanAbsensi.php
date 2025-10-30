@@ -11,7 +11,7 @@ class ScanAbsensi extends Page
 {
     protected string $view = 'filament.pages.scan-absensi';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCamera;
 
     protected static string|UnitEnum|null $navigationGroup = 'Absensi';
 

@@ -14,13 +14,15 @@ return new class extends Migration
         Schema::create('petty_cashes', function (Blueprint $table) {
             $table->id();
             $table->date('tanggal');
-            $table->decimal('pemasukan', 15, 2)->nullable();
+            $table->integer('pemasukan')->nullable()->default(0);
             $table->string('keterangan_pemasukan')->nullable();
-            $table->decimal('pengeluaran', 15, 2)->nullable();
+            $table->integer('pengeluaran')->nullable()->default(0);
             $table->string('keterangan_pengeluaran')->nullable();
-            $table->string('bukti_pembayaran')->nullable(); // Tambahan kolom foto
+            $table->string('path_bukti_pembayaran')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
         });
     }
 

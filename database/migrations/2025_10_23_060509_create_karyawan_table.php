@@ -13,18 +13,26 @@ return new class extends Migration
     {
         Schema::create('karyawan', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+
             $table->string('nama');
             $table->string('jabatan');
-            $table->string('no_hp');
-            $table->integer('gaji_pokok');
-            $table->text('alamat');
-            $table->text('foto_ktp');
-            $table->text('dokumen_tambahan');
-            $table->string('kontak_darurat_serumah');
-            $table->string('kontak_darurat_tidak_serumah');
-            $table->boolean('status_aktif');
+            $table->string('nomor_hp')->nullable();
+            $table->integer('gaji_pokok')->default(0);
+            $table->text('alamat')->nullable();
+
+            $table->text('path_foto_ktp')->nullable();
+            $table->text('path_dokumen_tambahan')->nullable();
+
+            $table->string('kontak_darurat_serumah')->nullable();
+            $table->string('kontak_darurat_tidak_serumah')->nullable();
+
+            $table->boolean('status_aktif')->default(true);
             $table->date('tanggal_terakhir_aktif')->nullable();
+
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
             $table->softDeletes();
         });

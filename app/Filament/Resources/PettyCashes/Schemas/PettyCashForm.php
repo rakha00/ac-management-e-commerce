@@ -14,46 +14,50 @@ class PettyCashForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->schema([
-            DatePicker::make('tanggal')
-                ->label('Tanggal')
-                ->required(),
-
             Section::make('Pemasukan')
                 ->schema([
                     TextInput::make('pemasukan')
                         ->label('Jumlah Pemasukan')
                         ->numeric()
+                        ->minValue(0)
                         ->prefix('Rp')
                         ->mask(RawJs::make('$money($input)'))
-                        ->stripCharacters(','),
+                        ->stripCharacters(',')
+                        ->placeholder('0'),
                     TextInput::make('keterangan_pemasukan')
                         ->label('Keterangan Pemasukan')
+                        ->placeholder('Opsional')
                         ->maxLength(255),
                 ])
-                ->collapsed(),
-
+                ->columns(2),
             Section::make('Pengeluaran')
                 ->schema([
                     TextInput::make('pengeluaran')
                         ->label('Jumlah Pengeluaran')
                         ->numeric()
+                        ->minValue(0)
                         ->prefix('Rp')
                         ->mask(RawJs::make('$money($input)'))
                         ->stripCharacters(',')
-                        ->dehydrateStateUsing(fn ($state) => (int) str_replace(',', '', $state)),
+                        ->placeholder('0'),
                     TextInput::make('keterangan_pengeluaran')
                         ->label('Keterangan Pengeluaran')
+                        ->placeholder('Opsional')
                         ->maxLength(255),
                 ])
-                ->collapsed(),
-
-            FileUpload::make('bukti_pembayaran')
+                ->columns(2),
+            DatePicker::make('tanggal')
+                ->label('Tanggal')
+                ->required(),
+            FileUpload::make('path_bukti_pembayaran')
                 ->label('Bukti Pembayaran (Foto)')
                 ->image()
+                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                 ->directory('bukti-petty-cash')
                 ->maxSize(2048)
                 ->downloadable()
-                ->previewable(),
+                ->previewable()
+                ->helperText('Format: JPG/PNG/WebP, maks 2MB'),
         ]);
     }
 }

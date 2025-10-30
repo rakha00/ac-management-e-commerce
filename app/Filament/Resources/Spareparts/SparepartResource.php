@@ -13,12 +13,28 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class SparepartResource extends Resource
 {
     protected static ?string $model = Sparepart::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
+
+    protected static ?int $navigationSort = 3;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user || ! $user->karyawan) {
+            return false;
+        }
+
+        return in_array($user->karyawan->jabatan, ['admin', 'gudang'], true);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -33,7 +49,7 @@ class SparepartResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\HargaHistoryRelationManager::class,
         ];
     }
 

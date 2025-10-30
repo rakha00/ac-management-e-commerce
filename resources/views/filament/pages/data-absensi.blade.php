@@ -29,24 +29,24 @@
                 </div>
             </div>
 
-            <div class="px-6">
+            <div class="px-6 pt-4">
                 <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                     <div
                         class="rounded-lg border border-gray-200 bg-white p-3 text-sm dark:bg-gray-800 dark:border-gray-700">
                         <div class="text-gray-500 dark:text-gray-400">Waktu Absen</div>
                         <div class="mt-1 text-gray-900 dark:text-gray-100 font-semibold">
-                            08:00 WIB
+                            {{ $this->jamMasuk }} WIB
                         </div>
                     </div>
                     <div
                         class="rounded-lg border border-gray-200 bg-white p-3 text-sm dark:bg-gray-800 dark:border-gray-700">
                         <div class="text-gray-500 dark:text-gray-400">Waktu Telat</div>
                         <div class="mt-1 text-gray-900 dark:text-gray-100 font-semibold">
-                            08:15 WIB
+                            {{ $this->waktuTelat }} WIB
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-col items-center space-y-4">
+                <div class="flex flex-col items-center space-y-4 pb-4">
                     <div
                         class="rounded-lg p-3 bg-white ring-1 ring-gray-200 shadow-sm dark:bg-gray-800 dark:ring-gray-700">
                         {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(260)->margin(1)->generate($this->tokenHarian) !!}

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -14,24 +15,49 @@ class PiutangProduk extends Model
 
     protected $fillable = [
         'no_invoice',
+        'transaksi_produk_id',
         'total_piutang',
-        'sisa_piutang',
         'status_pembayaran',
         'jatuh_tempo',
         'keterangan',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
     {
         return [
             'total_piutang' => 'integer',
-            'sisa_piutang' => 'integer',
             'jatuh_tempo' => 'date',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
         ];
     }
 
-    public function detailPiutangProdukCicilan(): HasMany
+    public function getSisaPiutangAttribute(): int
     {
-        return $this->hasMany(DetailPiutangProdukCicilan::class);
+        $totalCicilan = $this->piutangProdukCicilanDetail()->sum('nominal_cicilan');
+
+        return max($this->total_piutang - (int) $totalCicilan, 0);
+    }
+
+    public function piutangProdukCicilanDetail(): HasMany
+    {
+        return $this->hasMany(PiutangProdukCicilanDetail::class);
+    }
+
+    public function transaksiProduk(): BelongsTo
+    {
+        return $this->belongsTo(TransaksiProduk::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

@@ -19,17 +19,31 @@ class Laporan extends Model
         'jenis_pengerjaan',
         'foto_pengerjaan',
         'keterangan',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal' => 'datetime',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
         ];
     }
 
     public function karyawan(): BelongsTo
     {
         return $this->belongsTo(Karyawan::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

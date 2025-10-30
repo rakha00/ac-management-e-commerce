@@ -2,16 +2,12 @@
 
 namespace App\Filament\Resources\Spareparts\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\RawJs;
 
-/**
- * Sparepart master form schema.
- * Fields: Kode Sparepart, Nama Sparepart, Harga Modal, Stock Awal, Keterangan.
- * Note: stock_masuk / stock_keluar / stock_akhir are maintained by the system and not editable here.
- */
 class SparepartForm
 {
     public static function configure(Schema $schema): Schema
@@ -19,7 +15,7 @@ class SparepartForm
         return $schema
             ->components([
                 Section::make('Data Sparepart')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('kode_sparepart')
                             ->label('Kode Sparepart')
@@ -31,19 +27,42 @@ class SparepartForm
                             ->label('Nama Sparepart')
                             ->required()
                             ->maxLength(255),
-
+                    ]),
+                Section::make('Harga Saat Ini')
+                    ->columns(1)
+                    ->schema([
                         TextInput::make('harga_modal')
                             ->label('Harga Modal')
                             ->numeric()
                             ->prefix('Rp')
-                            ->required()
-                            ->default(0),
-
-                        TextInput::make('stock_awal')
-                            ->label('Stock Awal')
+                            ->placeholder('0')
+                            ->mask(RawJs::make('$money($input)'))
+                            ->stripCharacters(',')
+                            ->required(),
+                    ]),
+                Section::make('Stok')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('stok_awal')
+                            ->label('Stok Awal')
                             ->numeric()
                             ->required()
-                            ->default(0),
+                            ->suffix('unit'),
+                        TextInput::make('stok_akhir')
+                            ->label('Stok Akhir')
+                            ->numeric()
+                            ->suffix('unit')
+                            ->disabled(),
+                        TextInput::make('stok_masuk')
+                            ->label('Stok Masuk')
+                            ->numeric()
+                            ->suffix('unit')
+                            ->disabled(),
+                        TextInput::make('stok_keluar')
+                            ->label('Stok Keluar')
+                            ->numeric()
+                            ->suffix('unit')
+                            ->disabled(),
                     ]),
                 Section::make('Keterangan')
                     ->schema([

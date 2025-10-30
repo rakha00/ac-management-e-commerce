@@ -17,10 +17,12 @@ return new class extends Migration
             $table->dateTime('tanggal');
             $table->string('nama_konsumen');
             $table->string('jenis_pengerjaan');
-            $table->string('foto_pengerjaan');
+            $table->string('path_foto_pengerjaan')->nullable();
             $table->text('keterangan')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
         });
     }
 

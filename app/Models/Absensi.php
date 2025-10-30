@@ -11,23 +11,21 @@ class Absensi extends Model
 
     protected $fillable = [
         'karyawan_id',
-        'tanggal',
         'waktu_absen',
-        'telat',
+        'is_telat',
         'keterangan',
-        'terkonfirmasi',
-        'dikonfirmasi_oleh',
-        'waktu_konfirmasi',
+        'is_terkonfirmasi',
+        'dikonfirmasi_oleh_id',
+        'dikonfirmasi_pada',
     ];
 
     protected function casts(): array
     {
         return [
-            'tanggal' => 'date',
             'waktu_absen' => 'datetime',
-            'telat' => 'boolean',
-            'terkonfirmasi' => 'boolean',
-            'waktu_konfirmasi' => 'datetime',
+            'is_telat' => 'boolean',
+            'is_terkonfirmasi' => 'boolean',
+            'dikonfirmasi_pada' => 'datetime',
         ];
     }
 
@@ -38,6 +36,6 @@ class Absensi extends Model
 
     public function dikonfirmasiOleh(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'dikonfirmasi_oleh');
+        return $this->belongsTo(User::class, 'dikonfirmasi_oleh_id');
     }
 }

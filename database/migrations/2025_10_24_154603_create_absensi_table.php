@@ -13,20 +13,17 @@ return new class extends Migration
     {
         Schema::create('absensi', function (Blueprint $table) {
             $table->id();
-            // Relasi Karyawan
             $table->foreignId('karyawan_id')->constrained('karyawan')->onDelete('cascade');
-            // Informasi waktu absen
-            $table->date('tanggal');
+
             $table->dateTime('waktu_absen');
-            // Status keterlambatan & keterangan
-            $table->boolean('telat')->default(false);
+
+            $table->boolean('is_telat')->default(false);
             $table->string('keterangan')->nullable();
-            // Konfirmasi admin
-            $table->boolean('terkonfirmasi')->default(false);
-            $table->foreignId('dikonfirmasi_oleh')->nullable()->constrained('users')->onDelete('set null');
-            $table->timestamp('waktu_konfirmasi')->nullable();
-            // Unik absen per karyawan per hari
-            $table->unique(['karyawan_id', 'tanggal']);
+
+            $table->boolean('is_terkonfirmasi')->default(false);
+            $table->foreignId('dikonfirmasi_oleh_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->timestamp('dikonfirmasi_pada')->nullable();
+
             $table->timestamps();
         });
     }

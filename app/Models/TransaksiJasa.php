@@ -3,22 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
-/**
- * TransaksiJasa model for service transactions.
- * - Generates unique sequential kode_jasa per date
- * - Maintains aggregated totals based on details
- * - Uses soft deletes as requested
- */
 class TransaksiJasa extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'transaksi_jasas';
+    protected $table = 'transaksi_jasa';
 
     protected $fillable = [
         'tanggal_transaksi',
@@ -33,6 +27,8 @@ class TransaksiJasa extends Model
         'total_pengeluaran_jasa',
         'total_keuntungan_jasa',
         'keterangan',
+        'created_by',
+        'updated_by',
     ];
 
     protected function casts(): array
@@ -40,13 +36,14 @@ class TransaksiJasa extends Model
         return [
             'tanggal_transaksi' => 'date',
             'garansi_hari' => 'integer',
-            'total_pendapatan_jasa' => 'decimal:2',
-            'total_pengeluaran_jasa' => 'decimal:2',
-            'total_keuntungan_jasa' => 'decimal:2',
+            'total_pendapatan_jasa' => 'integer',
+            'total_pengeluaran_jasa' => 'integer',
+            'total_keuntungan_jasa' => 'integer',
+            'created_by' => 'string',
+            'updated_by' => 'string',
         ];
     }
 
-    // ============ RELATIONSHIPS ============
     public function teknisi(): BelongsTo
     {
         return $this->belongsTo(Karyawan::class, 'teknisi_karyawan_id');
@@ -62,7 +59,19 @@ class TransaksiJasa extends Model
         return $this->hasMany(TransaksiJasaDetail::class, 'transaksi_jasa_id');
     }
 
-    // ============ MODEL EVENTS ============
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Boot the model to handle events.
+     */
     protected static function boot()
     {
         parent::boot();
@@ -70,7 +79,6 @@ class TransaksiJasa extends Model
         static::creating(function (TransaksiJasa $model) {
             // Ensure transaction date exists
             $date = $model->tanggal_transaksi ? Carbon::parse($model->tanggal_transaksi)->toDateString() : Carbon::now()->toDateString();
-            $model->tanggal_transaksi = $date;
 
             // Auto-fill teknisi/helper names from Karyawan when provided
             if ($model->teknisi_karyawan_id && empty($model->teknisi_nama)) {
@@ -110,7 +118,6 @@ class TransaksiJasa extends Model
         });
     }
 
-    // ============ HELPERS ============
     /**
      * Generate sequential number per date with format PREFIX-YYYYMMDD-####.
      */
@@ -139,7 +146,7 @@ class TransaksiJasa extends Model
         }
 
         $next = $max + 1;
-        $seqStr = str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+        $seqStr = str_pad((string) $next, 0, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$ymd}-{$seqStr}";
     }
@@ -149,11 +156,11 @@ class TransaksiJasa extends Model
      */
     protected static function extractSequence(?string $no, string $prefix, string $ymd): int
     {
-        if (!$no) {
+        if (! $no) {
             return 0;
         }
 
-        $pattern = '/^' . preg_quote($prefix, '/') . '-' . preg_quote($ymd, '/') . '-(\d{4})$/';
+        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{4})$/';
         if (preg_match($pattern, $no, $m)) {
             return (int) $m[1];
         }
