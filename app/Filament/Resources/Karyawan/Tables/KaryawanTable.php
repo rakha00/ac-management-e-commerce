@@ -4,8 +4,8 @@ namespace App\Filament\Resources\Karyawan\Tables;
 
 use App\Filament\Resources\Karyawan\KaryawanResource;
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -13,6 +13,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction as ExcelExportAction;
 use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
@@ -22,6 +23,26 @@ class KaryawanTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query, \Filament\Tables\Contracts\HasTable $livewire) {
+                $tableFilters = $livewire->getTable()->getFilters();
+
+                if (isset($tableFilters['tanggal_penghasilan'])) {
+                    $filterData = $tableFilters['tanggal_penghasilan']->getState();
+                    if (isset($filterData['tanggal_awal']) || isset($filterData['tanggal_akhir'])) {
+                        $query->leftJoin('karyawan_penghasilan_detail', function ($join) use ($filterData) {
+                            $join->on('karyawan.id', '=', 'karyawan_penghasilan_detail.karyawan_id');
+                            if (isset($filterData['tanggal_awal'])) {
+                                $join->whereDate('karyawan_penghasilan_detail.tanggal', '>=', $filterData['tanggal_awal']);
+                            }
+                            if (isset($filterData['tanggal_akhir'])) {
+                                $join->whereDate('karyawan_penghasilan_detail.tanggal', '<=', $filterData['tanggal_akhir']);
+                            }
+                        })
+                            ->select('karyawan.*') // Explicitly select columns from karyawan table
+                            ->groupBy('karyawan.id');
+                    }
+                }
+            })
             ->columns([
                 TextColumn::make('nama')
                     ->searchable()
@@ -45,6 +66,37 @@ class KaryawanTable
                 TextColumn::make('gaji_pokok')
                     ->numeric()
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->sortable(),
+                TextColumn::make('total_gaji')
+                    ->label('Total Gaji')
+                    ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(function (\App\Models\Karyawan $record, \Filament\Tables\Contracts\HasTable $livewire): int {
+                        $totalPenghasilan = $record->gaji_pokok;
+
+                        $query = $record->karyawanPenghasilanDetail();
+
+                        $tableFilters = $livewire->getTable()->getFilters();
+
+                        if (isset($tableFilters['tanggal_penghasilan'])) {
+                            $filterData = $tableFilters['tanggal_penghasilan']->getState();
+                            if (isset($filterData['tanggal_awal'])) {
+                                $query->whereDate('tanggal', '>=', $filterData['tanggal_awal']);
+                            }
+
+                            if (isset($filterData['tanggal_akhir'])) {
+                                $query->whereDate('tanggal', '<=', $filterData['tanggal_akhir']);
+                            }
+                        }
+
+                        $details = $query->get();
+
+                        foreach ($details as $detail) {
+                            $totalPenghasilan += -$detail->kasbon + $detail->lembur + $detail->bonus - $detail->potongan;
+                        }
+
+                        return $totalPenghasilan;
+                    })
                     ->sortable(),
                 TextColumn::make('kontak_darurat_serumah')
                     ->searchable()
@@ -78,10 +130,36 @@ class KaryawanTable
                         'staff' => 'Staff',
                         'sales' => 'Sales',
                     ]),
-                Filter::make('aktif')
-                    ->label('Status Aktif')
-                    ->default()
-                    ->query(fn (Builder $query): Builder => $query->where('status_aktif', true)),
+                SelectFilter::make('status_aktif')
+                    ->options([
+                        true => 'Aktif',
+                        false => 'Tidak Aktif',
+                    ])
+                    ->default(true)
+                    ->label('Status Aktif'),
+
+                Filter::make('tanggal_penghasilan')
+                    ->form([
+                        DatePicker::make('tanggal_awal')
+                            ->default(now()->startOfMonth()),
+                        DatePicker::make('tanggal_akhir')
+                            ->default(now()->endOfMonth()),
+                    ])
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! $data['tanggal_awal'] && ! $data['tanggal_akhir']) {
+                            return null;
+                        }
+
+                        $indikator = 'Penghasilan dari ';
+                        if ($data['tanggal_awal']) {
+                            $indikator .= Carbon::parse($data['tanggal_awal'])->toFormattedDateString();
+                        }
+                        if ($data['tanggal_akhir']) {
+                            $indikator .= ' sampai '.Carbon::parse($data['tanggal_akhir'])->toFormattedDateString();
+                        }
+
+                        return $indikator;
+                    }),
             ])
             ->recordActions([
                 Action::make('penghasilan')
@@ -100,17 +178,42 @@ class KaryawanTable
                                 Column::make('jabatan'),
                                 Column::make('nomor_hp')->heading('Nomor HP'),
                                 Column::make('gaji_pokok'),
+                                Column::make('total_gaji')
+                                    ->getStateUsing(function (\App\Models\Karyawan $record, \Filament\Tables\Contracts\HasTable $livewire): int {
+                                        $totalPenghasilan = $record->gaji_pokok;
+
+                                        $query = $record->karyawanPenghasilanDetail();
+
+                                        $tableFilters = $livewire->getTable()->getFilters();
+
+                                        if (isset($tableFilters['tanggal_penghasilan'])) {
+                                            $filterData = $tableFilters['tanggal_penghasilan']->getState();
+                                            if (isset($filterData['tanggal_awal'])) {
+                                                $query->whereDate('tanggal', '>=', $filterData['tanggal_awal']);
+                                            }
+
+                                            if (isset($filterData['tanggal_akhir'])) {
+                                                $query->whereDate('tanggal', '<=', $filterData['tanggal_akhir']);
+                                            }
+                                        }
+
+                                        $details = $query->get();
+
+                                        foreach ($details as $detail) {
+                                            $totalPenghasilan += -$detail->kasbon + $detail->lembur + $detail->bonus - $detail->potongan;
+                                        }
+
+                                        return $totalPenghasilan;
+                                    }),
                                 Column::make('kontak_darurat_serumah'),
                                 Column::make('kontak_darurat_tidak_serumah'),
-                                Column::make('status_aktif'),
+                                Column::make('status_aktif')
+                                    ->formatStateUsing(fn ($state) => $state ? 'aktif' : 'tidak aktif'),
                                 Column::make('created_at')->heading('Dibuat Pada'),
                             ])
                             ->withFilename(fn () => 'karyawan_'.now()->format('Ymd_His'))
                             ->fromTable(),
                     ]),
-                BulkActionGroup::make([
-                    //
-                ]),
             ])
             ->deferFilters(false);
     }
