@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Karyawan;
+use App\Models\KaryawanPenghasilanDetail;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -36,6 +37,31 @@ class KaryawanSeeder extends Seeder
                 'kontak_darurat_tidak_serumah' => '081234567891',
                 'status_aktif' => true,
                 'tanggal_terakhir_aktif' => null,
+            ]);
+
+            // Add two KaryawanPenghasilanDetail entries for each Karyawan
+            KaryawanPenghasilanDetail::query()->create([
+                'karyawan_id' => $user->karyawan->id,
+                'kasbon' => 500000,
+                'lembur' => 100000,
+                'bonus' => 200000,
+                'potongan' => 50000,
+                'keterangan' => 'Detail penghasilan bulan lalu',
+                'tanggal' => now()->subMonth(),
+                'created_by' => $user->id,
+                'updated_by' => $user->id,
+            ]);
+
+            KaryawanPenghasilanDetail::query()->create([
+                'karyawan_id' => $user->karyawan->id,
+                'kasbon' => 0,
+                'lembur' => 150000,
+                'bonus' => 300000,
+                'potongan' => 0,
+                'keterangan' => 'Detail penghasilan bulan ini',
+                'tanggal' => now(),
+                'created_by' => $user->id,
+                'updated_by' => $user->id,
             ]);
         }
     }

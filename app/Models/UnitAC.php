@@ -61,19 +61,26 @@ class UnitAC extends Model
         return $this->hasMany(HargaUnitACHistory::class, 'unit_ac_id');
     }
 
-    /**
-     * Always compute stok_akhir before saving (create/update).
-     */
     protected static function booted(): void
     {
-        static::saving(function (UnitAC $model) {
-            $stokAwal = (int) ($model->stok_awal ?? 0);
-            $stokMasuk = (int) ($model->stok_masuk ?? 0);
-            $stokKeluar = (int) ($model->stok_keluar ?? 0);
+        static::creating(function (UnitAC $model) {
+            $model->stok_akhir = ($model->stok_awal ?? 0) + ($model->stok_masuk ?? 0) - ($model->stok_keluar ?? 0);
+        });
 
-            $model->stok_akhir = $stokAwal + $stokMasuk - $stokKeluar;
+        static::created(function (UnitAC $model) {
+            $model->hargaHistory()->create([
+                'harga_dealer' => $model->harga_dealer,
+                'harga_ecommerce' => $model->harga_ecommerce,
+                'harga_retail' => $model->harga_retail,
+                'karyawan_id' => Auth::id(),
+            ]);
+        });
 
-            // Record price history if prices have changed
+        static::updating(function (UnitAC $model) {
+            $model->stok_akhir = ($model->stok_awal ?? 0) + ($model->stok_masuk ?? 0) - ($model->stok_keluar ?? 0);
+        });
+
+        static::updated(function (UnitAC $model) {
             if ($model->isDirty('harga_dealer') || $model->isDirty('harga_ecommerce') || $model->isDirty('harga_retail')) {
                 $model->hargaHistory()->create([
                     'harga_dealer' => $model->harga_dealer,

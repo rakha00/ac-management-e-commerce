@@ -2,13 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
@@ -17,12 +14,14 @@ class DatabaseSeeder extends Seeder
         $this->call([
             KaryawanSeeder::class,
             TeknisiSeeder::class,
-            PrincipalSeeder::class,
-            BarangMasukSeeder::class,
             AbsensiSeeder::class,
-            TransaksiJasaSeeder::class,
-            DistributorSeeder::class,
+            UnitACSeeder::class,
+            KonsumenSeeder::class,
             SparepartSeeder::class,
+            DistributorSeeder::class,
+            PrincipalSeeder::class,
+
+            TransaksiJasaSeeder::class,
         ]);
     }
 }
