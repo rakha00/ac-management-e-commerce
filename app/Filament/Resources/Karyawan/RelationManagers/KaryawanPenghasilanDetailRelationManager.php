@@ -9,7 +9,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -112,79 +111,32 @@ class KaryawanPenghasilanDetailRelationManager extends RelationManager
             ])
             ->filters([
                 Filter::make('tanggal')
-                    ->schema([
-                        Select::make('bulan')
-                            ->label('Bulan')
-                            ->options([
-                                1 => 'Januari',
-                                2 => 'Februari',
-                                3 => 'Maret',
-                                4 => 'April',
-                                5 => 'Mei',
-                                6 => 'Juni',
-                                7 => 'Juli',
-                                8 => 'Agustus',
-                                9 => 'September',
-                                10 => 'Oktober',
-                                11 => 'November',
-                                12 => 'Desember',
-                            ]),
-                        Select::make('tahun')
-                            ->label('Tahun')
-                            ->options(function (): array {
-                                $currentYear = now()->year;
-                                $years = range($currentYear - 5, $currentYear + 1);
-
-                                return array_combine($years, array_map('strval', $years));
-                            }),
+                    ->form([
+                        DatePicker::make('from')->label('Dari')->default(now()->startOfMonth()),
+                        DatePicker::make('until')->label('Sampai')->default(now()->endOfMonth()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        $bulan = $data['bulan'] ?? null;
-                        $tahun = $data['tahun'] ?? null;
-
-                        if ($bulan && $tahun) {
-                            $start = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth()->toDateString();
-                            $end = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth()->toDateString();
-
-                            return $query
-                                ->whereDate('tanggal', '>=', $start)
-                                ->whereDate('tanggal', '<=', $end);
-                        }
-
-                        return $query;
+                        return $query
+                            ->when($data['from'], fn ($q, $date) => $q->whereDate('tanggal', '>=', $date))
+                            ->when($data['until'], fn ($q, $date) => $q->whereDate('tanggal', '<=', $date));
                     })
                     ->indicateUsing(function (array $data): array {
-                        $bulan = $data['bulan'] ?? null;
-                        $tahun = $data['tahun'] ?? null;
-
                         $indicators = [];
 
-                        if ($bulan && $tahun) {
-                            $monthNames = [
-                                1 => 'Januari',
-                                2 => 'Februari',
-                                3 => 'Maret',
-                                4 => 'April',
-                                5 => 'Mei',
-                                6 => 'Juni',
-                                7 => 'Juli',
-                                8 => 'Agustus',
-                                9 => 'September',
-                                10 => 'Oktober',
-                                11 => 'November',
-                                12 => 'Desember',
-                            ];
+                        if ($data['from'] ?? null) {
+                            $indicators[] = Indicator::make('Tanggal dari '.Carbon::parse($data['from'])->toFormattedDateString())
+                                ->removeField('from');
+                        }
 
-                            $label = 'Periode: '.($monthNames[$bulan] ?? $bulan).' '.$tahun;
-
-                            $indicators[] = Indicator::make($label)
-                                ->removeField('bulan')
-                                ->removeField('tahun');
+                        if ($data['until'] ?? null) {
+                            $indicators[] = Indicator::make('Tanggal sampai '.Carbon::parse($data['until'])->toFormattedDateString())
+                                ->removeField('until');
                         }
 
                         return $indicators;
                     }),
             ])
+            ->deferFilters(false)
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
