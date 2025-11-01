@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             PrincipalSeeder::class,
 
             TransaksiJasaSeeder::class,
+            TransaksiProdukSeeder::class,
         ]);
     }
 }

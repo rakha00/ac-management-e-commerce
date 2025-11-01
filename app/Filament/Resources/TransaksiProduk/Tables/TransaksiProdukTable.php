@@ -28,12 +28,30 @@ class TransaksiProdukTable
                     ->label('No. Surat Jalan')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('sales_nama')
+                TextColumn::make('salesKaryawan.nama')
                     ->label('Sales')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('toko_konsumen')
-                    ->label('Toko/Konsumen')
+                TextColumn::make('konsumen.nama')
+                    ->label('Konsumen')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('sub_total_modal')
+                    ->label('Sub Total Modal')
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(fn (\App\Models\TransaksiProduk $record): string => $record->transaksiProdukDetail->sum(fn ($detail) => $detail->harga_modal * $detail->jumlah_keluar))
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('sub_total_penjualan')
+                    ->label('Sub Total Penjualan')
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(fn (\App\Models\TransaksiProduk $record): string => $record->transaksiProdukDetail->sum(fn ($detail) => $detail->harga_jual * $detail->jumlah_keluar))
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('sub_total_keuntungan')
+                    ->label('Sub Total Keuntungan')
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(fn (\App\Models\TransaksiProduk $record): string => $record->transaksiProdukDetail->sum(fn ($detail) => ($detail->harga_jual - $detail->harga_modal) * $detail->jumlah_keluar))
                     ->sortable()
                     ->searchable(),
             ])

@@ -79,7 +79,7 @@ class TransaksiProdukDetail extends Model
                         $detail->sku = $unit->sku;
                     }
                     if (empty($detail->nama_unit)) {
-                        $detail->nama_unit = $unit->nama_merk;
+                        $detail->nama_unit = $unit->nama_unit;
                     }
 
                     // Retrieve historical prices

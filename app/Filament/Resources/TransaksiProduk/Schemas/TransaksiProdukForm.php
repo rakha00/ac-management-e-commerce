@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TransaksiProduk\Schemas;
 
 use App\Models\Karyawan;
+use App\Models\Konsumen;
 use App\Models\TransaksiProduk;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -58,8 +59,13 @@ class TransaksiProdukForm
                                 ->toArray())
                             ->searchable()
                             ->reactive(),
-                        TextInput::make('toko_konsumen')
+                        Select::make('konsumen_id')
                             ->label('Toko/Konsumen')
+                            ->options(fn () => Konsumen::query()
+                                ->orderBy('nama')
+                                ->pluck('nama', 'id')
+                                ->toArray())
+                            ->searchable()
                             ->required(),
                         Textarea::make('keterangan')
                             ->label('Keterangan')

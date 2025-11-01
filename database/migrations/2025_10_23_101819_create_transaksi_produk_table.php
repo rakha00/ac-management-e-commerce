@@ -19,8 +19,7 @@ return new class extends Migration
             $table->string('nomor_surat_jalan');
 
             $table->foreignId('sales_karyawan_id')->nullable()->constrained('karyawan')->onDelete('set null');
-            $table->string('sales_nama')->nullable();
-            $table->string('toko_konsumen');
+            $table->foreignId('konsumen_id')->nullable()->constrained('konsumen')->onDelete('set null');
 
             $table->text('keterangan')->nullable();
 

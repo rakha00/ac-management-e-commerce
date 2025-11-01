@@ -1,0 +1,104 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Karyawan;
+use App\Models\Konsumen;
+use App\Models\PiutangProduk;
+use App\Models\PiutangProdukCicilanDetail;
+use App\Models\TransaksiProduk;
+use App\Models\TransaksiProdukDetail;
+use App\Models\UnitAC;
+use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class TransaksiProdukSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        DB::beginTransaction();
+
+        try {
+            $salesKaryawans = Karyawan::where('jabatan', 'sales')->pluck('id');
+            $konsumens = Konsumen::pluck('id');
+            $unitAcs = UnitAC::all();
+
+            if ($salesKaryawans->isEmpty() || $konsumens->isEmpty() || $unitAcs->isEmpty()) {
+                $this->command->info('Skipping TransaksiProdukSeeder: Not enough data in Karyawan (sales), Konsumen, or UnitAC.');
+                DB::rollBack();
+
+                return;
+            }
+
+            for ($i = 0; $i < 3; $i++) {
+                $tanggalTransaksi = Carbon::now()->subDays(rand(1, 365));
+                $salesKaryawanId = $salesKaryawans->random();
+                $konsumenId = $konsumens->random();
+
+                $transaksiProduk = TransaksiProduk::create([
+                    'tanggal_transaksi' => $tanggalTransaksi,
+                    'sales_karyawan_id' => $salesKaryawanId,
+                    'konsumen_id' => $konsumenId,
+                    'keterangan' => 'Transaksi produk '.($i + 1),
+                ]);
+
+                $totalTransaksi = 0;
+                $jumlahDetail = rand(1, 3);
+
+                for ($j = 0; $j < $jumlahDetail; $j++) {
+                    $unitAc = $unitAcs->random();
+                    $jumlahKeluar = rand(1, 5);
+
+                    $hargaJual = $unitAc->harga_jual > 0 ? $unitAc->harga_jual : rand(2000000, 5000000);
+                    $hargaModal = rand(1000000, 2000000); // Menambahkan harga_modal secara langsung
+
+                    TransaksiProdukDetail::create([
+                        'transaksi_produk_id' => $transaksiProduk->id,
+                        'unit_ac_id' => $unitAc->id,
+                        'jumlah_keluar' => $jumlahKeluar,
+                        'harga_modal' => $hargaModal,
+                        'harga_jual' => $hargaJual,
+                        'keterangan' => 'Detail produk '.($j + 1),
+                    ]);
+
+                    $totalTransaksi += ($hargaJual * $jumlahKeluar);
+                }
+
+                // Logika untuk piutang produk
+                $persentaseUangMuka = rand(0, 100);
+                $uangMuka = ($totalTransaksi * $persentaseUangMuka) / 100;
+                $sisaPembayaran = $totalTransaksi - $uangMuka;
+
+                if ($sisaPembayaran > 0) {
+                    $piutangProduk = PiutangProduk::create([
+                        'transaksi_produk_id' => $transaksiProduk->id,
+                        'total_piutang' => $sisaPembayaran,
+                        'status_pembayaran' => 'belum_lunas',
+                        'jatuh_tempo' => Carbon::parse($tanggalTransaksi)->addMonths(rand(1, 12)),
+                        'keterangan' => 'Piutang untuk transaksi produk '.$transaksiProduk->nomor_invoice,
+                    ]);
+
+                    $jumlahCicilan = rand(1, 5);
+                    $nominalCicilanPerAngsuran = $sisaPembayaran / $jumlahCicilan;
+
+                    for ($k = 0; $k < $jumlahCicilan; $k++) {
+                        PiutangProdukCicilanDetail::create([
+                            'piutang_produk_id' => $piutangProduk->id,
+                            'nominal_cicilan' => $nominalCicilanPerAngsuran,
+                            'tanggal_cicilan' => Carbon::parse($tanggalTransaksi)->addDays(rand(1, 30 * ($k + 1))),
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+}

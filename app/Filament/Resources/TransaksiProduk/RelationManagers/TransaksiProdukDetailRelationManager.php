@@ -19,6 +19,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -160,19 +161,22 @@ class TransaksiProdukDetailRelationManager extends RelationManager
                     ->state(fn ($record) => (float) $record->harga_modal * (int) $record->jumlah_keluar)
                     ->numeric()
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Summarizer::make()->using(fn ($query) => $query->get()->sum(fn ($record) => (float) $record->harga_modal * (int) $record->jumlah_keluar))->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')),
                 TextColumn::make('subtotal_penjualan')
                     ->label('Subtotal Penjualan')
                     ->state(fn ($record) => (float) $record->harga_jual * (int) $record->jumlah_keluar)
                     ->numeric()
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Summarizer::make()->using(fn ($query) => $query->get()->sum(fn ($record) => (float) $record->harga_jual * (int) $record->jumlah_keluar))->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')),
                 TextColumn::make('subtotal_keuntungan')
                     ->label('Subtotal Keuntungan')
                     ->state(fn ($record) => max(((float) $record->harga_jual - (float) $record->harga_modal) * (int) $record->jumlah_keluar, 0))
                     ->numeric()
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Summarizer::make()->using(fn ($query) => $query->get()->sum(fn ($record) => max(((float) $record->harga_jual - (float) $record->harga_modal) * (int) $record->jumlah_keluar, 0)))->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')),
             ])
             ->filters([
                 TrashedFilter::make(),

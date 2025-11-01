@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 class TransaksiProduk extends Model
 {
@@ -19,8 +19,7 @@ class TransaksiProduk extends Model
         'nomor_invoice',
         'nomor_surat_jalan',
         'sales_karyawan_id',
-        'sales_nama',
-        'toko_konsumen',
+        'konsumen_id',
         'keterangan',
         'created_by',
         'updated_by',
@@ -50,6 +49,16 @@ class TransaksiProduk extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function konsumen(): BelongsTo
+    {
+        return $this->belongsTo(Konsumen::class, 'konsumen_id');
+    }
+
+    public function salesKaryawan(): BelongsTo
+    {
+        return $this->belongsTo(Karyawan::class, 'sales_karyawan_id');
+    }
+
     /**
      * Always set tanggal_transaksi to current date if not provided.
      */
@@ -61,24 +70,8 @@ class TransaksiProduk extends Model
             // Ensure transaction date exists
             $date = $model->tanggal_transaksi ? Carbon::parse($model->tanggal_transaksi)->toDateString() : Carbon::now()->toDateString();
 
-            // Auto-fill sales_nama from Karyawan when provided
-            if ($model->sales_karyawan_id && empty($model->sales_nama)) {
-                $sales = Karyawan::find($model->sales_karyawan_id);
-                if ($sales && ($sales->jabatan === 'sales' || empty($sales->jabatan))) {
-                    $model->sales_nama = $sales->nama;
-                }
-            }
-
             $model->nomor_invoice = self::generateNomorInvoice($date);
             $model->nomor_surat_jalan = self::generateNomorSuratJalan($date);
-        });
-
-        static::updating(function (TransaksiProduk $model) {
-            // If sales_karyawan_id changes, keep sales_nama in sync
-            if ($model->isDirty('sales_karyawan_id')) {
-                $sales = $model->sales_karyawan_id ? Karyawan::find($model->sales_karyawan_id) : null;
-                $model->sales_nama = $sales ? $sales->nama : null;
-            }
         });
     }
 
@@ -90,7 +83,7 @@ class TransaksiProduk extends Model
         $lastInvoice = self::whereDate('tanggal_transaksi', $tanggal)
             ->get()
             ->map(function ($item) {
-                if (preg_match('/INV-(\d{8})-(\d{4})$/', $item->nomor_invoice, $matches)) {
+                if (preg_match('/INV-(\d{8})-(\d{2})$/', $item->nomor_invoice, $matches)) {
                     return (int) $matches[2];
                 }
 
@@ -100,7 +93,7 @@ class TransaksiProduk extends Model
 
         $nextInvoice = ($lastInvoice ?? 0) + 1;
 
-        return "INV-{$ymd}-".str_pad($nextInvoice, 0, '0', STR_PAD_LEFT);
+        return "INV-{$ymd}-".str_pad($nextInvoice, 2, '0', STR_PAD_LEFT);
     }
 
     public static function generateNomorSuratJalan(string $date): string
@@ -111,7 +104,7 @@ class TransaksiProduk extends Model
         $lastSuratJalan = self::whereDate('tanggal_transaksi', $tanggal)
             ->get()
             ->map(function ($item) {
-                if (preg_match('/SJ-(\d{8})-(\d{4})$/', $item->nomor_surat_jalan, $matches)) {
+                if (preg_match('/SJ-(\d{8})-(\d{2})$/', $item->nomor_surat_jalan, $matches)) {
                     return (int) $matches[2];
                 }
 
@@ -121,6 +114,6 @@ class TransaksiProduk extends Model
 
         $nextSuratJalan = ($lastSuratJalan ?? 0) + 1;
 
-        return "SJ-{$ymd}-".str_pad($nextSuratJalan, 0, '0', STR_PAD_LEFT);
+        return "SJ-{$ymd}-".str_pad($nextSuratJalan, 2, '0', STR_PAD_LEFT);
     }
 }
