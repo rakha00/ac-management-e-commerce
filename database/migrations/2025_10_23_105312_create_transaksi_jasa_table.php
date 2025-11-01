@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('teknisi_nama')->nullable();
             $table->string('helper_nama')->nullable();
 
+            $table->foreignId('konsumen_id')->nullable()->constrained('konsumen')->onDelete('set null');
             $table->string('nama_konsumen');
             $table->integer('garansi_hari')->nullable()->default(0);
 

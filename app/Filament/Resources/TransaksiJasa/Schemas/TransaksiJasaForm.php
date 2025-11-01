@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TransaksiJasa\Schemas;
 
 use App\Models\Karyawan;
+use App\Models\Konsumen;
 use App\Models\TransaksiJasa;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -24,7 +25,7 @@ class TransaksiJasaForm
                         DatePicker::make('tanggal_transaksi')
                             ->label('Tanggal Transaksi')
                             ->required()
-                            ->disabled(fn (?Model $record) => $record !== null)
+                            ->disabled(fn(?Model $record) => $record !== null)
                             ->afterStateUpdated(function ($state, callable $set) {
                                 $set('kode_jasa', $state ? TransaksiJasa::generateSequentialNumber((string) $state, 'KJ') : null);
                             })
@@ -39,7 +40,7 @@ class TransaksiJasaForm
 
                         Select::make('teknisi_karyawan_id')
                             ->label('Teknisi')
-                            ->options(fn () => Karyawan::query()
+                            ->options(fn() => Karyawan::query()
                                 ->where('jabatan', 'teknisi')
                                 ->orderBy('nama')
                                 ->pluck('nama', 'id')
@@ -49,7 +50,7 @@ class TransaksiJasaForm
 
                         Select::make('helper_karyawan_id')
                             ->label('Helper')
-                            ->options(fn () => Karyawan::query()
+                            ->options(fn() => Karyawan::query()
                                 ->where('jabatan', 'helper')
                                 ->orderBy('nama')
                                 ->pluck('nama', 'id')
@@ -57,9 +58,13 @@ class TransaksiJasaForm
                             ->searchable()
                             ->nullable(),
 
-                        // Toko/Konsumen sebagai string biasa
-                        TextInput::make('nama_konsumen')
+                        Select::make('konsumen_id')
                             ->label('Nama Konsumen')
+                            ->options(fn() => Konsumen::query()
+                                ->orderBy('nama')
+                                ->pluck('nama', 'id')
+                                ->toArray())
+                            ->searchable()
                             ->required(),
                     ])->columns(2),
 

@@ -21,6 +21,7 @@ class TransaksiJasa extends Model
         'helper_karyawan_id',
         'teknisi_nama',
         'helper_nama',
+        'konsumen_id',
         'nama_konsumen',
         'garansi_hari',
         'total_pendapatan_jasa',
@@ -42,6 +43,11 @@ class TransaksiJasa extends Model
             'created_by' => 'string',
             'updated_by' => 'string',
         ];
+    }
+
+    public function konsumen(): BelongsTo
+    {
+        return $this->belongsTo(Konsumen::class, 'konsumen_id');
     }
 
     public function teknisi(): BelongsTo
@@ -94,6 +100,14 @@ class TransaksiJasa extends Model
                 }
             }
 
+            // Auto-fill nama_konsumen from Konsumen when provided
+            if ($model->konsumen_id && empty($model->nama_konsumen)) {
+                $konsumen = Konsumen::find($model->konsumen_id);
+                if ($konsumen) {
+                    $model->nama_konsumen = $konsumen->nama;
+                }
+            }
+
             // Generate kode_jasa if not set
             if (empty($model->kode_jasa)) {
                 $model->kode_jasa = static::generateSequentialNumber($date, 'KJ');
@@ -109,6 +123,12 @@ class TransaksiJasa extends Model
             if ($model->isDirty('helper_karyawan_id')) {
                 $k = $model->helper_karyawan_id ? Karyawan::find($model->helper_karyawan_id) : null;
                 $model->helper_nama = $k ? $k->nama : null;
+            }
+
+            // Keep nama_konsumen in sync if relation changes
+            if ($model->isDirty('konsumen_id')) {
+                $konsumen = $model->konsumen_id ? Konsumen::find($model->konsumen_id) : null;
+                $model->nama_konsumen = $konsumen ? $konsumen->nama : null;
             }
         });
 
