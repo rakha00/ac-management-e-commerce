@@ -40,14 +40,17 @@ class TransaksiJasaTable
                 TextColumn::make('total_pendapatan_jasa')
                     ->label('Total Pendapatan')
                     ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
                 TextColumn::make('total_pengeluaran_jasa')
                     ->label('Total Pengeluaran')
                     ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
                 TextColumn::make('total_keuntungan_jasa')
                     ->label('Total Keuntungan')
                     ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
             ])
             ->filters([

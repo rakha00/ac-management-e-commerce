@@ -35,20 +35,18 @@ class TransaksiJasaDetailRelationManager extends RelationManager
                 Section::make('Informasi Jasa')
                     ->description('Detail layanan jasa yang diberikan.')
                     ->schema([
-                        // Jenis data jasa
                         TextInput::make('jenis_data')
                             ->label('Jenis Data')
                             ->required()
                             ->maxLength(255),
 
-                        // Qty layanan
                         TextInput::make('qty')
                             ->label('Qty')
                             ->numeric()
                             ->minValue(1)
+                            ->placeholder(0)
                             ->required(),
 
-                        // Harga jasa
                         TextInput::make('harga_jasa')
                             ->label('Harga Jasa')
                             ->numeric()
@@ -59,7 +57,6 @@ class TransaksiJasaDetailRelationManager extends RelationManager
                             ->placeholder(0)
                             ->required(),
 
-                        // Keterangan jasa (opsional)
                         Textarea::make('keterangan_jasa')
                             ->label('Keterangan Jasa')
                             ->nullable(),
@@ -69,7 +66,6 @@ class TransaksiJasaDetailRelationManager extends RelationManager
                 Section::make('Pengeluaran Jasa')
                     ->description('Detail biaya pengeluaran terkait jasa.')
                     ->schema([
-                        // Pengeluaran jasa dan keterangannya
                         TextInput::make('pengeluaran_jasa')
                             ->label('Pengeluaran Jasa')
                             ->numeric()
@@ -106,20 +102,22 @@ class TransaksiJasaDetailRelationManager extends RelationManager
                 TextColumn::make('harga_jasa')
                     ->label('Harga Jasa')
                     ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
 
                 TextColumn::make('pengeluaran_jasa')
                     ->label('Pengeluaran')
                     ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable()
                     ->summarize(Sum::make()
                         ->label('Total Pengeluaran')
                         ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')),
 
-                // Subtotal pendapatan dari database
                 TextColumn::make('subtotal_pendapatan')
                     ->label('Subtotal Pendapatan')
                     ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable()
                     ->summarize(Sum::make()
                         ->label('Total Pendapatan')
@@ -127,10 +125,11 @@ class TransaksiJasaDetailRelationManager extends RelationManager
                         ->numeric()
                         ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')),
 
-                // Subtotal keuntungan dari database
                 TextColumn::make('subtotal_keuntungan')
                     ->label('Subtotal Keuntungan')
                     ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+
                     ->sortable()
                     ->summarize(Sum::make()
                         ->label('Total Keuntungan')
