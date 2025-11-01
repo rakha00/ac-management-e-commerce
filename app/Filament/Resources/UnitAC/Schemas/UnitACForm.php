@@ -34,10 +34,9 @@ class UnitACForm
                     FileUpload::make('foto_produk')
                         ->label('Foto Produk')
                         ->image()
+                        ->multiple()
                         ->directory('foto-produk')
-                        ->imagePreviewHeight('150px')
                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                        ->maxSize(2048) // dalam KB (±2 MB)
                         ->nullable(),
                 ]),
             Section::make('Harga Saat Ini')

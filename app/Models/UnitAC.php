@@ -23,7 +23,6 @@ class UnitAC extends Model
         'harga_ecommerce',
         'harga_retail',
         'stok_awal',
-        // 'stok_akhir',
         'stok_masuk',
         'stok_keluar',
         'keterangan',
@@ -43,6 +42,7 @@ class UnitAC extends Model
             'stok_keluar' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'foto_produk' => 'array',
         ];
     }
 
