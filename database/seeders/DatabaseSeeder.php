@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             SparepartSeeder::class,
             DistributorSeeder::class,
             PrincipalSeeder::class,
+            BarangMasukSeeder::class,
+            BarangMasukDetailSeeder::class,
 
             TransaksiJasaSeeder::class,
             TransaksiProdukSeeder::class,

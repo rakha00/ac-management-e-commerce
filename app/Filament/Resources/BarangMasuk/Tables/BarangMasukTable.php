@@ -26,6 +26,11 @@ class BarangMasukTable
                     ->label('Tanggal')
                     ->date()
                     ->sortable(),
+                TextColumn::make('barangMasukDetails.jumlah_barang_masuk')
+                    ->getStateUsing(function ($record) {
+                        return $record->barangMasukDetail()->sum('jumlah_barang_masuk');
+                    })
+                    ->label('Total Qty'),
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime()

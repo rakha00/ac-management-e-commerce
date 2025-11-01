@@ -51,24 +51,53 @@ class BarangMasuk extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    public static function generateNomorBarangMasuk(string $tanggalInput): string
+    /**
+     * Generate sequential number per date with format PREFIX-YYYYMMDD-####.
+     */
+    public static function generateNomorBarangMasuk(string $date, string $prefix = 'BM'): string
     {
-        $tanggal = Carbon::parse($tanggalInput);
-        $dateFormat = $tanggal->format('dmY');
+        $ymd = Carbon::parse($date)->format('Ymd');
 
-        $lastNumber = self::whereDate('tanggal', $tanggal)
-            ->get()
-            ->map(function ($item) {
-                if (preg_match('/-(\d+)$/', $item->nomor_barang_masuk, $matches)) {
-                    return (int) $matches[1];
-                }
+        // Include trashed to avoid reusing numbers that exist in soft-deleted rows
+        $builder = static::withTrashed()->whereDate('tanggal', Carbon::parse($date));
 
-                return 0;
-            })
-            ->max();
+        // Column for numbering
+        $column = 'nomor_barang_masuk';
 
-        $newNumber = $lastNumber + 1;
+        // Get existing numbers for the given date and prefix
+        $existing = $builder
+            ->where($column, 'like', "{$prefix}-{$ymd}-%")
+            ->pluck($column)
+            ->filter();
 
-        return "BM/{$dateFormat}-{$newNumber}";
+        $max = 0;
+        foreach ($existing as $no) {
+            $seq = static::extractSequence($no, $prefix, $ymd);
+            if ($seq > $max) {
+                $max = $seq;
+            }
+        }
+
+        $next = $max + 1;
+        $seqStr = str_pad((string) $next, 2, '0', STR_PAD_LEFT);
+
+        return "{$prefix}-{$ymd}-{$seqStr}";
+    }
+
+    /**
+     * Extract sequence integer from formatted number.
+     */
+    protected static function extractSequence(?string $no, string $prefix, string $ymd): int
+    {
+        if (! $no) {
+            return 0;
+        }
+
+        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{2})$/';
+        if (preg_match($pattern, $no, $m)) {
+            return (int) $m[1];
+        }
+
+        return 0;
     }
 }

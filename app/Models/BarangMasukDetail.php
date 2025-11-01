@@ -18,9 +18,6 @@ class BarangMasukDetail extends Model
         'sku',
         'nama_unit',
         'jumlah_barang_masuk',
-        'harga_dealer',
-        'harga_ecommerce',
-        'harga_retail',
         'keterangan',
         'created_by',
         'updated_by',
@@ -32,9 +29,6 @@ class BarangMasukDetail extends Model
             'jumlah_barang_masuk' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
-            'harga_dealer' => 'integer',
-            'harga_ecommerce' => 'integer',
-            'harga_retail' => 'integer',
         ];
     }
 
@@ -110,14 +104,10 @@ class BarangMasukDetail extends Model
                     ->first();
 
                 if ($hargaHistory) {
-                    $barangMasukDetail->harga_dealer = $hargaHistory->harga_dealer;
-                    $barangMasukDetail->harga_ecommerce = $hargaHistory->harga_ecommerce;
-                    $barangMasukDetail->harga_retail = $hargaHistory->harga_retail;
+                    // No longer setting harga_dealer, harga_ecommerce, harga_retail here
                 } else {
                     // Fallback to current prices if no history found (should not happen if prices are always recorded)
-                    $barangMasukDetail->harga_dealer = $unitAC->current_harga_dealer ?? 0;
-                    $barangMasukDetail->harga_ecommerce = $unitAC->current_harga_ecommerce ?? 0;
-                    $barangMasukDetail->harga_retail = $unitAC->current_harga_retail ?? 0;
+                    // No longer setting harga_dealer, harga_ecommerce, harga_retail here
                 }
             }
         });
