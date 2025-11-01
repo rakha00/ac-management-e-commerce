@@ -146,7 +146,7 @@ class TransaksiJasa extends Model
         }
 
         $next = $max + 1;
-        $seqStr = str_pad((string) $next, 0, '0', STR_PAD_LEFT);
+        $seqStr = str_pad((string) $next, 2, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$ymd}-{$seqStr}";
     }
@@ -160,7 +160,7 @@ class TransaksiJasa extends Model
             return 0;
         }
 
-        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{4})$/';
+        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{2})$/';
         if (preg_match($pattern, $no, $m)) {
             return (int) $m[1];
         }

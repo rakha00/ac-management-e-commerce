@@ -7,6 +7,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -50,7 +51,7 @@ class TransaksiJasaTable
                     ->sortable(),
             ])
             ->filters([
-                // Custom date range filter for 'tanggal_transaksi'
+                TrashedFilter::make(),
                 Filter::make('tanggal_transaksi')
                     ->label('Rentang Tanggal')
                     ->schema([
@@ -61,12 +62,23 @@ class TransaksiJasaTable
                         return $query
                             ->when(
                                 $data['created_from'] ?? null,
-                                fn (Builder $q, $date): Builder => $q->whereDate('tanggal_transaksi', '>=', $date),
+                                fn(Builder $q, $date): Builder => $q->whereDate('tanggal_transaksi', '>=', $date),
                             )
                             ->when(
                                 $data['created_until'] ?? null,
-                                fn (Builder $q, $date): Builder => $q->whereDate('tanggal_transaksi', '<=', $date),
+                                fn(Builder $q, $date): Builder => $q->whereDate('tanggal_transaksi', '<=', $date),
                             );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['created_from'] ?? null) {
+                            $indicators['created_from'] = 'Dari ' . \Carbon\Carbon::parse($data['created_from'])->toFormattedDateString();
+                        }
+                        if ($data['created_until'] ?? null) {
+                            $indicators['created_until'] = 'Hingga ' . \Carbon\Carbon::parse($data['created_until'])->toFormattedDateString();
+                        }
+
+                        return $indicators;
                     }),
             ])
             ->recordActions([
@@ -76,6 +88,7 @@ class TransaksiJasaTable
                 BulkActionGroup::make([
                     //
                 ]),
-            ]);
+            ])
+            ->deferFilters(false);
     }
 }

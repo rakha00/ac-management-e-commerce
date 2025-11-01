@@ -69,7 +69,7 @@ class TransaksiJasaForm
                             ->label('Garansi (hari)')
                             ->numeric()
                             ->minValue(0)
-                            ->nullable(),
+                            ->required(),
 
                         Textarea::make('keterangan')
                             ->label('Keterangan')

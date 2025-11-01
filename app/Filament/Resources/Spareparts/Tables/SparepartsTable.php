@@ -60,11 +60,11 @@ class SparepartsTable
                         $query = SparepartMasukDetail::where('sparepart_id', $record->id)
                             ->join('sparepart_masuk', 'sparepart_masuk.id', '=', 'sparepart_masuk_detail.sparepart_masuk_id');
 
-                        if (! empty($dateFilter['from_date'])) {
+                        if (!empty($dateFilter['from_date'])) {
                             $query->whereDate('sparepart_masuk.tanggal_masuk', '>=', $dateFilter['from_date']);
                         }
 
-                        if (! empty($dateFilter['until_date'])) {
+                        if (!empty($dateFilter['until_date'])) {
                             $query->whereDate('sparepart_masuk.tanggal_masuk', '<=', $dateFilter['until_date']);
                         }
 
@@ -85,11 +85,11 @@ class SparepartsTable
                         $query = SparepartKeluarDetail::where('sparepart_id', $record->id)
                             ->join('sparepart_keluar', 'sparepart_keluar.id', '=', 'sparepart_keluar_detail.sparepart_keluar_id');
 
-                        if (! empty($dateFilter['from_date'])) {
+                        if (!empty($dateFilter['from_date'])) {
                             $query->whereDate('sparepart_keluar.tanggal_keluar', '>=', $dateFilter['from_date']);
                         }
 
-                        if (! empty($dateFilter['until_date'])) {
+                        if (!empty($dateFilter['until_date'])) {
                             $query->whereDate('sparepart_keluar.tanggal_keluar', '<=', $dateFilter['until_date']);
                         }
 
@@ -112,11 +112,11 @@ class SparepartsTable
                         $stokMasukQuery = SparepartMasukDetail::where('sparepart_id', $record->id)
                             ->join('sparepart_masuk', 'sparepart_masuk.id', '=', 'sparepart_masuk_detail.sparepart_masuk_id');
 
-                        if (! empty($dateFilter['from_date'])) {
+                        if (!empty($dateFilter['from_date'])) {
                             $stokMasukQuery->whereDate('sparepart_masuk.tanggal_masuk', '>=', $dateFilter['from_date']);
                         }
 
-                        if (! empty($dateFilter['until_date'])) {
+                        if (!empty($dateFilter['until_date'])) {
                             $stokMasukQuery->whereDate('sparepart_masuk.tanggal_masuk', '<=', $dateFilter['until_date']);
                         }
 
@@ -125,11 +125,11 @@ class SparepartsTable
                         $stokKeluarQuery = SparepartKeluarDetail::where('sparepart_id', $record->id)
                             ->join('sparepart_keluar', 'sparepart_keluar.id', '=', 'sparepart_keluar_detail.sparepart_keluar_id');
 
-                        if (! empty($dateFilter['from_date'])) {
+                        if (!empty($dateFilter['from_date'])) {
                             $stokKeluarQuery->whereDate('sparepart_keluar.tanggal_keluar', '>=', $dateFilter['from_date']);
                         }
 
-                        if (! empty($dateFilter['until_date'])) {
+                        if (!empty($dateFilter['until_date'])) {
                             $stokKeluarQuery->whereDate('sparepart_keluar.tanggal_keluar', '<=', $dateFilter['until_date']);
                         }
 
@@ -145,7 +145,6 @@ class SparepartsTable
                         DatePicker::make('from_date')
                             ->label('Dari Tanggal')
                             ->placeholder('Dari Tanggal')
-                            ->default(now()->startOfMonth())
                             ->afterStateUpdated(function ($state) {
                                 $dateFilter = session('date_filter', []);
                                 $dateFilter['from_date'] = $state;
@@ -154,7 +153,6 @@ class SparepartsTable
                         DatePicker::make('until_date')
                             ->label('Sampai Tanggal')
                             ->placeholder('Sampai Tanggal')
-                            ->default(now()->endOfMonth())
                             ->afterStateUpdated(function ($state) {
                                 $dateFilter = session('date_filter', []);
                                 $dateFilter['until_date'] = $state;
@@ -167,10 +165,10 @@ class SparepartsTable
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['from_date'] ?? null) {
-                            $indicators['from_date'] = 'Dari '.Carbon::parse($data['from_date'])->toFormattedDateString();
+                            $indicators['from_date'] = 'Dari ' . Carbon::parse($data['from_date'])->toFormattedDateString();
                         }
                         if ($data['until_date'] ?? null) {
-                            $indicators['until_date'] = 'Sampai '.Carbon::parse($data['until_date'])->toFormattedDateString();
+                            $indicators['until_date'] = 'Sampai ' . Carbon::parse($data['until_date'])->toFormattedDateString();
                         }
 
                         return $indicators;

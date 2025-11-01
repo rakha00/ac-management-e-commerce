@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Spareparts\Pages;
 
 use App\Filament\Resources\Spareparts\SparepartResource;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSparepart extends EditRecord
@@ -19,6 +21,8 @@ class EditSparepart extends EditRecord
     {
         return [
             DeleteAction::make(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
         ];
     }
 }
