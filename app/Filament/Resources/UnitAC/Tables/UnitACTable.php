@@ -13,6 +13,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class UnitACTable
 {
@@ -20,7 +21,7 @@ class UnitACTable
     {
         return $table
             ->columns([
-                ImageColumn::make('foto_produk')
+                ImageColumn::make('path_foto_produk')
                     ->label('Foto')
                     ->size(50)
                     ->limit(1),
@@ -43,10 +44,10 @@ class UnitACTable
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
                 TextColumn::make('stok_awal')
-                    ->label('Awal')
+                    ->label('Stok Awal')
                     ->sortable(),
                 TextColumn::make('stok_masuk')
-                    ->label('Masuk')
+                    ->label('Stok Masuk')
                     ->sortable()
                     ->getStateUsing(function ($record) {
                         $dateFilter = session('date_filter');
@@ -69,7 +70,7 @@ class UnitACTable
                         return $query->sum('jumlah_barang_masuk');
                     }),
                 TextColumn::make('stok_keluar')
-                    ->label('Keluar')
+                    ->label('Stok Keluar')
                     ->sortable()
                     ->getStateUsing(function ($record) {
                         $dateFilter = session('date_filter');
@@ -92,7 +93,7 @@ class UnitACTable
                         return $query->sum('jumlah_keluar');
                     }),
                 TextColumn::make('stok_akhir')
-                    ->label('Akhir')
+                    ->label('Stok Akhir')
                     ->sortable()
                     ->getStateUsing(function ($record) {
                         $dateFilter = session('date_filter');
@@ -165,31 +166,16 @@ class UnitACTable
 
                         return $query;
                     })
-                    ->indicateUsing(function (array $data): ?string {
+                    ->indicateUsing(function (array $data): array {
                         $indicators = [];
-
-                        if (! empty($data['from_date'])) {
-                            $indicators[] = 'Dari: '.$data['from_date'];
+                        if ($data['from_date'] ?? null) {
+                            $indicators['from_date'] = 'Dari '.Carbon::parse($data['from_date'])->toFormattedDateString();
+                        }
+                        if ($data['until_date'] ?? null) {
+                            $indicators['until_date'] = 'Sampai '.Carbon::parse($data['until_date'])->toFormattedDateString();
                         }
 
-                        if (! empty($data['until_date'])) {
-                            $indicators[] = 'Sampai: '.$data['until_date'];
-                        }
-
-                        return count($indicators) ? implode(' ', $indicators) : null;
-                    })
-                    ->indicateUsing(function (array $data): ?string {
-                        $indicators = [];
-
-                        if (! empty($data['from_date'])) {
-                            $indicators[] = 'Dari: '.$data['from_date'];
-                        }
-
-                        if (! empty($data['until_date'])) {
-                            $indicators[] = 'Sampai: '.$data['until_date'];
-                        }
-
-                        return count($indicators) ? implode(' ', $indicators) : null;
+                        return $indicators;
                     }),
                 Filter::make('stok_kosong')
                     ->label('Stok Kosong')

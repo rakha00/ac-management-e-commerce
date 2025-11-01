@@ -16,6 +16,7 @@ class Sparepart extends Model
     protected $table = 'spareparts';
 
     protected $fillable = [
+        'path_foto_sparepart',
         'kode_sparepart',
         'nama_sparepart',
         'harga_modal',
@@ -36,6 +37,7 @@ class Sparepart extends Model
             'stok_keluar' => 'integer',
             'created_by' => 'string',
             'updated_by' => 'string',
+            'path_foto_sparepart' => 'array',
         ];
     }
 

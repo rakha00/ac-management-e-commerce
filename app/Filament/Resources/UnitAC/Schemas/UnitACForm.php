@@ -31,7 +31,7 @@ class UnitACForm
                 ]),
             Section::make('Foto Produk')
                 ->schema([
-                    FileUpload::make('foto_produk')
+                    FileUpload::make('path_foto_produk')
                         ->label('Foto Produk')
                         ->image()
                         ->multiple()

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('sku')->unique();
             $table->string('nama_unit');
-            $table->json('foto_produk')->nullable();
+            $table->json('path_foto_produk')->nullable();
             $table->integer('harga_dealer')->default(0);
             $table->integer('harga_ecommerce')->default(0);
             $table->integer('harga_retail')->default(0);

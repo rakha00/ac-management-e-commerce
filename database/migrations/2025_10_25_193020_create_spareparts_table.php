@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('spareparts', function (Blueprint $table) {
             $table->id();
 
+            $table->json('path_foto_sparepart')->nullable();
             $table->string('kode_sparepart')->unique();
             $table->string('nama_sparepart');
             $table->integer('harga_modal')->default(0);

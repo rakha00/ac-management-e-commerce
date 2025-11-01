@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Spareparts\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -70,6 +71,16 @@ class SparepartForm
                             ->label('Keterangan')
                             ->nullable()
                             ->columnSpanFull(),
+                    ]),
+                Section::make('Foto Sparepart')
+                    ->schema([
+                        FileUpload::make('path_foto_sparepart')
+                            ->label('Foto Sparepart')
+                            ->image()
+                            ->multiple()
+                            ->directory('foto-sparepart')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->nullable(),
                     ]),
             ])
             ->columns(1);

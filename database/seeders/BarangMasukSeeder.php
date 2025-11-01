@@ -38,7 +38,7 @@ class BarangMasukSeeder extends Seeder
             ['sku' => 'AC-SKU-001'],
             [
                 'nama_unit' => 'CoolBrand A',
-                'foto_produk' => null,
+                'path_foto_produk' => null,
                 'harga_dealer' => 3500000,
                 'harga_ecommerce' => 3700000,
                 'harga_retail' => 4000000,
@@ -54,7 +54,7 @@ class BarangMasukSeeder extends Seeder
             ['sku' => 'AC-SKU-002'],
             [
                 'nama_unit' => 'CoolBrand B',
-                'foto_produk' => null,
+                'path_foto_produk' => null,
                 'harga_dealer' => 4500000,
                 'harga_ecommerce' => 4700000,
                 'harga_retail' => 5000000,

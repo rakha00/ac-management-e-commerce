@@ -18,7 +18,7 @@ class UnitAC extends Model
     protected $fillable = [
         'sku',
         'nama_unit',
-        'foto_produk',
+        'path_foto_produk',
         'harga_dealer',
         'harga_ecommerce',
         'harga_retail',
@@ -42,7 +42,7 @@ class UnitAC extends Model
             'stok_keluar' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
-            'foto_produk' => 'array',
+            'path_foto_produk' => 'array',
         ];
     }
 

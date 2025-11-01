@@ -145,20 +145,16 @@ class KaryawanTable
                         DatePicker::make('tanggal_akhir')
                             ->default(now()->endOfMonth()),
                     ])
-                    ->indicateUsing(function (array $data): ?string {
-                        if (! $data['tanggal_awal'] && ! $data['tanggal_akhir']) {
-                            return null;
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['tanggal_awal'] ?? null) {
+                            $indicators['tanggal_awal'] = 'Dari '.Carbon::parse($data['tanggal_awal'])->toFormattedDateString();
+                        }
+                        if ($data['tanggal_akhir'] ?? null) {
+                            $indicators['tanggal_akhir'] = 'Sampai '.Carbon::parse($data['tanggal_akhir'])->toFormattedDateString();
                         }
 
-                        $indikator = 'Penghasilan dari ';
-                        if ($data['tanggal_awal']) {
-                            $indikator .= Carbon::parse($data['tanggal_awal'])->toFormattedDateString();
-                        }
-                        if ($data['tanggal_akhir']) {
-                            $indikator .= ' sampai '.Carbon::parse($data['tanggal_akhir'])->toFormattedDateString();
-                        }
-
-                        return $indikator;
+                        return $indicators;
                     }),
             ])
             ->recordActions([
