@@ -53,9 +53,9 @@ class HutangProdukForm
                                     ->where('barang_masuk_detail.barang_masuk_id', '=', $bm->id)
                                     ->sum(DB::raw('barang_masuk_detail.jumlah_barang_masuk * unit_ac.harga_dealer'));
 
-                                $set('total_hutang', $total);
+                                $set('total_hutang', number_format($total, 0, ',', ','));
                                 // Set initial remaining debt equals to total (no installments yet on create)
-                                $set('sisa_hutang', $total);
+                                $set('sisa_hutang', number_format($total, 0, ',', ','));
                             }),
                         TextInput::make('total_hutang')
                             ->label('Total Hutang')

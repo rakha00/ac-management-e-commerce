@@ -4,8 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Karyawan;
 use App\Models\Konsumen;
-use App\Models\PiutangProduk;
-use App\Models\PiutangProdukCicilanDetail;
 use App\Models\TransaksiProduk;
 use App\Models\TransaksiProdukDetail;
 use App\Models\UnitAC;
@@ -58,31 +56,6 @@ class TransaksiProdukSeeder extends Seeder
                 $totalTransaksi += ($hargaJual * $jumlahKeluar);
             }
 
-            // Logika untuk piutang produk
-            $persentaseUangMuka = rand(0, 100);
-            $uangMuka = ($totalTransaksi * $persentaseUangMuka) / 100;
-            $sisaPembayaran = $totalTransaksi - $uangMuka;
-
-            if ($sisaPembayaran > 0) {
-                $piutangProduk = PiutangProduk::create([
-                    'transaksi_produk_id' => $transaksiProduk->id,
-                    'total_piutang' => $sisaPembayaran,
-                    'status_pembayaran' => 'belum_lunas',
-                    'jatuh_tempo' => Carbon::parse($tanggalTransaksi)->addMonths(rand(1, 12)),
-                    'keterangan' => 'Piutang untuk transaksi produk '.$transaksiProduk->nomor_invoice,
-                ]);
-
-                $jumlahCicilan = rand(1, 5);
-                $nominalCicilanPerAngsuran = $sisaPembayaran / $jumlahCicilan;
-
-                for ($k = 0; $k < $jumlahCicilan; $k++) {
-                    PiutangProdukCicilanDetail::create([
-                        'piutang_produk_id' => $piutangProduk->id,
-                        'nominal_cicilan' => $nominalCicilanPerAngsuran,
-                        'tanggal_cicilan' => Carbon::parse($tanggalTransaksi)->addDays(rand(1, 30 * ($k + 1))),
-                    ]);
-                }
-            }
         }
 
     }

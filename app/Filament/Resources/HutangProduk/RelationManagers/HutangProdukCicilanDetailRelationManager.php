@@ -89,6 +89,7 @@ class HutangProdukCicilanDetailRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('nominal_cicilan')
                     ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
             ])
             ->filters([
@@ -109,9 +110,6 @@ class HutangProdukCicilanDetailRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->afterFormFilled(function () {
-                        dd($this->getFormData());
-                    })
                     ->after(fn () => $this->recalculateParent()),
             ])
             ->toolbarActions([

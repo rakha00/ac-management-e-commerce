@@ -91,6 +91,7 @@ class PiutangJasaCicilanDetailRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('nominal_cicilan')
                     ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
             ])
             ->filters([
