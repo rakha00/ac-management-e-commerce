@@ -44,12 +44,18 @@ class AdminPanelProvider extends PanelProvider
                 FilamentInfoWidget::class,
             ])
             ->navigationGroups([
-                NavigationGroup::make('Operasional')
-                    ->label('Operasional'),
+                NavigationGroup::make('Absensi')
+                    ->label('Absensi'),
+                NavigationGroup::make('Master Data')
+                    ->label('Master Data'),
+                NavigationGroup::make('Manajemen Produk')
+                    ->label('Manajemen Produk'),
+                NavigationGroup::make('Manajemen Sparepart')
+                    ->label('Manajemen Sparepart'),
+                NavigationGroup::make('Manajemen Jasa')
+                    ->label('Manajemen Jasa'),
                 NavigationGroup::make('Keuangan')
                     ->label('Keuangan'),
-                NavigationGroup::make('SDM')
-                    ->label('SDM'),
                 NavigationGroup::make('Laporan')
                     ->label('Laporan'),
             ])

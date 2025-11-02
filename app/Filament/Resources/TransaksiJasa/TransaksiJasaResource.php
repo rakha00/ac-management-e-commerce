@@ -24,7 +24,7 @@ class TransaksiJasaResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Transaksi';
+    protected static string|UnitEnum|null $navigationGroup = 'Manajemen Jasa';
 
     protected static ?int $navigationSort = 1;
 
