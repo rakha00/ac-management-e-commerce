@@ -18,19 +18,21 @@ class KaryawanSeeder extends Seeder
         $roles = ['admin', 'gudang', 'helper', 'teknisi', 'staff', 'sales'];
 
         foreach ($roles as $role) {
-            $user = User::query()->create([
-                'name' => $role,
-                'email' => $role.'@gmail.com',
-                'password' => bcrypt($role),
-            ]);
+            $user = User::query()->firstOrCreate(
+                ['email' => $role . '@gmail.com'],
+                [
+                    'name' => $role,
+                    'password' => bcrypt($role),
+                ]
+            );
 
             Karyawan::query()->create([
                 'user_id' => $user->id,
-                'nama' => ucfirst($role).' User',
+                'nama' => ucfirst($role) . ' User',
                 'jabatan' => $role,
-                'nomor_hp' => '08'.rand(100000000, 999999999),
+                'nomor_hp' => '08' . rand(100000000, 999999999),
                 'gaji_pokok' => 5000000,
-                'alamat' => 'Alamat '.ucfirst($role),
+                'alamat' => 'Alamat ' . ucfirst($role),
                 'path_foto_ktp' => 'N/A',
                 'path_dokumen_tambahan' => 'N/A',
                 'kontak_darurat_serumah' => '081234567890',
@@ -39,7 +41,6 @@ class KaryawanSeeder extends Seeder
                 'tanggal_terakhir_aktif' => null,
             ]);
 
-            // Add two KaryawanPenghasilanDetail entries for each Karyawan
             KaryawanPenghasilanDetail::query()->create([
                 'karyawan_id' => $user->karyawan->id,
                 'kasbon' => 500000,

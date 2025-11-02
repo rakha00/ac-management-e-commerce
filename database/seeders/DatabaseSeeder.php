@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
 
             TransaksiJasaSeeder::class,
             TransaksiProdukSeeder::class,
+            SparepartMasukSeeder::class,
         ]);
     }
 }

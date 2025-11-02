@@ -19,16 +19,6 @@ class BarangMasukSeeder extends Seeder
         $principals = Principal::all();
         $users = User::all();
 
-        if ($principals->isEmpty()) {
-            $this->call(PrincipalSeeder::class);
-            $principals = Principal::all();
-        }
-
-        if ($principals->isEmpty() || $users->isEmpty()) {
-            $this->command->info('Please seed Principals and Users first!');
-            return;
-        }
-
         for ($i = 0; $i < 3; $i++) {
             $tanggal = $faker->dateTimeBetween('-1 year', 'now')->format('Y-m-d');
             BarangMasuk::create([

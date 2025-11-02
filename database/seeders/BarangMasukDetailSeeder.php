@@ -21,21 +21,6 @@ class BarangMasukDetailSeeder extends Seeder
         $unitACs = UnitAC::all();
         $users = User::all();
 
-        if ($barangMasuks->isEmpty()) {
-            $this->call(BarangMasukSeeder::class);
-            $barangMasuks = BarangMasuk::all();
-        }
-
-        if ($unitACs->isEmpty()) {
-            $this->call(UnitACSeeder::class);
-            $unitACs = UnitAC::all();
-        }
-
-        if ($barangMasuks->isEmpty() || $unitACs->isEmpty() || $users->isEmpty()) {
-            $this->command->info('Please seed BarangMasuks, UnitACs, and Users first!');
-            return;
-        }
-
         foreach ($barangMasuks as $barangMasuk) {
             for ($i = 0; $i < $faker->numberBetween(1, 5); $i++) {
                 $unitAC = $unitACs->random();
