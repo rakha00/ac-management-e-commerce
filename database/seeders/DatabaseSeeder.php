@@ -12,21 +12,22 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            KaryawanSeeder::class,
-            TeknisiSeeder::class,
-            AbsensiSeeder::class,
-            UnitACSeeder::class,
-            KonsumenSeeder::class,
-            SparepartSeeder::class,
-            DistributorSeeder::class,
-            PrincipalSeeder::class,
-            BarangMasukSeeder::class,
-            BarangMasukDetailSeeder::class,
+            AdminSeeder::class,
+            // KaryawanSeeder::class,
+            // TeknisiSeeder::class,
+            // AbsensiSeeder::class,
+            // UnitACSeeder::class,
+            // KonsumenSeeder::class,
+            // SparepartSeeder::class,
+            // DistributorSeeder::class,
+            // PrincipalSeeder::class,
+            // BarangMasukSeeder::class,
+            // BarangMasukDetailSeeder::class,
 
-            TransaksiJasaSeeder::class,
-            TransaksiProdukSeeder::class,
-            SparepartMasukSeeder::class,
-            SparepartKeluarSeeder::class,
+            // TransaksiJasaSeeder::class,
+            // TransaksiProdukSeeder::class,
+            // SparepartMasukSeeder::class,
+            // SparepartKeluarSeeder::class,
         ]);
     }
 }
