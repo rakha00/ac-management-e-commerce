@@ -130,11 +130,11 @@ class SparepartMasuk extends Model
      */
     protected static function extractSequence(?string $no, string $prefix, string $ymd): int
     {
-        if (!$no) {
+        if (! $no) {
             return 0;
         }
 
-        $pattern = '/^' . preg_quote($prefix, '/') . '-' . preg_quote($ymd, '/') . '-(\d{2})$/';
+        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{2})$/';
         if (preg_match($pattern, $no, $m)) {
             return (int) $m[1];
         }

@@ -19,7 +19,7 @@ class KaryawanSeeder extends Seeder
 
         foreach ($roles as $role) {
             $user = User::query()->firstOrCreate(
-                ['email' => $role . '@gmail.com'],
+                ['email' => $role.'@gmail.com'],
                 [
                     'name' => $role,
                     'password' => bcrypt($role),
@@ -28,11 +28,11 @@ class KaryawanSeeder extends Seeder
 
             Karyawan::query()->create([
                 'user_id' => $user->id,
-                'nama' => ucfirst($role) . ' User',
+                'nama' => ucfirst($role).' User',
                 'jabatan' => $role,
-                'nomor_hp' => '08' . rand(100000000, 999999999),
+                'nomor_hp' => '08'.rand(100000000, 999999999),
                 'gaji_pokok' => 5000000,
-                'alamat' => 'Alamat ' . ucfirst($role),
+                'alamat' => 'Alamat '.ucfirst($role),
                 'path_foto_ktp' => 'N/A',
                 'path_dokumen_tambahan' => 'N/A',
                 'kontak_darurat_serumah' => '081234567890',

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('tanggal_keluar');
             $table->string('nomor_invoice');
 
-            $table->string('konsumen_nama')->nullable();
+            $table->foreignId('konsumen_id')->nullable()->constrained('konsumen')->onDelete('set null');
 
             $table->integer('total_modal')->default(0);
             $table->integer('total_penjualan')->default(0);

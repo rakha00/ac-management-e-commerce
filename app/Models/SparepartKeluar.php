@@ -17,7 +17,7 @@ class SparepartKeluar extends Model
     protected $fillable = [
         'tanggal_keluar',
         'nomor_invoice',
-        'konsumen_nama',
+        'konsumen_id',
         'total_modal',
         'total_penjualan',
         'total_keuntungan',
@@ -30,12 +30,18 @@ class SparepartKeluar extends Model
     {
         return [
             'tanggal_keluar' => 'date',
+            'konsumen_id' => 'integer',
             'total_modal' => 'integer',
             'total_penjualan' => 'integer',
             'total_keuntungan' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
         ];
+    }
+
+    public function konsumen(): BelongsTo
+    {
+        return $this->belongsTo(Konsumen::class, 'konsumen_id');
     }
 
     public function detailSparepartKeluar(): HasMany
@@ -103,7 +109,7 @@ class SparepartKeluar extends Model
         }
 
         $next = $max + 1;
-        $seqStr = str_pad((string) $next, 0, '0', STR_PAD_LEFT);
+        $seqStr = str_pad((string) $next, 2, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$ymd}-{$seqStr}";
     }
@@ -117,7 +123,7 @@ class SparepartKeluar extends Model
             return 0;
         }
 
-        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{4})$/';
+        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{2})$/';
         if (preg_match($pattern, $no, $m)) {
             return (int) $m[1];
         }
@@ -149,5 +155,13 @@ class SparepartKeluar extends Model
             'total_penjualan' => $totalPenjualan,
             'total_keuntungan' => max($totalPenjualan - $totalModal, 0),
         ])->saveQuietly();
+    }
+
+    /**
+     * Get konsumen_nama attribute.
+     */
+    public function getKonsumenNamaAttribute(): ?string
+    {
+        return $this->konsumen->nama ?? null;
     }
 }

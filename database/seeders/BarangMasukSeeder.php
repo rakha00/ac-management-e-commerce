@@ -5,8 +5,8 @@ namespace Database\Seeders;
 use App\Models\BarangMasuk;
 use App\Models\Principal;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class BarangMasukSeeder extends Seeder
 {

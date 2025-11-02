@@ -6,8 +6,8 @@ use App\Models\BarangMasuk;
 use App\Models\BarangMasukDetail;
 use App\Models\UnitAC;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class BarangMasukDetailSeeder extends Seeder
 {

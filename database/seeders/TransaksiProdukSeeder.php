@@ -11,7 +11,6 @@ use App\Models\TransaksiProdukDetail;
 use App\Models\UnitAC;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class TransaksiProdukSeeder extends Seeder
 {
@@ -34,7 +33,7 @@ class TransaksiProdukSeeder extends Seeder
                 'tanggal_transaksi' => $tanggalTransaksi,
                 'sales_karyawan_id' => $salesKaryawanId,
                 'konsumen_id' => $konsumenId,
-                'keterangan' => 'Transaksi produk ' . ($i + 1),
+                'keterangan' => 'Transaksi produk '.($i + 1),
             ]);
 
             $totalTransaksi = 0;
@@ -53,7 +52,7 @@ class TransaksiProdukSeeder extends Seeder
                     'jumlah_keluar' => $jumlahKeluar,
                     'harga_modal' => $hargaModal,
                     'harga_jual' => $hargaJual,
-                    'keterangan' => 'Detail produk ' . ($j + 1),
+                    'keterangan' => 'Detail produk '.($j + 1),
                 ]);
 
                 $totalTransaksi += ($hargaJual * $jumlahKeluar);
@@ -70,7 +69,7 @@ class TransaksiProdukSeeder extends Seeder
                     'total_piutang' => $sisaPembayaran,
                     'status_pembayaran' => 'belum_lunas',
                     'jatuh_tempo' => Carbon::parse($tanggalTransaksi)->addMonths(rand(1, 12)),
-                    'keterangan' => 'Piutang untuk transaksi produk ' . $transaksiProduk->nomor_invoice,
+                    'keterangan' => 'Piutang untuk transaksi produk '.$transaksiProduk->nomor_invoice,
                 ]);
 
                 $jumlahCicilan = rand(1, 5);

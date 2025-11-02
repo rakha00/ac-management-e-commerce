@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SparepartKeluar\Schemas;
 
 use App\Models\SparepartKeluar;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -32,8 +33,11 @@ class SparepartKeluarForm
                             ->label('Nomor Invoice')
                             ->disabled()
                             ->dehydrated(false),
-                        TextInput::make('nama_konsumen')
-                            ->label('Nama Konsumen')
+                        Select::make('konsumen_id')
+                            ->label('Konsumen')
+                            ->relationship('konsumen', 'nama')
+                            ->searchable()
+                            ->preload()
                             ->required(),
                         Textarea::make('keterangan')
                             ->label('Keterangan')
