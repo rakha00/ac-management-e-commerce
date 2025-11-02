@@ -120,7 +120,7 @@ class SparepartMasuk extends Model
         }
 
         $next = $max + 1;
-        $seqStr = str_pad((string) $next, 0, '0', STR_PAD_LEFT);
+        $seqStr = str_pad((string) $next, 2, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$ymd}-{$seqStr}";
     }
@@ -130,11 +130,11 @@ class SparepartMasuk extends Model
      */
     protected static function extractSequence(?string $no, string $prefix, string $ymd): int
     {
-        if (! $no) {
+        if (!$no) {
             return 0;
         }
 
-        $pattern = '/^'.preg_quote($prefix, '/').'-'.preg_quote($ymd, '/').'-(\d{4})$/';
+        $pattern = '/^' . preg_quote($prefix, '/') . '-' . preg_quote($ymd, '/') . '-(\d{2})$/';
         if (preg_match($pattern, $no, $m)) {
             return (int) $m[1];
         }
