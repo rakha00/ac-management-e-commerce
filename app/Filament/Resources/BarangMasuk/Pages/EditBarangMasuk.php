@@ -4,6 +4,8 @@ namespace App\Filament\Resources\BarangMasuk\Pages;
 
 use App\Filament\Resources\BarangMasuk\BarangMasukResource;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditBarangMasuk extends EditRecord
@@ -14,6 +16,8 @@ class EditBarangMasuk extends EditRecord
     {
         return [
             DeleteAction::make(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
         ];
     }
 }

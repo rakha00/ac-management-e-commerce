@@ -21,14 +21,18 @@ class BarangMasukDetail extends Model
         'keterangan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'barang_masuk_id' => 'integer',
+            'unit_ac_id' => 'integer',
             'jumlah_barang_masuk' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
@@ -39,7 +43,7 @@ class BarangMasukDetail extends Model
 
     public function unitAC()
     {
-        return $this->belongsTo(UnitAC::class)->withTrashed();
+        return $this->belongsTo(UnitAC::class, 'unit_ac_id')->withTrashed();
     }
 
     public function createdBy(): BelongsTo
@@ -52,102 +56,93 @@ class BarangMasukDetail extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    /**
-     * Always update stok_unit_ac when creating/updating BarangMasukDetail.
-     */
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
     protected static function boot()
     {
         parent::boot();
 
-        // When new record is created/updated
-        static::saving(function ($barangMasukDetail) {
-            // Get original values before changes
-            $originalJumlah = $barangMasukDetail->getOriginal('jumlah_barang_masuk');
-            $originalUnitACId = $barangMasukDetail->getOriginal('unit_ac_id');
+        // Set created_by  when creating
+        static::creating(function (self $barangMasukDetail): void {
+            if (auth()->check()) {
+                $barangMasukDetail->created_by = auth()->id();
+                $barangMasukDetail->updated_by = auth()->id();
+            }
+        });
 
-            $newJumlah = $barangMasukDetail->jumlah_barang_masuk;
-            $newUnitACId = $barangMasukDetail->unit_ac_id;
+        // Set updated_by when updating
+        static::updating(function (self $barangMasukDetail): void {
+            if (auth()->check()) {
+                $barangMasukDetail->updated_by = auth()->id();
+            }
+        });
 
-            if ($barangMasukDetail->exists) {
-                // Existing record - handle changes
+        // On soft delete: delete related BarangMasukDetail first; FK is SET NULL so barang_masuk_id becomes null automatically.
+        static::deleting(function (self $barangMasukDetail): void {
+            if (! $barangMasukDetail->isForceDeleting()) {
+                if (auth()->check()) {
+                    $barangMasukDetail->deleted_by = auth()->id();
+                    $barangMasukDetail->save(); // Save the model to persist the deleted_by value
+                }
+            }
+        });
 
-                // Check if unit_ac_id changed
-                if ($originalUnitACId !== $newUnitACId) {
-                    // Remove from old unit
-                    $barangMasukDetail->updateStokUnitAC($originalJumlah, 'decrement', $originalUnitACId);
-                    // Add to new unit
-                    $barangMasukDetail->updateStokUnitAC($newJumlah, 'increment', $newUnitACId);
+        static::saving(function ($detail) {
+            $originalQuantity = $detail->getOriginal('jumlah_barang_masuk');
+            $originalUnitId = $detail->getOriginal('unit_ac_id');
+
+            $newQuantity = $detail->jumlah_barang_masuk;
+            $newUnitId = $detail->unit_ac_id;
+
+            if ($detail->exists) {
+                if ($originalUnitId !== $newUnitId) {
+                    $detail->updateUnitACStock($originalQuantity, 'decrement', $originalUnitId);
+                    $detail->updateUnitACStock($newQuantity, 'increment', $newUnitId);
                 } else {
-                    // Same unit, handle quantity changes
-                    $difference = $newJumlah - $originalJumlah;
-
+                    $difference = $newQuantity - $originalQuantity;
                     if ($difference > 0) {
-                        // Increment the difference
-                        $barangMasukDetail->updateStokUnitAC($difference, 'increment');
+                        $detail->updateUnitACStock($difference, 'increment');
                     } elseif ($difference < 0) {
-                        // Decrement the absolute difference
-                        $barangMasukDetail->updateStokUnitAC(abs($difference), 'decrement');
+                        $detail->updateUnitACStock(abs($difference), 'decrement');
                     }
-                    // If difference = 0, do nothing
                 }
             } else {
-                // New record - increment the full amount
-                $barangMasukDetail->updateStokUnitAC($newJumlah, 'increment');
+                $detail->updateUnitACStock($newQuantity, 'increment');
             }
 
-            // Retrieve historical prices
-            $unitAC = UnitAC::find($barangMasukDetail->unit_ac_id);
-            if ($unitAC && $barangMasukDetail->barangMasuk) {
+            $unitAC = UnitAC::find($detail->unit_ac_id);
+            if ($unitAC && $detail->barangMasuk) {
                 $hargaHistory = $unitAC->hargaHistory()
-                    ->where('created_at', '<=', $barangMasukDetail->barangMasuk->created_at)
+                    ->where('created_at', '<=', $detail->barangMasuk->created_at)
                     ->latest()
                     ->first();
-
-                if ($hargaHistory) {
-                    // No longer setting harga_dealer, harga_ecommerce, harga_retail here
-                } else {
-                    // Fallback to current prices if no history found (should not happen if prices are always recorded)
-                    // No longer setting harga_dealer, harga_ecommerce, harga_retail here
-                }
             }
         });
 
-        // When soft deleted or force deleted
-        static::softDeleted(function ($barangMasukDetail) {
-            // Get the original values at time of deletion
-            $originalJumlah = $barangMasukDetail->getOriginal('jumlah_barang_masuk');
-            $originalUnitACId = $barangMasukDetail->getOriginal('unit_ac_id');
-
-            // Decrement from the original unit
-            $barangMasukDetail->updateStokUnitAC($originalJumlah, 'decrement', $originalUnitACId);
+        static::softDeleted(function ($detail) {
+            $detail->updateUnitACStock($detail->getOriginal('jumlah_barang_masuk'), 'decrement', $detail->getOriginal('unit_ac_id'));
         });
 
-        // When restored from soft delete
-        static::restored(function ($barangMasukDetail) {
-            // Get the current values at time of restoration
-            $currentJumlah = $barangMasukDetail->jumlah_barang_masuk;
-            $currentUnitACId = $barangMasukDetail->unit_ac_id;
-
-            // Increment to the current unit
-            $barangMasukDetail->updateStokUnitAC($currentJumlah, 'increment', $currentUnitACId);
+        static::restored(function ($detail) {
+            $detail->updateUnitACStock($detail->jumlah_barang_masuk, 'increment', $detail->unit_ac_id);
         });
     }
 
-    /**
-     * Update stok_unit_ac based on the action (increment or decrement).
-     */
-    private function updateStokUnitAC(int $jumlah, string $action, ?int $unitACId = null)
+    private function updateUnitACStock(int $quantity, string $action, ?int $unitId = null)
     {
-        $unitAC = UnitAC::find($unitACId ?? $this->unit_ac_id);
+        $unitAC = UnitAC::find($unitId ?? $this->unit_ac_id);
 
         if (! $unitAC) {
             return;
         }
 
         if ($action === 'increment') {
-            $unitAC->increment('stok_masuk', $jumlah);
+            $unitAC->increment('stok_masuk', $quantity);
         } else {
-            $unitAC->decrement('stok_masuk', $jumlah);
+            $unitAC->decrement('stok_masuk', $quantity);
         }
     }
 }

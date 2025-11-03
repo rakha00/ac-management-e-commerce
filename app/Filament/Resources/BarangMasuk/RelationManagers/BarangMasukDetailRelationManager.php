@@ -49,27 +49,20 @@ class BarangMasukDetailRelationManager extends RelationManager
                             $set('sku', null);
                             $set('nama_unit', null);
                         }
-                    })
-                    ->columnSpanFull(),
+                    }),
                 TextInput::make('sku')
                     ->label('SKU')
                     ->disabled()
-                    ->dehydrated()
-                    ->required(),
+                    ->dehydrated(),
                 TextInput::make('nama_unit')
                     ->label('Nama Unit')
                     ->disabled()
-                    ->dehydrated()
-                    ->required(),
+                    ->dehydrated(),
                 TextInput::make('jumlah_barang_masuk')
                     ->label('Jumlah Barang Masuk')
-                    ->required()
                     ->numeric()
-                    ->minValue(1)
-                    ->default(1),
+                    ->suffix('unit'),
                 Textarea::make('keterangan')
-                    ->label('Catatan')
-                    ->maxLength(65535)
                     ->columnSpanFull(),
             ]);
     }
@@ -92,15 +85,32 @@ class BarangMasukDetailRelationManager extends RelationManager
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('keterangan')
-                    ->label('Catatan')
                     ->limit(50)
                     ->toggleable(),
+                TextColumn::make('createdBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updatedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deletedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
-                    ->label('Dibuat')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
             ->filters([
                 TrashedFilter::make(),
             ])

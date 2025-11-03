@@ -2,11 +2,17 @@
 
 namespace App\Filament\Resources\BarangMasuk\Tables;
 
+use Carbon\Carbon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class BarangMasukTable
 {
@@ -31,16 +37,68 @@ class BarangMasukTable
                         return $record->barangMasukDetail()->sum('jumlah_barang_masuk');
                     })
                     ->label('Total Qty'),
+                TextColumn::make('createdBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updatedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deletedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
-                    ->label('Dibuat')
                     ->dateTime()
+                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label('Diubah')
                     ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
+            ->filters([
+                TrashedFilter::make(),
+                SelectFilter::make('principal_id')
+                    ->label('Principal')
+                    ->relationship('principal', 'nama')
+                    ->searchable()
+                    ->preload(),
+                Filter::make('date_range')
+                    ->label('Filter Tanggal')
+                    ->form([
+                        DatePicker::make('dari')
+                            ->maxDate(fn (callable $get) => $get('sampai') ?? null),
+                        DatePicker::make('sampai')
+                            ->minDate(fn (callable $get) => $get('dari')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['dari'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal', '>=', $date),
+                            )
+                            ->when(
+                                $data['sampai'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal', '<=', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['dari'] ?? null) {
+                            $indicators['dari'] = 'Dari '.Carbon::parse($data['dari'])->toFormattedDateString();
+                        }
+                        if ($data['sampai'] ?? null) {
+                            $indicators['sampai'] = 'Sampai '.Carbon::parse($data['sampai'])->toFormattedDateString();
+                        }
+
+                        return $indicators;
+                    }),
+            ])
             ->recordActions([
                 EditAction::make(),
             ])

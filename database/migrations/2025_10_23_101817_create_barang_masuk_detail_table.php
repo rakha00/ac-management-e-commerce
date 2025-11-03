@@ -15,14 +15,19 @@ return new class extends Migration
             $table->id();
             $table->foreignId('barang_masuk_id')->constrained('barang_masuk')->onDelete('cascade');
             $table->foreignId('unit_ac_id')->constrained('unit_ac')->onDelete('cascade');
-            $table->string('sku');
-            $table->string('nama_unit');
+
+            $table->string('sku')->nullable();
+            $table->string('nama_unit')->nullable();
             $table->integer('jumlah_barang_masuk')->default(0);
             $table->text('keterangan')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
+            $table->timestamps();
+            $table->softDeletes();
+
         });
     }
 

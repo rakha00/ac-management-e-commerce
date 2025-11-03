@@ -20,11 +20,12 @@ class DatabaseSeeder extends Seeder
             TipeACSeeder::class,
             UnitACSeeder::class,
 
+            PrincipalSeeder::class,
+            BarangMasukSeeder::class,
+
             // KonsumenSeeder::class,
             // SparepartSeeder::class,
             // DistributorSeeder::class,
-            PrincipalSeeder::class,
-            // BarangMasukSeeder::class,
             // BarangMasukDetailSeeder::class,
             // AbsensiSeeder::class,
 

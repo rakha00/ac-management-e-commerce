@@ -20,14 +20,17 @@ class BarangMasuk extends Model
         'nomor_barang_masuk',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'principal_id' => 'integer',
             'tanggal' => 'date',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
@@ -51,9 +54,44 @@ class BarangMasuk extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    /**
-     * Generate sequential number per date with format PREFIX-YYYYMMDD-####.
-     */
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    protected static function booted(): void
+    {
+        // Set created_by  when creating
+        static::creating(function (self $barangMasuk): void {
+            if (auth()->check()) {
+                $barangMasuk->created_by = auth()->id();
+                $barangMasuk->updated_by = auth()->id();
+            }
+        });
+
+        // Set updated_by when updating
+        static::updating(function (self $barangMasuk): void {
+            if (auth()->check()) {
+                $barangMasuk->updated_by = auth()->id();
+            }
+        });
+
+        // On soft delete: delete related BarangMasukDetail first; FK is SET NULL so barang_masuk_id becomes null automatically.
+        static::deleting(function (self $barangMasuk): void {
+            if (! $barangMasuk->isForceDeleting()) {
+                if (auth()->check()) {
+                    $barangMasuk->deleted_by = auth()->id();
+                    $barangMasuk->save(); // Save the model to persist the deleted_by value
+                }
+            }
+        });
+
+        // On permanent delete: ensure related BarangMasukDetail is removed if still present (defensive)
+        static::forceDeleted(function (self $barangMasuk): void {
+            $barangMasuk->barangMasukDetail()->delete();
+        });
+    }
+
     public static function generateNomorBarangMasuk(string $date, string $prefix = 'BM'): string
     {
         $ymd = Carbon::parse($date)->format('Ymd');
@@ -84,9 +122,6 @@ class BarangMasuk extends Model
         return "{$prefix}-{$ymd}-{$seqStr}";
     }
 
-    /**
-     * Extract sequence integer from formatted number.
-     */
     protected static function extractSequence(?string $no, string $prefix, string $ymd): int
     {
         if (! $no) {
