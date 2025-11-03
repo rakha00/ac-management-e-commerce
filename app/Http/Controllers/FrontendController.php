@@ -34,7 +34,7 @@ class FrontendController extends Controller
     {
         // Logika untuk halaman detail produk
         $product = UnitAC::find($id) ?? Sparepart::find($id);
-        if (!$product) {
+        if (! $product) {
             abort(404);
         }
 
