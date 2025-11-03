@@ -36,6 +36,7 @@ class Karyawan extends Model
         return [
             'user_id' => 'integer',
             'gaji_pokok' => 'integer',
+            'path_dokumen_tambahan' => 'array',
             'status_aktif' => 'boolean',
             'tanggal_terakhir_aktif' => 'date',
             'created_by' => 'integer',

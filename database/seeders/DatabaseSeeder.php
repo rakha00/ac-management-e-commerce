@@ -16,14 +16,17 @@ class DatabaseSeeder extends Seeder
             KaryawanSeeder::class,
             TeknisiSeeder::class,
 
-            // AbsensiSeeder::class,
-            // UnitACSeeder::class,
+            MerkSeeder::class,
+            TipeACSeeder::class,
+            UnitACSeeder::class,
+
             // KonsumenSeeder::class,
             // SparepartSeeder::class,
             // DistributorSeeder::class,
-            // PrincipalSeeder::class,
+            PrincipalSeeder::class,
             // BarangMasukSeeder::class,
             // BarangMasukDetailSeeder::class,
+            // AbsensiSeeder::class,
 
             // TransaksiJasaSeeder::class,
             // TransaksiProdukSeeder::class,

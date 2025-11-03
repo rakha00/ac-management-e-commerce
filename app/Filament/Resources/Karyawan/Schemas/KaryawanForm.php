@@ -74,6 +74,8 @@ class KaryawanForm
                             ->openable()
                             ->columnSpanFull(),
                         FileUpload::make('path_dokumen_tambahan')
+                            ->label('Dokumen Tambahan')
+                            ->multiple()
                             ->directory('karyawan/dokumen')
                             ->downloadable()
                             ->openable()

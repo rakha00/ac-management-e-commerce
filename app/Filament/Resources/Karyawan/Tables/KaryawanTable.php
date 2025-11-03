@@ -56,8 +56,8 @@ class KaryawanTable
                         $tanggalAwal = null;
                         $tanggalAkhir = null;
 
-                        if (isset($tableFilters['tanggal_penghasilan'])) {
-                            $filterData = $tableFilters['tanggal_penghasilan']->getState();
+                        if (isset($tableFilters['date_range'])) {
+                            $filterData = $tableFilters['date_range']->getState();
                             $tanggalAwal = $filterData['dari'] ?? null;
                             $tanggalAkhir = $filterData['sampai'] ?? null;
                         }
@@ -116,7 +116,7 @@ class KaryawanTable
                     ->default(true)
                     ->label('Status Aktif'),
 
-                Filter::make('tanggal_penghasilan')
+                Filter::make('date_range')
                     ->form([
                         DatePicker::make('dari')
                             ->default(now()->startOfMonth())
@@ -157,8 +157,8 @@ class KaryawanTable
                                         $tanggalAwal = null;
                                         $tanggalAkhir = null;
 
-                                        if (isset($tableFilters['tanggal_penghasilan'])) {
-                                            $filterData = $tableFilters['tanggal_penghasilan']->getState();
+                                        if (isset($tableFilters['date_range'])) {
+                                            $filterData = $tableFilters['date_range']->getState();
                                             $tanggalAwal = $filterData['dari'] ?? null;
                                             $tanggalAkhir = $filterData['sampai'] ?? null;
                                         }

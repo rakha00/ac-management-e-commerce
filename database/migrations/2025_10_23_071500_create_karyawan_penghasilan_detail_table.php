@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('karyawan_id')->constrained('karyawan')->onDelete('cascade');
 
-            $table->date('tanggal')->nullable();
+            $table->date('tanggal');
 
-            $table->integer('kasbon')->nullable()->default(0);
-            $table->integer('lembur')->nullable()->default(0);
-            $table->integer('bonus')->nullable()->default(0);
-            $table->integer('potongan')->nullable()->default(0);
+            $table->integer('kasbon')->default(0);
+            $table->integer('lembur')->default(0);
+            $table->integer('bonus')->default(0);
+            $table->integer('potongan')->default(0);
 
             $table->text('keterangan')->nullable();
 

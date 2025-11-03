@@ -2,17 +2,17 @@
 
 namespace App\Filament\Resources\UnitAC\Tables;
 
-use App\Models\BarangMasukDetail;
-use App\Models\TransaksiProdukDetail;
+use App\Models\UnitAC;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 class UnitACTable
@@ -25,153 +25,151 @@ class UnitACTable
                     ->disk('public')
                     ->label('Foto')
                     ->size(50)
-                    ->limit(1),
+                    ->limit(1)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sku')
                     ->label('SKU')
                     ->searchable(),
+                TextColumn::make('merk.merk')
+                    ->label('Merk')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('pk')
+                    ->label('PK')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('tipeAC.tipe_ac')
+                    ->label('Tipe AC')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('nama_unit')
                     ->label('Nama Unit')
                     ->searchable(),
                 TextColumn::make('harga_dealer')
                     ->label('Harga Dealer')
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('harga_ecommerce')
                     ->label('Harga E-commerce')
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('harga_retail')
                     ->label('Harga Retail')
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('stok_awal')
                     ->label('Stok Awal')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('stok_masuk')
                     ->label('Stok Masuk')
                     ->sortable()
-                    ->getStateUsing(function ($record) {
-                        $dateFilter = session('date_filter');
+                    ->getStateUsing(function (UnitAC $record, HasTable $livewire): int {
+                        $tableFilters = $livewire->getTable()->getFilters();
+                        $tanggalAwal = null;
+                        $tanggalAkhir = null;
 
-                        if (empty($dateFilter)) {
-                            return $record->stok_masuk;
+                        if (isset($tableFilters['date_range'])) {
+                            $filterData = $tableFilters['date_range']->getState();
+                            $tanggalAwal = $filterData['dari'] ?? null;
+                            $tanggalAkhir = $filterData['sampai'] ?? null;
                         }
 
-                        $query = BarangMasukDetail::where('unit_ac_id', $record->id)
-                            ->join('barang_masuk', 'barang_masuk.id', '=', 'barang_masuk_detail.barang_masuk_id');
-
-                        if (! empty($dateFilter['from_date'])) {
-                            $query->whereDate('barang_masuk.tanggal', '>=', $dateFilter['from_date']);
-                        }
-
-                        if (! empty($dateFilter['until_date'])) {
-                            $query->whereDate('barang_masuk.tanggal', '<=', $dateFilter['until_date']);
-                        }
-
-                        return $query->sum('jumlah_barang_masuk');
-                    }),
+                        return $record->getTotalStokMasuk($tanggalAwal, $tanggalAkhir);
+                    })
+                    ->toggleable(),
                 TextColumn::make('stok_keluar')
                     ->label('Stok Keluar')
                     ->sortable()
-                    ->getStateUsing(function ($record) {
-                        $dateFilter = session('date_filter');
+                    ->getStateUsing(function (UnitAC $record, HasTable $livewire): int {
+                        $tableFilters = $livewire->getTable()->getFilters();
+                        $tanggalAwal = null;
+                        $tanggalAkhir = null;
 
-                        if (empty($dateFilter)) {
-                            return $record->stok_keluar;
+                        if (isset($tableFilters['date_range'])) {
+                            $filterData = $tableFilters['date_range']->getState();
+                            $tanggalAwal = $filterData['dari'] ?? null;
+                            $tanggalAkhir = $filterData['sampai'] ?? null;
                         }
 
-                        $query = TransaksiProdukDetail::where('unit_ac_id', $record->id)
-                            ->join('transaksi_produk', 'transaksi_produk.id', '=', 'transaksi_produk_detail.transaksi_produk_id');
-
-                        if (! empty($dateFilter['from_date'])) {
-                            $query->whereDate('transaksi_produk.tanggal_transaksi', '>=', $dateFilter['from_date']);
-                        }
-
-                        if (! empty($dateFilter['until_date'])) {
-                            $query->whereDate('transaksi_produk.tanggal_transaksi', '<=', $dateFilter['until_date']);
-                        }
-
-                        return $query->sum('jumlah_keluar');
-                    }),
+                        return $record->getTotalStokKeluar($tanggalAwal, $tanggalAkhir);
+                    })
+                    ->toggleable(),
                 TextColumn::make('stok_akhir')
                     ->label('Stok Akhir')
                     ->sortable()
-                    ->getStateUsing(function ($record) {
-                        $dateFilter = session('date_filter');
+                    ->getStateUsing(function (UnitAC $record, HasTable $livewire): int {
+                        $tableFilters = $livewire->getTable()->getFilters();
+                        $tanggalAwal = null;
+                        $tanggalAkhir = null;
 
-                        if (empty($dateFilter)) {
-                            return $record->stok_akhir;
+                        if (isset($tableFilters['date_range'])) {
+                            $filterData = $tableFilters['date_range']->getState();
+                            $tanggalAwal = $filterData['dari'] ?? null;
+                            $tanggalAkhir = $filterData['sampai'] ?? null;
                         }
 
-                        // Hitung stok masuk berdasarkan filter tanggal
-                        $stokMasukQuery = BarangMasukDetail::where('unit_ac_id', $record->id)
-                            ->join('barang_masuk', 'barang_masuk.id', '=', 'barang_masuk_detail.barang_masuk_id');
-
-                        if (! empty($dateFilter['from_date'])) {
-                            $stokMasukQuery->whereDate('barang_masuk.tanggal', '>=', $dateFilter['from_date']);
-                        }
-
-                        if (! empty($dateFilter['until_date'])) {
-                            $stokMasukQuery->whereDate('barang_masuk.tanggal', '<=', $dateFilter['until_date']);
-                        }
-
-                        $stokMasuk = $stokMasukQuery->sum('jumlah_barang_masuk');
-
-                        // Hitung stok keluar berdasarkan filter tanggal
-                        $stokKeluarQuery = TransaksiProdukDetail::where('unit_ac_id', $record->id)
-                            ->join('transaksi_produk', 'transaksi_produk.id', '=', 'transaksi_produk_detail.transaksi_produk_id');
-
-                        if (! empty($dateFilter['from_date'])) {
-                            $stokKeluarQuery->whereDate('transaksi_produk.tanggal_transaksi', '>=', $dateFilter['from_date']);
-                        }
-
-                        if (! empty($dateFilter['until_date'])) {
-                            $stokKeluarQuery->whereDate('transaksi_produk.tanggal_transaksi', '<=', $dateFilter['until_date']);
-                        }
-
-                        $stokKeluar = $stokKeluarQuery->sum('jumlah_keluar');
-
-                        // Hitung stok akhir: stok awal + stok masuk - stok keluar
-                        return $record->stok_awal + $stokMasuk - $stokKeluar;
-                    }),
+                        return $record->getCalculatedStokAkhir($tanggalAwal, $tanggalAkhir);
+                    })
+                    ->toggleable(),
                 TextColumn::make('keterangan')
                     ->label('Keterangan')
                     ->searchable()
-                    ->limit(25),
+                    ->limit(25)
+                    ->toggleable(),
+                TextColumn::make('createdBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updatedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deletedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('merk')
+                    ->relationship('merk', 'merk')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('tipeAC')
+                    ->label('Tipe AC')
+                    ->relationship('tipeAC', 'tipe_ac')
+                    ->searchable()
+                    ->preload(),
                 Filter::make('date_range')
                     ->label('Filter Tanggal')
                     ->form([
-                        DatePicker::make('from_date')
-                            ->label('Dari Tanggal'),
-                        DatePicker::make('until_date')
-                            ->label('Sampai Tanggal'),
+                        DatePicker::make('dari')
+                            ->maxDate(fn (callable $get) => $get('sampai') ?? null),
+                        DatePicker::make('sampai')
+                            ->minDate(fn (callable $get) => $get('dari')),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        // Jika kedua tanggal tidak diisi, kembalikan query tanpa filter
-                        if (empty($data['from_date']) && empty($data['until_date'])) {
-                            return $query;
-                        }
-
-                        // Simpan filter date range dalam session
-                        session([
-                            'date_filter' => [
-                                'from_date' => $data['from_date'] ?? null,
-                                'until_date' => $data['until_date'] ?? null,
-                            ],
-                        ]);
-
-                        return $query;
-                    })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
-                        if ($data['from_date'] ?? null) {
-                            $indicators['from_date'] = 'Dari '.Carbon::parse($data['from_date'])->toFormattedDateString();
+                        if ($data['dari'] ?? null) {
+                            $indicators['dari'] = 'Dari '.Carbon::parse($data['dari'])->toFormattedDateString();
                         }
-                        if ($data['until_date'] ?? null) {
-                            $indicators['until_date'] = 'Sampai '.Carbon::parse($data['until_date'])->toFormattedDateString();
+                        if ($data['sampai'] ?? null) {
+                            $indicators['sampai'] = 'Sampai '.Carbon::parse($data['sampai'])->toFormattedDateString();
                         }
 
                         return $indicators;
@@ -191,7 +189,6 @@ class UnitACTable
                 BulkActionGroup::make([
                     //
                 ]),
-            ])
-            ->deferFilters(false);
+            ]);
     }
 }
