@@ -60,11 +60,11 @@ class UnitACTable
                         $query = BarangMasukDetail::where('unit_ac_id', $record->id)
                             ->join('barang_masuk', 'barang_masuk.id', '=', 'barang_masuk_detail.barang_masuk_id');
 
-                        if (!empty($dateFilter['from_date'])) {
+                        if (! empty($dateFilter['from_date'])) {
                             $query->whereDate('barang_masuk.tanggal', '>=', $dateFilter['from_date']);
                         }
 
-                        if (!empty($dateFilter['until_date'])) {
+                        if (! empty($dateFilter['until_date'])) {
                             $query->whereDate('barang_masuk.tanggal', '<=', $dateFilter['until_date']);
                         }
 
@@ -83,11 +83,11 @@ class UnitACTable
                         $query = TransaksiProdukDetail::where('unit_ac_id', $record->id)
                             ->join('transaksi_produk', 'transaksi_produk.id', '=', 'transaksi_produk_detail.transaksi_produk_id');
 
-                        if (!empty($dateFilter['from_date'])) {
+                        if (! empty($dateFilter['from_date'])) {
                             $query->whereDate('transaksi_produk.tanggal_transaksi', '>=', $dateFilter['from_date']);
                         }
 
-                        if (!empty($dateFilter['until_date'])) {
+                        if (! empty($dateFilter['until_date'])) {
                             $query->whereDate('transaksi_produk.tanggal_transaksi', '<=', $dateFilter['until_date']);
                         }
 
@@ -107,11 +107,11 @@ class UnitACTable
                         $stokMasukQuery = BarangMasukDetail::where('unit_ac_id', $record->id)
                             ->join('barang_masuk', 'barang_masuk.id', '=', 'barang_masuk_detail.barang_masuk_id');
 
-                        if (!empty($dateFilter['from_date'])) {
+                        if (! empty($dateFilter['from_date'])) {
                             $stokMasukQuery->whereDate('barang_masuk.tanggal', '>=', $dateFilter['from_date']);
                         }
 
-                        if (!empty($dateFilter['until_date'])) {
+                        if (! empty($dateFilter['until_date'])) {
                             $stokMasukQuery->whereDate('barang_masuk.tanggal', '<=', $dateFilter['until_date']);
                         }
 
@@ -121,11 +121,11 @@ class UnitACTable
                         $stokKeluarQuery = TransaksiProdukDetail::where('unit_ac_id', $record->id)
                             ->join('transaksi_produk', 'transaksi_produk.id', '=', 'transaksi_produk_detail.transaksi_produk_id');
 
-                        if (!empty($dateFilter['from_date'])) {
+                        if (! empty($dateFilter['from_date'])) {
                             $stokKeluarQuery->whereDate('transaksi_produk.tanggal_transaksi', '>=', $dateFilter['from_date']);
                         }
 
-                        if (!empty($dateFilter['until_date'])) {
+                        if (! empty($dateFilter['until_date'])) {
                             $stokKeluarQuery->whereDate('transaksi_produk.tanggal_transaksi', '<=', $dateFilter['until_date']);
                         }
 
@@ -168,21 +168,21 @@ class UnitACTable
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['from_date'] ?? null) {
-                            $indicators['from_date'] = 'Dari ' . Carbon::parse($data['from_date'])->toFormattedDateString();
+                            $indicators['from_date'] = 'Dari '.Carbon::parse($data['from_date'])->toFormattedDateString();
                         }
                         if ($data['until_date'] ?? null) {
-                            $indicators['until_date'] = 'Sampai ' . Carbon::parse($data['until_date'])->toFormattedDateString();
+                            $indicators['until_date'] = 'Sampai '.Carbon::parse($data['until_date'])->toFormattedDateString();
                         }
 
                         return $indicators;
                     }),
                 Filter::make('stok_kosong')
                     ->label('Stok Kosong')
-                    ->query(fn($query) => $query->where('stok_akhir', '<=', 0)),
+                    ->query(fn ($query) => $query->where('stok_akhir', '<=', 0)),
 
                 Filter::make('harga_tinggi')
                     ->label('Harga Retail > 5 Juta')
-                    ->query(fn($query) => $query->where('harga_retail', '>', 5000000)),
+                    ->query(fn ($query) => $query->where('harga_retail', '>', 5000000)),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -86,6 +86,7 @@ class SparepartForm
                         FileUpload::make('path_foto_sparepart')
                             ->label('Foto Sparepart')
                             ->image()
+                            ->disk('public')
                             ->multiple()
                             ->directory('foto-sparepart')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
