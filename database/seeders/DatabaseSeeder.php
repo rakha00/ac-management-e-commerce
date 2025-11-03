@@ -13,11 +13,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
-            // KaryawanSeeder::class,
-            // TeknisiSeeder::class,
-            // AbsensiSeeder::class,
+            KaryawanSeeder::class,
+                // TeknisiSeeder::class,
+                // AbsensiSeeder::class,
             UnitACSeeder::class,
-            // KonsumenSeeder::class,
+                // KonsumenSeeder::class,
             SparepartSeeder::class,
             // DistributorSeeder::class,
             // PrincipalSeeder::class,
