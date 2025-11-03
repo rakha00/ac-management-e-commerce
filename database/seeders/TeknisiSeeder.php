@@ -24,7 +24,7 @@ class TeknisiSeeder extends Seeder
             $name = "Teknisi {$i}";
             $email = "teknisi{$i}@gmail.com";
 
-            $user = User::query()->firstOrCreate(
+            $user = User::firstOrCreate(
                 ['email' => $email],
                 [
                     'name' => $name,
@@ -32,7 +32,7 @@ class TeknisiSeeder extends Seeder
                 ]
             );
 
-            Karyawan::query()->firstOrCreate(
+            Karyawan::firstOrCreate(
                 ['user_id' => $user->id],
                 [
                     'nama' => $name,

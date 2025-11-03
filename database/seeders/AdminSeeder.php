@@ -13,7 +13,7 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::query()->firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => 'admin@gmail.com'],
             [
                 'name' => 'admin',
@@ -21,7 +21,7 @@ class AdminSeeder extends Seeder
             ]
         );
 
-        Karyawan::query()->create([
+        Karyawan::firstOrCreate([
             'user_id' => $user->id,
             'nama' => 'Admin User',
             'jabatan' => 'admin',

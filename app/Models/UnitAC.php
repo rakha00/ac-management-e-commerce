@@ -98,7 +98,7 @@ class UnitAC extends Model
                 'harga_dealer' => $model->harga_dealer,
                 'harga_ecommerce' => $model->harga_ecommerce,
                 'harga_retail' => $model->harga_retail,
-                'karyawan_id' => Auth::id(),
+                'updated_by' => Auth::id(),
             ]);
         });
 
@@ -108,7 +108,7 @@ class UnitAC extends Model
                     'harga_dealer' => $model->harga_dealer,
                     'harga_ecommerce' => $model->harga_ecommerce,
                     'harga_retail' => $model->harga_retail,
-                    'karyawan_id' => Auth::id(),
+                    'updated_by' => Auth::id(),
                 ]);
             }
         });

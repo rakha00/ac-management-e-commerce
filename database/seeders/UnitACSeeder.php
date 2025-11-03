@@ -12,7 +12,7 @@ class UnitACSeeder extends Seeder
      */
     public function run(): void
     {
-        UnitAC::query()->create([
+        UnitAC::create([
             'sku' => 'AC001',
             'nama_unit' => 'AC Split 1 PK',
             'merk_id' => 1,
@@ -28,7 +28,7 @@ class UnitACSeeder extends Seeder
             'keterangan' => 'Unit AC Split 1 PK standar',
         ]);
 
-        UnitAC::query()->create([
+        UnitAC::create([
             'sku' => 'AC002',
             'nama_unit' => 'AC Inverter 1.5 PK',
             'merk_id' => 2,
@@ -44,7 +44,7 @@ class UnitACSeeder extends Seeder
             'keterangan' => 'Unit AC Inverter hemat energi 1.5 PK',
         ]);
 
-        UnitAC::query()->create([
+        UnitAC::create([
             'sku' => 'AC003',
             'nama_unit' => 'AC Cassette 2 PK',
             'merk_id' => 3,

@@ -12,7 +12,7 @@ class PrincipalSeeder extends Seeder
      */
     public function run(): void
     {
-        $data = [
+        Principal::insert([
             [
                 'nama' => 'PT. Sejuk Abadi',
                 'sales' => 'Budi',
@@ -31,17 +31,7 @@ class PrincipalSeeder extends Seeder
                 'nomor_hp' => '081223344556',
                 'keterangan' => 'Regional',
             ],
-        ];
+        ]);
 
-        foreach ($data as $item) {
-            Principal::firstOrCreate(
-                ['nama' => $item['nama']],
-                [
-                    'sales' => $item['sales'],
-                    'nomor_hp' => $item['nomor_hp'],
-                    'keterangan' => $item['keterangan'],
-                ]
-            );
-        }
     }
 }

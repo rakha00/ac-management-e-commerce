@@ -36,8 +36,9 @@ class HargaHistoryRelationManager extends RelationManager
                     ->label('Tanggal Perubahan')
                     ->dateTime()
                     ->sortable()
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                TextColumn::make('karyawan.nama')
+                TextColumn::make('updatedBy.name')
                     ->label('Diubah Oleh')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),

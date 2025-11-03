@@ -18,7 +18,7 @@ class KaryawanSeeder extends Seeder
         $roles = ['gudang', 'helper', 'teknisi', 'staff', 'sales'];
 
         foreach ($roles as $role) {
-            $user = User::query()->firstOrCreate(
+            $user = User::firstOrCreate(
                 ['email' => $role.'@gmail.com'],
                 [
                     'name' => $role,
@@ -26,7 +26,7 @@ class KaryawanSeeder extends Seeder
                 ]
             );
 
-            Karyawan::query()->create([
+            Karyawan::firstOrCreate([
                 'user_id' => $user->id,
                 'nama' => ucfirst($role).' User',
                 'jabatan' => $role,
@@ -41,7 +41,7 @@ class KaryawanSeeder extends Seeder
                 'tanggal_terakhir_aktif' => null,
             ]);
 
-            KaryawanPenghasilanDetail::query()->create([
+            KaryawanPenghasilanDetail::firstOrCreate([
                 'karyawan_id' => $user->karyawan->id,
                 'kasbon' => 500000,
                 'lembur' => 100000,
@@ -51,7 +51,7 @@ class KaryawanSeeder extends Seeder
                 'tanggal' => now()->subMonth(),
             ]);
 
-            KaryawanPenghasilanDetail::query()->create([
+            KaryawanPenghasilanDetail::firstOrCreate([
                 'karyawan_id' => $user->karyawan->id,
                 'kasbon' => 0,
                 'lembur' => 150000,

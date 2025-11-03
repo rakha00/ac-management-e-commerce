@@ -30,6 +30,9 @@ class UnitACTable
                 TextColumn::make('sku')
                     ->label('SKU')
                     ->searchable(),
+                TextColumn::make('nama_unit')
+                    ->label('Nama Unit')
+                    ->searchable(),
                 TextColumn::make('merk.merk')
                     ->label('Merk')
                     ->searchable()
@@ -42,9 +45,6 @@ class UnitACTable
                     ->label('Tipe AC')
                     ->searchable()
                     ->toggleable(),
-                TextColumn::make('nama_unit')
-                    ->label('Nama Unit')
-                    ->searchable(),
                 TextColumn::make('harga_dealer')
                     ->label('Harga Dealer')
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
@@ -117,9 +117,8 @@ class UnitACTable
                     ->toggleable(),
                 TextColumn::make('keterangan')
                     ->label('Keterangan')
-                    ->searchable()
                     ->limit(25)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('createdBy.name')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

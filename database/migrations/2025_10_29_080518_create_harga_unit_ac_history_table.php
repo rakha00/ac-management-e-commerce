@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('harga_unit_ac_history', function (Blueprint $table) {
             $table->id();
             $table->foreignId('unit_ac_id')->constrained('unit_ac')->onDelete('cascade');
-            $table->foreignId('karyawan_id')->nullable()->constrained('karyawan')->onDelete('set null');
+
             $table->integer('harga_dealer');
             $table->integer('harga_ecommerce');
             $table->integer('harga_retail');
+
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }
