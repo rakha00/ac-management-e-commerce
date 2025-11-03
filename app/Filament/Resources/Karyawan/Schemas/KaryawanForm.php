@@ -38,6 +38,7 @@ class KaryawanForm
                             ->password()
                             ->revealable()
                             ->minLength(6)
+                            ->dehydrated(fn ($state) => filled($state))
                             ->required(fn (string $operation) => $operation === 'create'),
                     ])
                     ->columnSpanFull(),

@@ -168,6 +168,8 @@ class KaryawanTable
                                     ->format('"Rp"#,##0_-'),
                                 Column::make('status_aktif')
                                     ->formatStateUsing(fn ($state) => $state ? 'aktif' : 'tidak aktif'),
+                                Column::make('created_at'),
+                                Column::make('updated_at'),
                             ])
                             ->withFilename(fn () => 'karyawan_'.now()->format('Ymd_His'))
                             ->fromTable(),

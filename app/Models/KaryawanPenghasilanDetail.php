@@ -22,11 +22,13 @@ class KaryawanPenghasilanDetail extends Model
         'tanggal',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'karyawan_id' => 'integer',
             'kasbon' => 'integer',
             'lembur' => 'integer',
             'bonus' => 'integer',
@@ -34,6 +36,7 @@ class KaryawanPenghasilanDetail extends Model
             'tanggal' => 'date',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
@@ -50,5 +53,36 @@ class KaryawanPenghasilanDetail extends Model
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    protected static function booted(): void
+    {
+        // Set created_by  when creating
+        static::creating(function (self $penghasilanKaryawan): void {
+            if (auth()->check()) {
+                $penghasilanKaryawan->created_by = auth()->id();
+                $penghasilanKaryawan->updated_by = auth()->id();
+            }
+        });
+
+        // Set updated_by when updating
+        static::updating(function (self $penghasilanKaryawan): void {
+            if (auth()->check()) {
+                $penghasilanKaryawan->updated_by = auth()->id();
+            }
+        });
+
+        // Set deleted_by when soft deleting
+        static::deleting(function (self $penghasilanKaryawan): void {
+            if (auth()->check()) {
+                $penghasilanKaryawan->deleted_by = auth()->id();
+                $penghasilanKaryawan->save();
+            }
+        });
     }
 }

@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\Karyawan\RelationManagers;
 
 use Carbon\Carbon;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -18,8 +18,10 @@ use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\Indicator;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction as ExcelExportAction;
 use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
@@ -38,26 +40,22 @@ class KaryawanPenghasilanDetailRelationManager extends RelationManager
                     ->numeric()
                     ->prefix('Rp')
                     ->mask(RawJs::make('$money($input)'))
-                    ->stripCharacters(',')
-                    ->default(0),
+                    ->stripCharacters(','),
                 TextInput::make('lembur')
                     ->numeric()
                     ->prefix('Rp')
                     ->mask(RawJs::make('$money($input)'))
-                    ->stripCharacters(',')
-                    ->default(0),
+                    ->stripCharacters(','),
                 TextInput::make('bonus')
                     ->numeric()
                     ->prefix('Rp')
                     ->mask(RawJs::make('$money($input)'))
-                    ->stripCharacters(',')
-                    ->default(0),
+                    ->stripCharacters(','),
                 TextInput::make('potongan')
                     ->numeric()
                     ->prefix('Rp')
                     ->mask(RawJs::make('$money($input)'))
-                    ->stripCharacters(',')
-                    ->default(0),
+                    ->stripCharacters(','),
                 Textarea::make('keterangan')
                     ->columnSpanFull(),
                 DatePicker::make('tanggal')
@@ -108,62 +106,84 @@ class KaryawanPenghasilanDetailRelationManager extends RelationManager
                 TextColumn::make('keterangan')
                     ->limit(30)
                     ->wrap(),
+                TextColumn::make('createdBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updatedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deletedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
             ->filters([
+                TrashedFilter::make(),
                 Filter::make('tanggal')
                     ->form([
-                        DatePicker::make('from')->label('Dari')->default(now()->startOfMonth()),
-                        DatePicker::make('until')->label('Sampai')->default(now()->endOfMonth()),
+                        DatePicker::make('dari')
+                            ->default(now()->startOfMonth()),
+                        DatePicker::make('sampai')
+                            ->default(now()->endOfMonth()),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from'], fn ($q, $date) => $q->whereDate('tanggal', '>=', $date))
-                            ->when($data['until'], fn ($q, $date) => $q->whereDate('tanggal', '<=', $date));
+                            ->when($data['dari'], fn ($q, $date) => $q->whereDate('tanggal', '>=', $date))
+                            ->when($data['sampai'], fn ($q, $date) => $q->whereDate('tanggal', '<=', $date));
                     })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
 
-                        if ($data['from'] ?? null) {
-                            $indicators[] = Indicator::make('Tanggal dari '.Carbon::parse($data['from'])->toFormattedDateString())
-                                ->removeField('from');
+                        if ($data['dari'] ?? null) {
+                            $indicators[] = Indicator::make('Dari '.Carbon::parse($data['dari'])->toFormattedDateString())
+                                ->removeField('dari');
                         }
 
-                        if ($data['until'] ?? null) {
-                            $indicators[] = Indicator::make('Tanggal sampai '.Carbon::parse($data['until'])->toFormattedDateString())
-                                ->removeField('until');
+                        if ($data['sampai'] ?? null) {
+                            $indicators[] = Indicator::make('Sampai '.Carbon::parse($data['sampai'])->toFormattedDateString())
+                                ->removeField('sampai');
                         }
 
                         return $indicators;
                     }),
             ])
-            ->deferFilters(false)
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
+                ForceDeleteAction::make(),
+                RestoreAction::make(),
             ])
             ->headerActions([
                 CreateAction::make(),
             ])
             ->toolbarActions([
                 ExcelExportAction::make('export_excel')
-                    ->label('Export Excel')
                     ->exports([
                         ExcelExport::make('table')
                             ->withColumns([
                                 Column::make('tanggal')
                                     ->formatStateUsing(fn (string $state): string => Carbon::parse($state)->format('d-m-Y')),
-                                Column::make('kasbon'),
-                                Column::make('lembur'),
-                                Column::make('bonus'),
-                                Column::make('potongan'),
-                                Column::make('keterangan'),
                             ])
                             ->withFilename(fn () => 'detail_penghasilan_'.$this->ownerRecord->nama.'_'.now()->format('Ymd_His'))
                             ->fromTable(),
                     ]),
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ])
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->withoutGlobalScopes([
+                    SoftDeletingScope::class,
+                ]));
     }
 }

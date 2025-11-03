@@ -14,14 +14,20 @@ return new class extends Migration
         Schema::create('karyawan_penghasilan_detail', function (Blueprint $table) {
             $table->id();
             $table->foreignId('karyawan_id')->constrained('karyawan')->onDelete('cascade');
-            $table->date('tanggal');
-            $table->integer('kasbon')->default(0);
-            $table->integer('lembur')->default(0);
-            $table->integer('bonus')->default(0);
-            $table->integer('potongan')->default(0);
+
+            $table->date('tanggal')->nullable();
+
+            $table->integer('kasbon')->nullable()->default(0);
+            $table->integer('lembur')->nullable()->default(0);
+            $table->integer('bonus')->nullable()->default(0);
+            $table->integer('potongan')->nullable()->default(0);
+
             $table->text('keterangan')->nullable();
+
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
             $table->softDeletes();
         });

@@ -49,8 +49,6 @@ class KaryawanSeeder extends Seeder
                 'potongan' => 50000,
                 'keterangan' => 'Detail penghasilan bulan lalu',
                 'tanggal' => now()->subMonth(),
-                'created_by' => $user->id,
-                'updated_by' => $user->id,
             ]);
 
             KaryawanPenghasilanDetail::query()->create([
@@ -61,8 +59,6 @@ class KaryawanSeeder extends Seeder
                 'potongan' => 0,
                 'keterangan' => 'Detail penghasilan bulan ini',
                 'tanggal' => now(),
-                'created_by' => $user->id,
-                'updated_by' => $user->id,
             ]);
         }
     }
