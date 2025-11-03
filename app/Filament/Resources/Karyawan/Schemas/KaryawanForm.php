@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Karyawan\Schemas;
 
-use App\Filament\Resources\Karyawan\Pages\CreateKaryawan;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -25,7 +24,6 @@ class KaryawanForm
                     ->relationship('user')
                     ->schema([
                         TextInput::make('email')
-                            ->label('Email')
                             ->email()
                             ->rules([
                                 function ($livewire) {
@@ -34,18 +32,13 @@ class KaryawanForm
                                     return Rule::unique('users', 'email')->ignore($userId);
                                 },
                             ])
-                            ->default(fn ($livewire) => old('email', data_get($livewire, 'record.user.email')))
-                            ->dehydrated(true)
-                            ->required(fn ($livewire) => $livewire instanceof CreateKaryawan),
+                            ->required(),
                         TextInput::make('password')
                             ->label('Password')
                             ->password()
                             ->revealable()
                             ->minLength(6)
-                            ->rules(['nullable'])
-                            ->default(fn () => old('password'))
-                            ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn ($livewire) => $livewire instanceof CreateKaryawan),
+                            ->required(fn (string $operation) => $operation === 'create'),
                     ])
                     ->columnSpanFull(),
                 Section::make('Data Karyawan')
@@ -63,14 +56,12 @@ class KaryawanForm
                             ])
                             ->required(),
                         TextInput::make('nomor_hp')
-                            ->label('No. HP')
-                            ->required(),
+                            ->label('No. HP'),
                         TextInput::make('gaji_pokok')
                             ->numeric()
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
-                            ->stripCharacters(',')
-                            ->required(),
+                            ->stripCharacters(','),
                         Textarea::make('alamat')
                             ->columnSpanFull(),
                         FileUpload::make('path_foto_ktp')
@@ -95,10 +86,10 @@ class KaryawanForm
                             ->live()
                             ->afterStateUpdated(function (Set $set, ?bool $state): void {
                                 $set('tanggal_terakhir_aktif', $state ? null : now());
-                            })
-                            ->required(),
+                            }),
                         DatePicker::make('tanggal_terakhir_aktif')
-                            ->readOnly()
+                            ->disabled()
+                            ->dehydrated()
                             ->helperText('Diisi otomatis ketika status diubah menjadi non-aktif'),
                     ])
                     ->columnSpanFull(),

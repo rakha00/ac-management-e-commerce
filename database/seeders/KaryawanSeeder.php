@@ -15,7 +15,7 @@ class KaryawanSeeder extends Seeder
     public function run(): void
     {
         // Seed example users and their Karyawan profiles for each role.
-        $roles = ['admin', 'gudang', 'helper', 'teknisi', 'staff', 'sales'];
+        $roles = ['gudang', 'helper', 'teknisi', 'staff', 'sales'];
 
         foreach ($roles as $role) {
             $user = User::query()->firstOrCreate(
