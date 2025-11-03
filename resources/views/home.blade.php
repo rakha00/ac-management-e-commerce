@@ -159,10 +159,10 @@
                 @forelse ($spareparts as $sparepart)
                     <div
                         class="group bg-white/30 backdrop-blur-md border border-gray-200 rounded-lg shadow-lg p-4 flex flex-col h-[450px]">
-                        <div class="relative mb-5 overflow-hidden rounded-md h-64">
-                            <img src="https://via.placeholder.com/300" alt="{{ $sparepart->nama_sparepart }}"
-                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                        </div>
+                        @foreach ($sparepart->path_foto_sparepart as $path)
+                            <img src="{{ asset('storage/' . $path) }}" alt="{{ $sparepart->nama_sparepart }}"
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 slider-image">
+                        @endforeach
                         <div class="flex flex-col justify-between grow">
                             <h3 class="font-semibold text-xl text-gray-800 mb-2">
                                 {{ Str::limit($sparepart->nama_sparepart, 50) }}
