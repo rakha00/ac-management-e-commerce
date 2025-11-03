@@ -20,6 +20,7 @@ class Sparepart extends Model
         'kode_sparepart',
         'nama_sparepart',
         'harga_modal',
+        'harga_ecommerce',
         'stok_awal',
         'stok_masuk',
         'stok_keluar',
@@ -32,6 +33,7 @@ class Sparepart extends Model
     {
         return [
             'harga_modal' => 'integer',
+            'harga_ecommerce' => 'integer',
             'stok_awal' => 'integer',
             'stok_masuk' => 'integer',
             'stok_keluar' => 'integer',
@@ -93,6 +95,13 @@ class Sparepart extends Model
             if ($sp->isDirty('harga_modal') && $sp->exists) {
                 $sp->hargaHistory()->create([
                     'harga_modal' => $sp->harga_modal,
+                    'karyawan_id' => Auth::id(),
+                ]);
+            }
+
+            if ($sp->isDirty('harga_ecommerce') && $sp->exists) {
+                $sp->hargaHistory()->create([
+                    'harga_ecommerce' => $sp->harga_ecommerce,
                     'karyawan_id' => Auth::id(),
                 ]);
             }

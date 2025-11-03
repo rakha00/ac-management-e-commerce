@@ -2,11 +2,13 @@
 
 use App\Filament\Pages\ScanAbsensi;
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\FrontendController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [FrontendController::class, 'home'])->name('home');
+Route::get('/kategori/{type}', [FrontendController::class, 'category'])->name('category');
+Route::get('/produk/{id}', [FrontendController::class, 'productDetail'])->name('product.detail');
+Route::get('/tentang-kami', [FrontendController::class, 'aboutUs'])->name('about.us');
 
 Route::middleware(['auth'])->group(function () {
     // Alias to the ScanAbsensi page (to make the URL easy to reference from QR)

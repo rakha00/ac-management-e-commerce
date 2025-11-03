@@ -40,6 +40,15 @@ class SparepartForm
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
                             ->required(),
+
+                        TextInput::make('harga_ecommerce')
+                            ->label('Harga E-commerce')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->placeholder('0')
+                            ->mask(RawJs::make('$money($input)'))
+                            ->stripCharacters(',')
+                            ->required(),
                     ]),
                 Section::make('Stok')
                     ->columns(2)

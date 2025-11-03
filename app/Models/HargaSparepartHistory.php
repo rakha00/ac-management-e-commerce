@@ -16,12 +16,14 @@ class HargaSparepartHistory extends Model
         'sparepart_id',
         'karyawan_id',
         'harga_modal',
+        'harga_ecommerce',
     ];
 
     protected function casts(): array
     {
         return [
             'harga_modal' => 'integer',
+            'harga_ecommerce' => 'integer',
         ];
     }
 

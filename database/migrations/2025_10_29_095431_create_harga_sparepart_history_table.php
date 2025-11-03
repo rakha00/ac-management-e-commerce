@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('sparepart_id')->constrained('spareparts')->onDelete('cascade');
             $table->foreignId('karyawan_id')->nullable()->constrained('karyawan')->onDelete('set null');
             $table->integer('harga_modal');
+            $table->integer('harga_ecommerce')->nullable();
             $table->timestamps();
         });
     }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('kode_sparepart')->unique();
             $table->string('nama_sparepart');
             $table->integer('harga_modal')->default(0);
+            $table->integer('harga_ecommerce')->default(0);
 
             $table->integer('stok_awal')->default(0);
             $table->integer('stok_akhir')->default(0);

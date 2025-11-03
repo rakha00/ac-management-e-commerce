@@ -41,6 +41,12 @@ class SparepartsTable
                     ->money('IDR', locale: 'id_ID')
                     ->sortable(),
 
+                TextColumn::make('harga_ecommerce')
+                    ->label('Harga E-commerce')
+                    ->numeric()
+                    ->money('IDR', locale: 'id_ID')
+                    ->sortable(),
+
                 TextColumn::make('stok_awal')
                     ->label('Stok Awal')
                     ->numeric()
