@@ -33,6 +33,7 @@ class UnitACForm
                 ->schema([
                     FileUpload::make('path_foto_produk')
                         ->label('Foto Produk')
+                        ->disk('public')
                         ->image()
                         ->multiple()
                         ->directory('foto-produk')
