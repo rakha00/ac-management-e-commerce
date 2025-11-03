@@ -25,6 +25,7 @@ class SparepartsTable
             ->columns([
                 ImageColumn::make('path_foto_sparepart')
                     ->label('Foto')
+                    ->disk('public')
                     ->size(50)
                     ->limit(1),
                 TextColumn::make('kode_sparepart')
