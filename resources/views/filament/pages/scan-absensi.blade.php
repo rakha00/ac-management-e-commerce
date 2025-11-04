@@ -1,66 +1,57 @@
 <x-filament-panels::page>
-    <div class="max-w-3xl mx-auto px-3 sm:px-0">
-        <div class="rounded-xl border border-gray-200 bg-white shadow-sm dark:bg-gray-900 dark:border-gray-800">
-            <div class="px-4 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800">
-                <div class="flex items-center justify-between sm:gap-14 gap-4 flex-col sm:flex-row">
-                    <div>
-                        <h2 class="text-lg font-semibold tracking-tight">Scan Absensi</h2>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            Arahkan kamera ke QR pada halaman “QR Absensi Harian”.
+    <div class="page-container">
+        <div class="card">
+            <div class="card-header">
+                <div class="header-top">
+                    <div class="header-text">
+                        <h2 class="title">Scan Absensi</h2>
+                        <p class="subtitle">
+                            Arahkan kamera ke QR pada halaman "QR Absensi Harian".
                         </p>
                     </div>
 
-                    <span id="scan-status"
-                        class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20 dark:bg-amber-900/30 dark:text-amber-300">
+                    <span id="scan-status" class="status-badge status-warn">
                         Menunggu izin kamera
                     </span>
                 </div>
             </div>
 
-            <div class="px-4 py-6 sm:px-6 sm:py-8">
-                <div class="flex flex-col items-center gap-4">
-                    <div class="w-full max-w-[560px]">
-                        <div id="reader"
-                            class="w-full aspect-square rounded-lg ring-1 ring-gray-200 shadow-sm dark:ring-gray-700 dark:bg-gray-800 overflow-hidden">
-                        </div>
+            <div class="card-body">
+                <div class="scanner-section">
+                    <div class="scanner-wrapper">
+                        <div id="reader" class="scanner"></div>
                     </div>
 
-                    <div class="w-full max-w-[560px] grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div class="sm:col-span-2">
-                            <label for="camera-select"
-                                class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <div class="camera-controls">
+                        <div class="camera-select">
+                            <label for="camera-select" class="camera-label">
                                 Pilih Kamera
                             </label>
-                            <select id="camera-select"
-                                class="w-full rounded-md border-gray-300 bg-white text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
-                                hidden>
-                            </select>
+                            <select id="camera-select" class="camera-dropdown" hidden></select>
                         </div>
 
-                        <div class="flex items-end">
-                            <button id="restart-btn" type="button"
-                                class="w-full inline-flex items-center justify-center gap-1 rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:ring-gray-700 dark:hover:bg-gray-700">
+                        <div class="restart-container">
+                            <button id="restart-btn" type="button" class="btn-restart">
                                 Restart
                             </button>
                         </div>
                     </div>
 
-                    <div class="text-center space-y-1">
-                        <p class="text-xs text-gray-600 dark:text-gray-400">
+                    <div class="scanner-notes">
+                        <p class="scanner-note">
                             Jika kamera tidak muncul, pastikan Anda memberi izin akses kamera pada browser.
                         </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                        <p class="scanner-note-secondary">
                             Disarankan menggunakan kamera belakang (environment) di perangkat mobile.
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div class="px-4 py-3 sm:px-6 sm:py-4 bg-gray-50 rounded-b-xl dark:bg-gray-900/50">
-                <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+            <div class="card-footer">
+                <div class="footer-content">
                     <span>Privasi: video tidak disimpan, hanya diproses di perangkat untuk membaca QR.</span>
-                    <button type="button" id="reload-page"
-                        class="hidden sm:inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:ring-gray-700 dark:hover:bg-gray-700">
+                    <button type="button" id="reload-page" class="btn-reload">
                         Muat Ulang
                     </button>
                 </div>
@@ -68,16 +59,16 @@
         </div>
     </div>
 
-    <form id="absen-form" method="POST" action="{{ route('absensi.submit') }}" class="hidden">
+    <form id="absen-form" method="POST" action="{{ route('absensi.submit') }}" class="hidden-form">
         @csrf
         <input type="hidden" name="token" id="token">
     </form>
 
     <!-- Hidden triggers to open Filament modals via Alpine $dispatch -->
     <button id="open-success-modal" type="button" x-data="{}"
-        x-on:click="$dispatch('open-modal', { id: 'scan-success' })" class="hidden">Open</button>
+        x-on:click="$dispatch('open-modal', { id: 'scan-success' })" class="hidden-btn">Open</button>
     <button id="open-duplicate-modal" type="button" x-data="{}"
-        x-on:click="$dispatch('open-modal', { id: 'scan-duplicate' })" class="hidden">Open</button>
+        x-on:click="$dispatch('open-modal', { id: 'scan-duplicate' })" class="hidden-btn">Open</button>
 
     <!-- Filament success modal shown after successful scan & submit -->
     <x-filament::modal id="scan-success" icon="heroicon-o-check-circle" icon-color="success"
@@ -86,8 +77,8 @@
             Absen Berhasil
         </x-slot>
 
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-            Absensi berhasil disimpan. Tekan “OK” untuk menuju halaman Riwayat Absensi.
+        <p class="modal-text">
+            Absensi berhasil disimpan. Tekan "OK" untuk menuju halaman Riwayat Absensi.
         </p>
 
         <x-slot name="footer">
@@ -104,8 +95,8 @@
             Sudah Absen
         </x-slot>
 
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-            Anda sudah melakukan absensi hari ini. Tekan “OK” untuk menuju halaman Riwayat Absensi.
+        <p class="modal-text">
+            Anda sudah melakukan absensi hari ini. Tekan "OK" untuk menuju halaman Riwayat Absensi.
         </p>
 
         <x-slot name="footer">
@@ -116,7 +107,206 @@
     </x-filament::modal>
 
     <style>
-        /* Force scanner preview to strict 1:1 square */
+        :root {
+            --bg-light: #ffffff;
+            --bg-dark: #1f2937;
+            --bg-darker: #111827;
+            --text-dark: #1f2937;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --text-lighter: #9ca3af;
+            --text-dark-mode: #d1d5db;
+            --text-dark-mode-secondary: #9ca3af;
+            --border-color: #e5e7eb;
+            --border-dark: #374151;
+            --border-darker: #1f2937;
+            --radius: 12px;
+            --shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --ring-gray: #d1d5db;
+        }
+
+        /* Page Container */
+        .page-container {
+            max-width: 768px;
+            margin: 0 auto;
+            padding: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .page-container {
+                padding: 0;
+            }
+        }
+
+        /* Card */
+        .card {
+            border-radius: var(--radius);
+            border: 1px solid #e5e7eb;
+            background-color: var(--bg-light);
+            box-shadow: var(--shadow);
+        }
+
+        body.dark .card {
+            background-color: #111827;
+            border-color: #1f2937;
+        }
+
+        /* Card Header */
+        .card-header {
+            padding: 1rem 1rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        body.dark .card-header {
+            border-bottom-color: #1f2937;
+        }
+
+        @media (min-width: 640px) {
+            .card-header {
+                padding: 1.25rem 1.5rem;
+            }
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .header-top {
+                flex-direction: row;
+                gap: 3.5rem;
+            }
+        }
+
+        .header-text {
+            width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .header-text {
+                width: auto;
+            }
+        }
+
+        .title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        body.dark .title {
+            color: var(--text-dark-mode);
+        }
+
+        .subtitle {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        body.dark .subtitle {
+            color: #9ca3af;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .status-info {
+            background-color: #eff6ff;
+            color: #1e40af;
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        body.dark .status-info {
+            background-color: rgba(30, 64, 175, 0.3);
+            color: #93c5fd;
+        }
+
+        .status-warn {
+            background-color: #fef3c7;
+            color: #92400e;
+            border-color: rgba(217, 119, 6, 0.2);
+        }
+
+        body.dark .status-warn {
+            background-color: rgba(120, 53, 15, 0.3);
+            color: #fcd34d;
+        }
+
+        .status-ok {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-color: rgba(5, 150, 105, 0.2);
+        }
+
+        body.dark .status-ok {
+            background-color: rgba(6, 95, 70, 0.3);
+            color: #6ee7b7;
+        }
+
+        .status-err {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-color: rgba(220, 38, 38, 0.2);
+        }
+
+        body.dark .status-err {
+            background-color: rgba(153, 27, 27, 0.3);
+            color: #fca5a5;
+        }
+
+        /* Card Body */
+        .card-body {
+            padding: 1.5rem 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .card-body {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        .scanner-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .scanner-wrapper {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .scanner {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            background-color: #f9fafb;
+        }
+
+        body.dark .scanner {
+            border-color: #374151;
+            background-color: #1f2937;
+        }
+
         #reader {
             aspect-ratio: 1 / 1;
             display: block;
@@ -128,10 +318,210 @@
             height: 100% !important;
             aspect-ratio: 1 / 1;
             object-fit: cover;
-            /* fill square without distortion (crop if needed) */
             display: block;
         }
+
+        /* Camera Controls */
+        .camera-controls {
+            width: 100%;
+            max-width: 560px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .camera-controls {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .camera-select {
+            width: 100%;
+        }
+
+        .camera-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+
+        body.dark .camera-label {
+            color: #d1d5db;
+        }
+
+        .camera-dropdown {
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            background-color: #ffffff;
+            font-size: 0.875rem;
+            color: #374151;
+            box-shadow: var(--shadow);
+            padding: 0.5rem;
+        }
+
+        .camera-dropdown:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        body.dark .camera-dropdown {
+            background-color: #1f2937;
+            border-color: #374151;
+            color: #d1d5db;
+        }
+
+        .restart-container {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .btn-restart {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            border-radius: 6px;
+            background-color: #ffffff;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .btn-restart:hover {
+            background-color: #f9fafb;
+        }
+
+        body.dark .btn-restart {
+            background-color: #1f2937;
+            color: #d1d5db;
+            border-color: #374151;
+        }
+
+        body.dark .btn-restart:hover {
+            background-color: #374151;
+        }
+
+        /* Scanner Notes */
+        .scanner-notes {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .scanner-note {
+            font-size: 0.75rem;
+            color: #4b5563;
+            margin: 0;
+        }
+
+        body.dark .scanner-note {
+            color: #9ca3af;
+        }
+
+        .scanner-note-secondary {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        body.dark .scanner-note-secondary {
+            color: #9ca3af;
+        }
+
+        /* Card Footer */
+        .card-footer {
+            padding: 0.75rem 1rem;
+            background-color: #f9fafb;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+
+        @media (min-width: 640px) {
+            .card-footer {
+                padding: 1rem 1.5rem;
+            }
+        }
+
+        body.dark .card-footer {
+            background-color: rgba(17, 24, 39, 0.5);
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #4b5563;
+        }
+
+        body.dark .footer-content {
+            color: #9ca3af;
+        }
+
+        .btn-reload {
+            display: none;
+            align-items: center;
+            gap: 0.25rem;
+            border-radius: 6px;
+            background-color: #ffffff;
+            padding: 0.375rem 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #374151;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        @media (min-width: 640px) {
+            .btn-reload {
+                display: inline-flex;
+            }
+        }
+
+        .btn-reload:hover {
+            background-color: #f9fafb;
+        }
+
+        body.dark .btn-reload {
+            background-color: #1f2937;
+            color: #d1d5db;
+            border-color: #374151;
+        }
+
+        body.dark .btn-reload:hover {
+            background-color: #374151;
+        }
+
+        /* Hidden Elements */
+        .hidden-form,
+        .hidden-btn {
+            display: none;
+        }
+
+        /* Modal Text */
+        .modal-text {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        body.dark .modal-text {
+            color: #9ca3af;
+        }
     </style>
+
     <script src="https://unpkg.com/html5-qrcode" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -149,14 +539,7 @@
 
             const setStatus = (text, tone = 'info') => {
                 statusEl.textContent = text;
-                const base = 'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset';
-                const light = {
-                    info: 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300',
-                    warn: 'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-900/30 dark:text-amber-300',
-                    ok: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-900/30 dark:text-emerald-300',
-                    err: 'bg-rose-50 text-rose-700 ring-rose-600/20 dark:bg-rose-900/30 dark:text-rose-300',
-                };
-                statusEl.className = base + ' ' + (light[tone] ?? light.info);
+                statusEl.className = 'status-badge status-' + tone;
             };
 
             const stopScanner = async () => {
@@ -191,7 +574,6 @@
                             if (!isRunning) return;
                             setStatus('Mendeteksi QR…', 'info');
 
-                            // Submit segera setelah terdeteksi, lalu tampilkan modal sukses
                             tokenInput.value = decodedText;
                             setStatus('Mengirim absensi…', 'ok');
 
