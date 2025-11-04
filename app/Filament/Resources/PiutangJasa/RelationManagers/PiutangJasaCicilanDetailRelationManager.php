@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\PiutangJasa\RelationManagers;
 
-use App\Models\PiutangJasa;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -37,43 +36,12 @@ class PiutangJasaCicilanDetailRelationManager extends RelationManager
                 TextInput::make('nominal_cicilan')
                     ->numeric()
                     ->required()
-                    ->default(0)
                     ->prefix('Rp')
                     ->mask(RawJs::make('$money($input)'))
                     ->stripCharacters(',')
-                    ->minValue(1)
-                    ->maxValue(function () {
-                        $owner = $this->getOwnerRecord();
-                        if (! $owner) {
-                            return null;
-                        }
-                        $total = (int) ($owner->total_piutang ?? 0);
-                        $paid = (int) $owner->piutangJasaCicilanDetail()->sum('nominal_cicilan');
+                    ->maxValue(fn () => $this->getOwnerRecord()->sisa_piutang)
 
-                        return max($total - $paid, 0);
-                    })
-                    ->rules(function () {
-                        $owner = $this->getOwnerRecord();
-                        if (! $owner) {
-                            return ['numeric', 'min:1'];
-                        }
-                        $total = (int) ($owner->total_piutang ?? 0);
-                        $paid = (int) $owner->piutangJasaCicilanDetail()->sum('nominal_cicilan');
-                        $sisa = max($total - $paid, 0);
-
-                        return ['numeric', 'min:1', 'max:'.$sisa];
-                    })
-                    ->helperText(function () {
-                        $owner = $this->getOwnerRecord();
-                        if (! $owner) {
-                            return null;
-                        }
-                        $total = (int) ($owner->total_piutang ?? 0);
-                        $paid = (int) $owner->piutangJasaCicilanDetail()->sum('nominal_cicilan');
-                        $sisa = max($total - $paid, 0);
-
-                        return 'Max: Rp '.number_format($sisa, 0, ',', '.');
-                    }),
+                    ->helperText(fn () => 'Sisa piutang: Rp '.number_format($this->getOwnerRecord()->sisa_piutang)),
                 DatePicker::make('tanggal_cicilan')
                     ->required(),
             ])
@@ -83,7 +51,6 @@ class PiutangJasaCicilanDetailRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->withoutGlobalScopes([SoftDeletingScope::class]))
             ->recordTitle(fn ($record): string => "{$record->tanggal_cicilan} ({$record->nominal_cicilan})")
             ->columns([
                 TextColumn::make('tanggal_cicilan')
@@ -98,52 +65,23 @@ class PiutangJasaCicilanDetailRelationManager extends RelationManager
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make()
-                    ->after(fn () => $this->recalculateParent()),
-                DeleteAction::make()
-                    ->after(fn () => $this->recalculateParent()),
-                ForceDeleteAction::make()
-                    ->after(fn () => $this->recalculateParent()),
-                RestoreAction::make()
-                    ->after(fn () => $this->recalculateParent()),
+                EditAction::make(),
+                DeleteAction::make(),
+                ForceDeleteAction::make(),
+                RestoreAction::make(),
             ])
             ->headerActions([
-                CreateAction::make()
-                    ->after(fn () => $this->recalculateParent()),
+                CreateAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->after(fn () => $this->recalculateParent()),
-                    ForceDeleteBulkAction::make()
-                        ->after(fn () => $this->recalculateParent()),
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
                 ]),
-            ]);
-    }
-
-    protected function recalculateParent(): void
-    {
-        $owner = $this->getOwnerRecord();
-
-        if (! $owner instanceof PiutangJasa) {
-            return;
-        }
-
-        // Sum cicilan yang belum di-soft delete (default relasi exclude trashed)
-        $totalCicilan = $owner->piutangJasaCicilanDetail()->sum('nominal_cicilan');
-        $totalPiutang = (int) ($owner->total_piutang ?? 0);
-        $sisa = max($totalPiutang - (int) $totalCicilan, 0);
-
-        // Update status pembayaran otomatis
-        $status = 'belum lunas';
-        if ($sisa <= 0 && $totalPiutang > 0) {
-            $status = 'sudah lunas';
-        } elseif ($sisa < $totalPiutang && $sisa > 0) {
-            $status = 'tercicil';
-        }
-
-        $owner->forceFill([
-            'status_pembayaran' => $status,
-        ])->save();
+            ])
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->withoutGlobalScopes([
+                    SoftDeletingScope::class,
+                ]));
     }
 }

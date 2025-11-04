@@ -30,6 +30,19 @@ class PiutangJasaCicilanDetail extends Model
         ];
     }
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::saved(function (PiutangJasaCicilanDetail $piutangJasaCicilanDetail) {
+            $piutangJasaCicilanDetail->piutangJasa->recalculatePaymentStatus();
+        });
+
+        static::deleted(function (PiutangJasaCicilanDetail $piutangJasaCicilanDetail) {
+            $piutangJasaCicilanDetail->piutangJasa->recalculatePaymentStatus();
+        });
+    }
+
     public function piutangJasa(): BelongsTo
     {
         return $this->belongsTo(PiutangJasa::class);
