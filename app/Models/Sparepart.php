@@ -87,16 +87,16 @@ class Sparepart extends Model
         static::created(function (Sparepart $model) {
             $model->hargaHistory()->create([
                 'harga_modal' => $model->harga_modal,
-                'harga_jual' => $model->harga_jual,
+                'harga_ecommerce' => $model->harga_ecommerce,
                 'updated_by' => Auth::id(),
             ]);
         });
 
         static::updated(function (Sparepart $model) {
-            if ($model->isDirty('harga_modal') || $model->isDirty('harga_jual')) {
+            if ($model->isDirty('harga_modal') || $model->isDirty('harga_ecommerce')) {
                 $model->hargaHistory()->create([
                     'harga_modal' => $model->harga_modal,
-                    'harga_jual' => $model->harga_jual,
+                    'harga_ecommerce' => $model->harga_ecommerce,
                     'updated_by' => Auth::id(),
                 ]);
             }

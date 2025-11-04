@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\SparepartMasuk\Schemas;
 
-use App\Models\DistributorSparepart;
 use App\Models\SparepartMasuk;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -24,39 +23,29 @@ class SparepartMasukForm
                         DatePicker::make('tanggal_masuk')
                             ->label('Tanggal Masuk')
                             ->required()
-                            ->reactive()
+                            ->live()
                             ->afterStateUpdated(function ($state, Set $set) {
                                 if ($state) {
-                                    $set('nomor_sparepart_masuk', SparepartMasuk::generateSequentialNumber(
-                                        (string) $state,
-                                        'SM'
-                                    ));
+                                    $set('nomor_sparepart_masuk', SparepartMasuk::generateSequentialNumber((string) $state));
                                 }
                             })
                             ->disabled(fn (string $operation) => $operation === 'edit'),
-
                         Select::make('distributor_sparepart_id')
                             ->label('Distributor')
-                            ->options(fn () => DistributorSparepart::query()
-                                ->orderBy('nama_distributor')
-                                ->pluck('nama_distributor', 'id')
-                                ->toArray())
+                            ->relationship('distributor', 'nama_distributor')
                             ->searchable()
                             ->preload()
                             ->required(),
-
-                        // Read-only preview; value is auto-generated in model creating hook
                         TextInput::make('nomor_sparepart_masuk')
                             ->label('Nomor Sparepart Masuk')
                             ->disabled()
-                            ->dehydrated(false),
-
+                            ->dehydrated(),
                         Textarea::make('keterangan')
                             ->label('Keterangan')
                             ->nullable()
                             ->columnSpanFull(),
-                    ]),
-            ])
-            ->columns(1);
+                    ])
+                    ->columnSpanFull(),
+            ]);
     }
 }

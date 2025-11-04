@@ -16,8 +16,6 @@ return new class extends Migration
             $table->foreignId('barang_masuk_id')->constrained('barang_masuk')->onDelete('cascade');
             $table->foreignId('unit_ac_id')->constrained('unit_ac')->onDelete('cascade');
 
-            $table->string('sku')->nullable();
-            $table->string('nama_unit')->nullable();
             $table->integer('jumlah_barang_masuk')->default(0);
             $table->text('keterangan')->nullable();
 

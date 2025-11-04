@@ -35,8 +35,6 @@ class BarangMasukSeeder extends Seeder
                 BarangMasukDetail::create([
                     'barang_masuk_id' => $barangMasuk->id,
                     'unit_ac_id' => $unitAC->id,
-                    'sku' => $unitAC->sku,
-                    'nama_unit' => $unitAC->nama_unit,
                     'jumlah_barang_masuk' => $faker->numberBetween(1, 10),
                     'keterangan' => null,
                     'created_by' => 1,

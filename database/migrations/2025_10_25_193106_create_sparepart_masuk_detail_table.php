@@ -13,28 +13,14 @@ return new class extends Migration
     {
         Schema::create('sparepart_masuk_detail', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('sparepart_masuk_id')
-                ->constrained('sparepart_masuk')
-                ->onDelete('cascade');
-
-            $table->foreignId('sparepart_id')
-                ->nullable()
-                ->constrained('spareparts')
-                ->onDelete('restrict');
-            $table->string('kode_sparepart');
-            $table->string('nama_sparepart');
+            $table->foreignId('sparepart_masuk_id')->constrained('sparepart_masuk')->onDelete('cascade');
+            $table->foreignId('sparepart_id')->nullable()->constrained('spareparts')->onDelete('restrict');
 
             $table->integer('jumlah_masuk');
 
-            $table->foreignId('created_by')
-                ->nullable()
-                ->constrained('users')
-                ->onDelete('set null');
-            $table->foreignId('updated_by')
-                ->nullable()
-                ->constrained('users')
-                ->onDelete('set null');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
 
             $table->timestamps();
             $table->softDeletes();

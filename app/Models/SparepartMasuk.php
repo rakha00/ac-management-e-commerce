@@ -15,23 +15,23 @@ class SparepartMasuk extends Model
     protected $table = 'sparepart_masuk';
 
     protected $fillable = [
-        'tanggal_masuk',
         'nomor_sparepart_masuk',
+        'tanggal_masuk',
         'distributor_sparepart_id',
-        'distributor_nama',
-        'total_qty',
         'keterangan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'distributor_sparepart_id' => 'integer',
             'tanggal_masuk' => 'date',
-            'total_qty' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
@@ -55,49 +55,15 @@ class SparepartMasuk extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    /**
-     * Boot the model to handle events.
-     */
-    protected static function boot()
+    public function deletedBy(): BelongsTo
     {
-        parent::boot();
-
-        static::creating(function (SparepartMasuk $model) {
-            // Ensure date exists
-            $date = $model->tanggal_masuk ? Carbon::parse($model->tanggal_masuk)->toDateString() : Carbon::now()->toDateString();
-
-            // Sync distributor_nama if distributor selected
-            if ($model->distributor_sparepart_id && empty($model->distributor_nama)) {
-                $dist = DistributorSparepart::find($model->distributor_sparepart_id);
-                if ($dist) {
-                    $model->distributor_nama = $dist->nama_distributor;
-                }
-            }
-
-            // Generate nomor_sparepart_masuk if not set
-            if (empty($model->nomor_sparepart_masuk)) {
-                $model->nomor_sparepart_masuk = static::generateSequentialNumber($date, 'SM');
-            }
-        });
-
-        static::updating(function (SparepartMasuk $model) {
-            // Keep distributor name in sync when distributor changes
-            if ($model->isDirty('distributor_sparepart_id')) {
-                $dist = $model->distributor_sparepart_id ? DistributorSparepart::find($model->distributor_sparepart_id) : null;
-                $model->distributor_nama = $dist ? $dist->nama_distributor : null;
-            }
-        });
-
-        static::saved(function (SparepartMasuk $model) {
-            // Maintain total qty in sync
-            $model->recalcFromDetails();
-        });
+        return $this->belongsTo(User::class, 'deleted_by');
     }
 
     /**
      * Generate sequential number per date with format PREFIX-YYYYMMDD-####.
      */
-    public static function generateSequentialNumber(string $date, string $prefix): string
+    public static function generateSequentialNumber(string $date, string $prefix = 'SM'): string
     {
         $ymd = Carbon::parse($date)->format('Ymd');
 
@@ -140,17 +106,5 @@ class SparepartMasuk extends Model
         }
 
         return 0;
-    }
-
-    /**
-     * Recalculate total_qty from non-trashed details.
-     */
-    public function recalcFromDetails(): void
-    {
-        $qty = (int) $this->detailSparepartMasuk()->sum('jumlah_masuk');
-
-        $this->forceFill([
-            'total_qty' => $qty,
-        ])->saveQuietly();
     }
 }

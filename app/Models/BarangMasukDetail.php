@@ -15,8 +15,6 @@ class BarangMasukDetail extends Model
     protected $fillable = [
         'barang_masuk_id',
         'unit_ac_id',
-        'sku',
-        'nama_unit',
         'jumlah_barang_masuk',
         'keterangan',
         'created_by',
@@ -111,14 +109,6 @@ class BarangMasukDetail extends Model
                 }
             } else {
                 $detail->updateUnitACStock($newQuantity, 'increment');
-            }
-
-            $unitAC = UnitAC::find($detail->unit_ac_id);
-            if ($unitAC && $detail->barangMasuk) {
-                $hargaHistory = $unitAC->hargaHistory()
-                    ->where('created_at', '<=', $detail->barangMasuk->created_at)
-                    ->latest()
-                    ->first();
             }
         });
 

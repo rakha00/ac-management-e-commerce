@@ -52,12 +52,10 @@ class BarangMasukDetailRelationManager extends RelationManager
                     }),
                 TextInput::make('sku')
                     ->label('SKU')
-                    ->disabled()
-                    ->dehydrated(),
+                    ->disabled(),
                 TextInput::make('nama_unit')
                     ->label('Nama Unit')
-                    ->disabled()
-                    ->dehydrated(),
+                    ->disabled(),
                 TextInput::make('jumlah_barang_masuk')
                     ->label('Jumlah Barang Masuk')
                     ->numeric()
@@ -72,11 +70,11 @@ class BarangMasukDetailRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('nama_unit')
             ->columns([
-                TextColumn::make('sku')
+                TextColumn::make('unitAC.sku')
                     ->label('SKU')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('nama_unit')
+                TextColumn::make('unitAC.nama_unit')
                     ->label('Nama Unit')
                     ->searchable()
                     ->sortable(),

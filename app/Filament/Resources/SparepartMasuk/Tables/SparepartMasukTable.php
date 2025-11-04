@@ -27,7 +27,7 @@ class SparepartMasukTable
                     ->date()
                     ->sortable(),
 
-                TextColumn::make('distributor_nama')
+                TextColumn::make('distributor.nama_distributor')
                     ->label('Distributor')
                     ->searchable()
                     ->sortable(),
@@ -35,23 +35,28 @@ class SparepartMasukTable
                 TextColumn::make('total_qty')
                     ->label('Total Qty')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->getStateUsing(fn ($record) => $record->detailSparepartMasuk()->sum('jumlah_masuk')),
             ])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
             ->filters([
-                Filter::make('tanggal_masuk')
+                Filter::make('date_range')
                     ->label('Rentang Tanggal')
                     ->schema([
-                        DatePicker::make('date_from')->label('Dari'),
-                        DatePicker::make('date_until')->label('Hingga'),
+                        DatePicker::make('dari')
+                            ->maxDate(fn (callable $get) => $get('sampai') ?? null),
+                        DatePicker::make('sampai')
+                            ->minDate(fn (callable $get) => $get('dari')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['date_from'] ?? null,
+                                $data['dari'] ?? null,
                                 fn (Builder $q, $date): Builder => $q->whereDate('tanggal_masuk', '>=', $date),
                             )
                             ->when(
-                                $data['date_until'] ?? null,
+                                $data['sampai'] ?? null,
                                 fn (Builder $q, $date): Builder => $q->whereDate('tanggal_masuk', '<=', $date),
                             );
                     }),
