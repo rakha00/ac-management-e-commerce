@@ -35,7 +35,9 @@ class KonsumenResource extends Resource
         return $user->karyawan->jabatan === 'admin';
     }
 
-    protected static ?string $pluralModelLabel = 'Konsumen';
+    protected static ?string $pluralModelLabel = 'Toko/Konsumen';
+
+    protected static ?string $slug = 'toko-konsumen';
 
     public static function form(Schema $schema): Schema
     {
