@@ -13,9 +13,15 @@ return new class extends Migration
     {
         Schema::create('konsumen', function (Blueprint $table) {
             $table->id();
+
             $table->string('nama');
             $table->string('alamat');
             $table->string('telepon');
+
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
             $table->softDeletes();
         });
