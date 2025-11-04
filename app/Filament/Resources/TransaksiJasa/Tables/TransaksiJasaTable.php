@@ -10,6 +10,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class TransaksiJasaTable
 {
@@ -25,15 +26,15 @@ class TransaksiJasaTable
                     ->label('Kode Jasa')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('teknisi_nama')
+                TextColumn::make('teknisi.nama')
                     ->label('Teknisi')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('helper_nama')
+                TextColumn::make('helper.nama')
                     ->label('Helper')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('nama_konsumen')
+                TextColumn::make('konsumen.nama')
                     ->label('Nama Konsumen')
                     ->sortable()
                     ->searchable(),
@@ -41,44 +42,71 @@ class TransaksiJasaTable
                     ->label('Total Pendapatan')
                     ->numeric()
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(fn ($record) => 'Rp '.number_format($record->detailTransaksiJasa->sum('subtotal_pendapatan')))
                     ->sortable(),
                 TextColumn::make('total_pengeluaran_jasa')
                     ->label('Total Pengeluaran')
                     ->numeric()
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(fn ($record) => 'Rp '.number_format($record->detailTransaksiJasa->sum('pengeluaran_jasa')))
                     ->sortable(),
                 TextColumn::make('total_keuntungan_jasa')
                     ->label('Total Keuntungan')
                     ->numeric()
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(fn ($record) => 'Rp '.number_format($record->detailTransaksiJasa->sum('subtotal_keuntungan')))
                     ->sortable(),
+                TextColumn::make('createdBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updatedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deletedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
             ->filters([
                 TrashedFilter::make(),
                 Filter::make('tanggal_transaksi')
-                    ->label('Rentang Tanggal')
                     ->schema([
-                        DatePicker::make('created_from')->label('Dari'),
-                        DatePicker::make('created_until')->label('Hingga'),
+                        DatePicker::make('dari')
+                            ->maxDate(fn (callable $get) => $get('sampai') ?? null),
+                        DatePicker::make('sampai')
+                            ->minDate(fn (callable $get) => $get('dari')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['created_from'] ?? null,
+                                $data['dari'] ?? null,
                                 fn (Builder $q, $date): Builder => $q->whereDate('tanggal_transaksi', '>=', $date),
                             )
                             ->when(
-                                $data['created_until'] ?? null,
+                                $data['sampai'] ?? null,
                                 fn (Builder $q, $date): Builder => $q->whereDate('tanggal_transaksi', '<=', $date),
                             );
                     })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
-                        if ($data['created_from'] ?? null) {
-                            $indicators['created_from'] = 'Dari '.\Carbon\Carbon::parse($data['created_from'])->toFormattedDateString();
+                        if ($data['dari'] ?? null) {
+                            $indicators['dari'] = 'Dari '.Carbon::parse($data['dari'])->toFormattedDateString();
                         }
-                        if ($data['created_until'] ?? null) {
-                            $indicators['created_until'] = 'Hingga '.\Carbon\Carbon::parse($data['created_until'])->toFormattedDateString();
+                        if ($data['sampai'] ?? null) {
+                            $indicators['sampai'] = 'Hingga '.Carbon::parse($data['sampai'])->toFormattedDateString();
                         }
 
                         return $indicators;
@@ -91,7 +119,6 @@ class TransaksiJasaTable
                 BulkActionGroup::make([
                     //
                 ]),
-            ])
-            ->deferFilters(false);
+            ]);
     }
 }

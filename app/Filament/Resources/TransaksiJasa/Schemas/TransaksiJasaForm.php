@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\TransaksiJasa\Schemas;
 
-use App\Models\Karyawan;
-use App\Models\Konsumen;
 use App\Models\TransaksiJasa;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -11,7 +9,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Model;
 
 class TransaksiJasaForm
 {
@@ -21,49 +18,44 @@ class TransaksiJasaForm
             ->components([
                 Section::make('Informasi Transaksi')
                     ->schema([
-                        // Date controls the sequential code generation.
                         DatePicker::make('tanggal_transaksi')
                             ->label('Tanggal Transaksi')
                             ->required()
-                            ->disabled(fn (?Model $record) => $record !== null)
+                            ->live()
+                            ->disabled(fn (string $operation) => $operation === 'edit')
                             ->afterStateUpdated(function ($state, callable $set) {
-                                $set('kode_jasa', $state ? TransaksiJasa::generateSequentialNumber((string) $state, 'KJ') : null);
-                            })
-                            ->live(),
-
-                        // Read-only preview; actual value is generated on save in the model.
+                                $set('kode_jasa', $state ? TransaksiJasa::generateSequentialNumber((string) $state, 'kode_jasa', 'KJ') : null);
+                                $set('nomor_invoice_jasa', $state ? TransaksiJasa::generateSequentialNumber((string) $state, 'nomor_invoice_jasa', 'INV-TJ') : null);
+                                $set('nomor_surat_jalan_jasa', $state ? TransaksiJasa::generateSequentialNumber((string) $state, 'nomor_surat_jalan_jasa', 'SJ-TJ') : null);
+                            }),
                         TextInput::make('kode_jasa')
                             ->label('Kode Jasa')
                             ->disabled()
-                            ->dehydrated(false)
-                            ->default(null),
-
+                            ->dehydrated(),
+                        TextInput::make('nomor_invoice_jasa')
+                            ->label('Nomor Invoice Jasa')
+                            ->disabled()
+                            ->dehydrated(),
+                        TextInput::make('nomor_surat_jalan_jasa')
+                            ->label('Nomor Surat Jalan Jasa')
+                            ->disabled()
+                            ->dehydrated(),
                         Select::make('teknisi_karyawan_id')
                             ->label('Teknisi')
-                            ->options(fn () => Karyawan::query()
-                                ->where('jabatan', 'teknisi')
-                                ->orderBy('nama')
-                                ->pluck('nama', 'id')
-                                ->toArray())
+                            ->relationship('teknisi', 'nama')
+                            ->preload()
                             ->searchable()
-                            ->nullable(),
-
+                            ->required(),
                         Select::make('helper_karyawan_id')
                             ->label('Helper')
-                            ->options(fn () => Karyawan::query()
-                                ->where('jabatan', 'helper')
-                                ->orderBy('nama')
-                                ->pluck('nama', 'id')
-                                ->toArray())
+                            ->relationship('helper', 'nama')
+                            ->preload()
                             ->searchable()
-                            ->nullable(),
-
+                            ->required(),
                         Select::make('konsumen_id')
                             ->label('Nama Konsumen')
-                            ->options(fn () => Konsumen::query()
-                                ->orderBy('nama')
-                                ->pluck('nama', 'id')
-                                ->toArray())
+                            ->relationship('konsumen', 'nama')
+                            ->preload()
                             ->searchable()
                             ->required(),
                     ])->columns(2),
@@ -72,13 +64,9 @@ class TransaksiJasaForm
                     ->schema([
                         TextInput::make('garansi_hari')
                             ->label('Garansi (hari)')
-                            ->numeric()
-                            ->minValue(0)
-                            ->required(),
-
+                            ->numeric(),
                         Textarea::make('keterangan')
-                            ->label('Keterangan')
-                            ->nullable(),
+                            ->label('Keterangan'),
                     ]),
             ]);
     }

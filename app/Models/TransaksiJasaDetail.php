@@ -14,7 +14,7 @@ class TransaksiJasaDetail extends Model
 
     protected $fillable = [
         'transaksi_jasa_id',
-        'jenis_data',
+        'jenis_jasa',
         'qty',
         'harga_jasa',
         'keterangan_jasa',
@@ -24,11 +24,13 @@ class TransaksiJasaDetail extends Model
         'subtotal_keuntungan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'transaksi_jasa_id' => 'integer',
             'qty' => 'integer',
             'harga_jasa' => 'integer',
             'pengeluaran_jasa' => 'integer',
@@ -36,6 +38,7 @@ class TransaksiJasaDetail extends Model
             'subtotal_keuntungan' => 'integer',
             'created_by' => 'string',
             'updated_by' => 'string',
+            'deleted_by' => 'string',
         ];
     }
 
@@ -54,29 +57,14 @@ class TransaksiJasaDetail extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    /**
-     * Boot the model to handle events.
-     */
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
     protected static function boot()
     {
         parent::boot();
-
-        // After create/update/delete/restore, recalc parent totals
-        static::created(function (TransaksiJasaDetail $detail) {
-            $detail->recalculateParent();
-        });
-
-        static::updated(function (TransaksiJasaDetail $detail) {
-            $detail->recalculateParent();
-        });
-
-        static::deleted(function (TransaksiJasaDetail $detail) {
-            $detail->recalculateParent();
-        });
-
-        static::restored(function (TransaksiJasaDetail $detail) {
-            $detail->recalculateParent();
-        });
 
         static::saving(function (TransaksiJasaDetail $detail) {
             $qty = (int) ($detail->qty ?? 0);
@@ -86,17 +74,5 @@ class TransaksiJasaDetail extends Model
             $detail->subtotal_pendapatan = $qty * $hargaJasa;
             $detail->subtotal_keuntungan = $detail->subtotal_pendapatan - $pengeluaranJasa;
         });
-    }
-
-    /**
-     * Recalculate parent totals based on current non-trashed details.
-     */
-    private function recalculateParent(): void
-    {
-        $parent = $this->transaksiJasa;
-        if ($parent instanceof TransaksiJasa) {
-            // Delegate to parent's method for consistent aggregation
-            $parent->recalcFromDetails();
-        }
     }
 }

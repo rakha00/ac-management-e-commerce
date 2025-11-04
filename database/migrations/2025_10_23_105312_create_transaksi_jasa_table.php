@@ -16,6 +16,8 @@ return new class extends Migration
 
             $table->date('tanggal_transaksi');
             $table->string('kode_jasa')->unique();
+            $table->string('nomor_invoice_jasa')->unique();
+            $table->string('nomor_surat_jalan_jasa')->unique();
 
             $table->foreignId('teknisi_karyawan_id')->nullable()->constrained('karyawan')->onDelete('set null');
             $table->foreignId('helper_karyawan_id')->nullable()->constrained('karyawan')->onDelete('set null');

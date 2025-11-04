@@ -17,31 +17,29 @@ class TransaksiJasa extends Model
     protected $fillable = [
         'tanggal_transaksi',
         'kode_jasa',
+        'nomor_invoice_jasa',
+        'nomor_surat_jalan_jasa',
         'teknisi_karyawan_id',
         'helper_karyawan_id',
-        'teknisi_nama',
-        'helper_nama',
         'konsumen_id',
-        'nama_konsumen',
         'garansi_hari',
-        'total_pendapatan_jasa',
-        'total_pengeluaran_jasa',
-        'total_keuntungan_jasa',
         'keterangan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'teknisi_karyawan_id' => 'integer',
+            'helper_karyawan_id' => 'integer',
+            'konsumen_id' => 'integer',
             'tanggal_transaksi' => 'date',
             'garansi_hari' => 'integer',
-            'total_pendapatan_jasa' => 'integer',
-            'total_pengeluaran_jasa' => 'integer',
-            'total_keuntungan_jasa' => 'integer',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
@@ -52,12 +50,12 @@ class TransaksiJasa extends Model
 
     public function teknisi(): BelongsTo
     {
-        return $this->belongsTo(Karyawan::class, 'teknisi_karyawan_id');
+        return $this->belongsTo(Karyawan::class, 'teknisi_karyawan_id')->where('jabatan', 'teknisi');
     }
 
     public function helper(): BelongsTo
     {
-        return $this->belongsTo(Karyawan::class, 'helper_karyawan_id');
+        return $this->belongsTo(Karyawan::class, 'helper_karyawan_id')->where('jabatan', 'helper');
     }
 
     public function detailTransaksiJasa(): HasMany
@@ -75,81 +73,17 @@ class TransaksiJasa extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    /**
-     * Boot the model to handle events.
-     */
-    protected static function boot()
+    public function deletedBy(): BelongsTo
     {
-        parent::boot();
-
-        static::creating(function (TransaksiJasa $model) {
-            // Ensure transaction date exists
-            $date = $model->tanggal_transaksi ? Carbon::parse($model->tanggal_transaksi)->toDateString() : Carbon::now()->toDateString();
-
-            // Auto-fill teknisi/helper names from Karyawan when provided
-            if ($model->teknisi_karyawan_id && empty($model->teknisi_nama)) {
-                $k = Karyawan::find($model->teknisi_karyawan_id);
-                if ($k) {
-                    $model->teknisi_nama = $k->nama;
-                }
-            }
-            if ($model->helper_karyawan_id && empty($model->helper_nama)) {
-                $k = Karyawan::find($model->helper_karyawan_id);
-                if ($k) {
-                    $model->helper_nama = $k->nama;
-                }
-            }
-
-            // Auto-fill nama_konsumen from Konsumen when provided
-            if ($model->konsumen_id && empty($model->nama_konsumen)) {
-                $konsumen = Konsumen::find($model->konsumen_id);
-                if ($konsumen) {
-                    $model->nama_konsumen = $konsumen->nama;
-                }
-            }
-
-            // Generate kode_jasa if not set
-            if (empty($model->kode_jasa)) {
-                $model->kode_jasa = static::generateSequentialNumber($date, 'KJ');
-            }
-        });
-
-        static::updating(function (TransaksiJasa $model) {
-            // Keep teknisi/helper names in sync if relation changes
-            if ($model->isDirty('teknisi_karyawan_id')) {
-                $k = $model->teknisi_karyawan_id ? Karyawan::find($model->teknisi_karyawan_id) : null;
-                $model->teknisi_nama = $k ? $k->nama : null;
-            }
-            if ($model->isDirty('helper_karyawan_id')) {
-                $k = $model->helper_karyawan_id ? Karyawan::find($model->helper_karyawan_id) : null;
-                $model->helper_nama = $k ? $k->nama : null;
-            }
-
-            // Keep nama_konsumen in sync if relation changes
-            if ($model->isDirty('konsumen_id')) {
-                $konsumen = $model->konsumen_id ? Konsumen::find($model->konsumen_id) : null;
-                $model->nama_konsumen = $konsumen ? $konsumen->nama : null;
-            }
-        });
-
-        static::saved(function (TransaksiJasa $model) {
-            // Keep totals in sync whenever parent is saved
-            $model->recalcFromDetails();
-        });
+        return $this->belongsTo(User::class, 'deleted_by');
     }
 
-    /**
-     * Generate sequential number per date with format PREFIX-YYYYMMDD-####.
-     */
-    public static function generateSequentialNumber(string $date, string $prefix): string
+    public static function generateSequentialNumber(string $date, string $column, string $prefix): string
     {
         $ymd = Carbon::parse($date)->format('Ymd');
 
         // Include trashed to avoid reusing numbers that exist in soft-deleted rows
         $builder = static::withTrashed()->whereDate('tanggal_transaksi', Carbon::parse($date));
-
-        // Column for numbering
-        $column = 'kode_jasa';
 
         // Get existing numbers for the given date and prefix
         $existing = $builder
@@ -171,9 +105,6 @@ class TransaksiJasa extends Model
         return "{$prefix}-{$ymd}-{$seqStr}";
     }
 
-    /**
-     * Extract sequence integer from formatted number.
-     */
     protected static function extractSequence(?string $no, string $prefix, string $ymd): int
     {
         if (! $no) {
@@ -186,31 +117,5 @@ class TransaksiJasa extends Model
         }
 
         return 0;
-    }
-
-    /**
-     * Recalculate totals from non-trashed details.
-     */
-    public function recalcFromDetails(): void
-    {
-        $details = $this->detailTransaksiJasa()->get();
-
-        $totalPendapatan = 0.0;
-        $totalPengeluaran = 0.0;
-
-        foreach ($details as $d) {
-            $qty = (int) ($d->qty ?? 0);
-            $harga = (float) ($d->harga_jasa ?? 0);
-            $biaya = (float) ($d->pengeluaran_jasa ?? 0);
-
-            $totalPendapatan += $harga * $qty;
-            $totalPengeluaran += $biaya;
-        }
-
-        $this->forceFill([
-            'total_pendapatan_jasa' => $totalPendapatan,
-            'total_pengeluaran_jasa' => $totalPengeluaran,
-            'total_keuntungan_jasa' => max($totalPendapatan - $totalPengeluaran, 0),
-        ])->saveQuietly();
     }
 }

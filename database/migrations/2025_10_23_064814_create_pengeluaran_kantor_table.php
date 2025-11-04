@@ -13,14 +13,18 @@ return new class extends Migration
     {
         Schema::create('pengeluaran_kantor', function (Blueprint $table) {
             $table->id();
+
             $table->date('tanggal');
             $table->integer('pengeluaran')->default(0);
             $table->string('keterangan_pengeluaran')->nullable();
             $table->string('path_bukti_pembayaran')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

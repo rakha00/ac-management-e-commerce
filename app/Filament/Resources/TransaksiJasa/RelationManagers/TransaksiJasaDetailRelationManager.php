@@ -35,31 +35,30 @@ class TransaksiJasaDetailRelationManager extends RelationManager
                 Section::make('Informasi Jasa')
                     ->description('Detail layanan jasa yang diberikan.')
                     ->schema([
-                        TextInput::make('jenis_data')
-                            ->label('Jenis Data')
-                            ->required()
-                            ->maxLength(255),
+                        TextInput::make('jenis_jasa')
+                            ->label('Jenis Jasa')
+                            ->required(),
 
                         TextInput::make('qty')
                             ->label('Qty')
-                            ->numeric()
-                            ->minValue(1)
-                            ->placeholder(0)
-                            ->required(),
+                            ->numeric(),
 
                         TextInput::make('harga_jasa')
                             ->label('Harga Jasa')
-                            ->numeric()
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
-                            ->minValue(0)
-                            ->placeholder(0)
-                            ->required(),
-
+                            ->live(true)
+                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                $subtotal = $get('qty') * (int) str_replace(',', '', $state);
+                                $set('subtotal_pendapatan', number_format($subtotal));
+                            }),
+                        TextInput::make('subtotal_pendapatan')
+                            ->label('Subtotal Pendapatan')
+                            ->prefix('Rp')
+                            ->disabled(),
                         Textarea::make('keterangan_jasa')
-                            ->label('Keterangan Jasa')
-                            ->nullable(),
+                            ->label('Keterangan Jasa'),
                     ])
                     ->columnSpanFull(),
 
@@ -71,14 +70,10 @@ class TransaksiJasaDetailRelationManager extends RelationManager
                             ->numeric()
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
-                            ->stripCharacters(',')
-                            ->minValue(0)
-                            ->placeholder(0)
-                            ->nullable(),
+                            ->stripCharacters(','),
 
                         Textarea::make('keterangan_pengeluaran')
-                            ->label('Keterangan Pengeluaran')
-                            ->nullable(),
+                            ->label('Keterangan Pengeluaran'),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -87,9 +82,9 @@ class TransaksiJasaDetailRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('jenis_data')
+            ->recordTitleAttribute('jenis_jasa')
             ->columns([
-                TextColumn::make('jenis_data')
+                TextColumn::make('jenis_jasa')
                     ->label('Jenis')
                     ->sortable()
                     ->searchable(),
