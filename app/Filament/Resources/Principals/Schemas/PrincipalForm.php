@@ -14,7 +14,7 @@ class PrincipalForm
         return $schema
             ->components([
                 Section::make('Informasi Principal')
-                    ->columns(2)
+                    ->columns(1)
                     ->schema([
                         TextInput::make('nama')
                             ->label('Nama')

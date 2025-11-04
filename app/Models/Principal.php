@@ -17,6 +17,7 @@ class Principal extends Model
         'keterangan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
@@ -24,6 +25,7 @@ class Principal extends Model
         return [
             'created_by' => 'string',
             'updated_by' => 'string',
+            'deleted_by' => 'string',
         ];
     }
 
@@ -40,5 +42,10 @@ class Principal extends Model
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
     }
 }
