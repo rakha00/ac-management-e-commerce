@@ -18,17 +18,11 @@ class DistributorSparepartForm
                     ->schema([
                         TextInput::make('nama_distributor')
                             ->label('Nama Distributor')
-                            ->required()
-                            ->maxLength(255),
+                            ->required(),
                         TextInput::make('kontak')
-                            ->label('Kontak')
-                            ->tel()
-                            ->maxLength(255)
-                            ->nullable(),
+                            ->label('Kontak'),
                         Textarea::make('alamat')
                             ->label('Alamat')
-                            ->maxLength(255)
-                            ->nullable()
                             ->columnSpanFull(),
                     ]),
             ]);

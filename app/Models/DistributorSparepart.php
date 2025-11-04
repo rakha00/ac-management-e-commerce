@@ -16,6 +16,7 @@ class DistributorSparepart extends Model
         'alamat',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
@@ -23,6 +24,7 @@ class DistributorSparepart extends Model
         return [
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
@@ -34,5 +36,10 @@ class DistributorSparepart extends Model
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
     }
 }
