@@ -18,30 +18,21 @@ class HutangProdukCicilanDetail extends Model
         'tanggal_cicilan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'hutang_produk_id' => 'integer',
             'nominal_cicilan' => 'integer',
             'tanggal_cicilan' => 'date',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Otomatis hitung sisa hutang saat data cicilan berubah
-        static::created(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
-        static::updated(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
-        static::deleted(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
-        static::restored(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
-    }
-
-    // Relasi ke model HutangProduk (pastikan ada)
     public function hutangProduk()
     {
         return $this->belongsTo(HutangProduk::class);
@@ -55,5 +46,21 @@ class HutangProdukCicilanDetail extends Model
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Otomatis hitung sisa hutang saat data cicilan berubah
+        static::created(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
+        static::updated(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
+        static::deleted(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
+        static::restored(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
     }
 }

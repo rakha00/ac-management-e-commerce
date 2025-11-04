@@ -14,10 +14,14 @@ return new class extends Migration
         Schema::create('hutang_produk_cicilan_detail', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hutang_produk_id')->constrained('hutang_produk')->onDelete('cascade');
+
             $table->integer('nominal_cicilan')->default(0);
             $table->date('tanggal_cicilan');
+
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
             $table->softDeletes();
         });
