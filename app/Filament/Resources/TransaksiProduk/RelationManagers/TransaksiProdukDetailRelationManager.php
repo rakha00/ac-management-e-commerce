@@ -43,13 +43,12 @@ class TransaksiProdukDetailRelationManager extends RelationManager
                     ->components([
                         Select::make('unit_ac_id')
                             ->label('SKU')
-                            ->options(fn () => UnitAC::query()
-                                ->orderBy('sku')
-                                ->pluck('sku', 'id')
-                                ->toArray())
+                            ->relationship('unitAC', 'sku')
+                            ->preload()
                             ->searchable()
-                            ->reactive()
-                            ->disabled(fn (?Model $record) => $record !== null)
+                            ->disabled(fn (string $operation) => $operation === 'edit')
+                            ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->sku} - {$record->nama_unit}")
+                            ->live()
                             ->afterStateUpdated(function ($state, callable $set) {
                                 $unit = UnitAC::find($state);
                                 if ($unit) {
@@ -59,12 +58,8 @@ class TransaksiProdukDetailRelationManager extends RelationManager
                                     $set('harga_retail', number_format($unit->harga_retail));
                                 }
                             }),
-                        TextInput::make('sku')
-                            ->hidden()
-                            ->disabled(),
                         TextInput::make('nama_unit')
-                            ->disabled()
-                            ->dehydrated(),
+                            ->disabled(),
                     ])
                     ->columnSpanFull(),
                 Section::make('Detail Transaksi')
@@ -88,15 +83,13 @@ class TransaksiProdukDetailRelationManager extends RelationManager
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
-                            ->required()
-                            ->placeholder(0),
+                            ->required(),
                         TextInput::make('harga_jual')
                             ->numeric()
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
-                            ->required()
-                            ->placeholder(0),
+                            ->required(),
                     ]),
                 Section::make('Harga Referensi')
                     ->description('Data harga referensi dari sistem')
@@ -125,8 +118,7 @@ class TransaksiProdukDetailRelationManager extends RelationManager
                     ]),
                 Section::make('Informasi Tambahan')
                     ->components([
-                        Textarea::make('keterangan')
-                            ->nullable(),
+                        Textarea::make('keterangan'),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -135,8 +127,6 @@ class TransaksiProdukDetailRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->withoutGlobalScopes([SoftDeletingScope::class]))
-            ->recordTitle(fn ($record): string => "{$record->sku} ({$record->jumlah_keluar})")
             ->columns([
                 TextColumn::make('sku')
                     ->label('SKU')
@@ -196,6 +186,10 @@ class TransaksiProdukDetailRelationManager extends RelationManager
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->withoutGlobalScopes([
+                    SoftDeletingScope::class,
+                ]));
     }
 }

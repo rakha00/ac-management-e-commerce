@@ -21,17 +21,18 @@ class DatabaseSeeder extends Seeder
             UnitACSeeder::class,
 
             PrincipalSeeder::class,
+            KonsumenSeeder::class,
+
             BarangMasukSeeder::class,
             BarangMasukDetailSeeder::class,
             HutangProdukSeeder::class,
+            // TransaksiProdukSeeder::class,
 
-            // KonsumenSeeder::class,
             // SparepartSeeder::class,
             // DistributorSeeder::class,
             // AbsensiSeeder::class,
 
             // TransaksiJasaSeeder::class,
-            // TransaksiProdukSeeder::class,
             // SparepartMasukSeeder::class,
             // SparepartKeluarSeeder::class,
         ]);

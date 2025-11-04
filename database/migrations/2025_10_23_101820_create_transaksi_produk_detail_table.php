@@ -15,10 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('transaksi_produk_id')->constrained('transaksi_produk')->onDelete('cascade');
-
             $table->foreignId('unit_ac_id')->nullable()->constrained('unit_ac')->onDelete('restrict');
-            $table->string('sku');
-            $table->string('nama_unit');
 
             $table->integer('harga_dealer')->default(0);
             $table->integer('harga_ecommerce')->default(0);
@@ -29,9 +26,12 @@ return new class extends Migration
             $table->integer('harga_jual')->default(0);
 
             $table->text('keterangan')->nullable();
-            $table->timestamps();
+
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
+            $table->timestamps();
             $table->softDeletes();
         });
     }

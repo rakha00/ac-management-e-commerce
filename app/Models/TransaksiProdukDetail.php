@@ -15,8 +15,6 @@ class TransaksiProdukDetail extends Model
     protected $fillable = [
         'transaksi_produk_id',
         'unit_ac_id',
-        'sku',
-        'nama_unit',
         'harga_dealer',
         'harga_ecommerce',
         'harga_retail',
@@ -26,11 +24,14 @@ class TransaksiProdukDetail extends Model
         'keterangan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'transaksi_produk_id' => 'integer',
+            'unit_ac_id' => 'integer',
             'harga_dealer' => 'integer',
             'harga_ecommerce' => 'integer',
             'harga_retail' => 'integer',
@@ -39,6 +40,7 @@ class TransaksiProdukDetail extends Model
             'jumlah_keluar' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
@@ -62,17 +64,26 @@ class TransaksiProdukDetail extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    /**
-     * Boot the model.
-     */
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
     protected static function boot()
     {
         parent::boot();
 
-        // Before creating, ensure denormalized fields are populated from UnitAC.
+        // Populate denormalized fields from UnitAC before creation.
         static::creating(function (TransaksiProdukDetail $detail) {
-            // Fill denormalized SKU, name, and pricing if missing
-            if ($detail->unit_ac_id && (empty($detail->sku) || empty($detail->nama_unit) || $detail->harga_dealer === null || $detail->harga_ecommerce === null || $detail->harga_retail === null)) {
+            if (
+                $detail->unit_ac_id && (
+                    empty($detail->sku) ||
+                    empty($detail->nama_unit) ||
+                    $detail->harga_dealer === null ||
+                    $detail->harga_ecommerce === null ||
+                    $detail->harga_retail === null
+                )
+            ) {
                 $unit = UnitAC::withTrashed()->find($detail->unit_ac_id);
                 if ($unit) {
                     if (empty($detail->sku)) {
@@ -82,7 +93,6 @@ class TransaksiProdukDetail extends Model
                         $detail->nama_unit = $unit->nama_unit;
                     }
 
-                    // Retrieve historical prices
                     if ($detail->transaksiProduk) {
                         $hargaHistory = $unit->hargaHistory()
                             ->where('created_at', '<=', $detail->transaksiProduk->created_at)
@@ -94,13 +104,11 @@ class TransaksiProdukDetail extends Model
                             $detail->harga_ecommerce = $hargaHistory->harga_ecommerce;
                             $detail->harga_retail = $hargaHistory->harga_retail;
                         } else {
-                            // Fallback to current prices if no history found
                             $detail->harga_dealer = $unit->current_harga_dealer ?? 0;
                             $detail->harga_ecommerce = $unit->current_harga_ecommerce ?? 0;
                             $detail->harga_retail = $unit->current_harga_retail ?? 0;
                         }
                     } else {
-                        // Fallback to current prices if no TransaksiProduk (should not happen)
                         $detail->harga_dealer = $unit->current_harga_dealer ?? 0;
                         $detail->harga_ecommerce = $unit->current_harga_ecommerce ?? 0;
                         $detail->harga_retail = $unit->current_harga_retail ?? 0;
@@ -109,19 +117,17 @@ class TransaksiProdukDetail extends Model
             }
         });
 
-        // When a new detail is created
         static::created(function (TransaksiProdukDetail $detail) {
             $detail->updateStokUnitAC((int) $detail->jumlah_keluar, 'out');
         });
 
-        // Before a detail is updated (handle change in qty or unit)
+        // Handle stock adjustments on update.
         static::updating(function (TransaksiProdukDetail $detail) {
             $oldJumlah = (int) $detail->getOriginal('jumlah_keluar');
             $newJumlah = (int) $detail->jumlah_keluar;
             $oldUnitACId = $detail->getOriginal('unit_ac_id');
             $newUnitACId = $detail->unit_ac_id;
 
-            // If the Unit AC has changed, revert from old and apply to new
             if ($oldUnitACId != $newUnitACId) {
                 if ($oldUnitACId) {
                     $detail->updateStokUnitAC($oldJumlah, 'revert', $oldUnitACId);
@@ -130,7 +136,6 @@ class TransaksiProdukDetail extends Model
                     $detail->updateStokUnitAC($newJumlah, 'out', $newUnitACId);
                 }
             } else {
-                // Unit unchanged, adjust by difference
                 $diff = $newJumlah - $oldJumlah;
                 if ($diff !== 0) {
                     $detail->updateStokUnitAC(abs($diff), $diff > 0 ? 'out' : 'revert', $newUnitACId);
@@ -138,20 +143,17 @@ class TransaksiProdukDetail extends Model
             }
         });
 
-        // On soft delete, revert stok (return stok back)
+        // Revert stock on soft delete.
         static::deleted(function (TransaksiProdukDetail $detail) {
             $detail->updateStokUnitAC((int) $detail->jumlah_keluar, 'revert');
         });
 
-        // On restore, re-apply stok out
+        // Re-apply stock on restore.
         static::restored(function (TransaksiProdukDetail $detail) {
             $detail->updateStokUnitAC((int) $detail->jumlah_keluar, 'out');
         });
     }
 
-    /**
-     * Update stok UnitAC based on the transaction detail.
-     */
     private function updateStokUnitAC(int $jumlah, string $action, ?int $unitACId = null): void
     {
         $unitAC = UnitAC::find($unitACId ?? $this->unit_ac_id);

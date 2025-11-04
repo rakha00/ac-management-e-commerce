@@ -15,28 +15,42 @@ class TransaksiProduk extends Model
     protected $table = 'transaksi_produk';
 
     protected $fillable = [
-        'tanggal_transaksi',
         'nomor_invoice',
         'nomor_surat_jalan',
+        'tanggal_transaksi',
         'sales_karyawan_id',
         'konsumen_id',
         'keterangan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal_transaksi' => 'date',
+            'sales_karyawan_id' => 'integer',
+            'konsumen_id' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
     public function transaksiProdukDetail(): HasMany
     {
         return $this->hasMany(TransaksiProdukDetail::class, 'transaksi_produk_id');
+    }
+
+    public function konsumen(): BelongsTo
+    {
+        return $this->belongsTo(Konsumen::class, 'konsumen_id');
+    }
+
+    public function salesKaryawan(): BelongsTo
+    {
+        return $this->belongsTo(Karyawan::class, 'sales_karyawan_id')->where('jabatan', 'sales');
     }
 
     public function createdBy(): BelongsTo
@@ -49,29 +63,38 @@ class TransaksiProduk extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    public function konsumen(): BelongsTo
+    public function deletedBy(): BelongsTo
     {
-        return $this->belongsTo(Konsumen::class, 'konsumen_id');
+        return $this->belongsTo(User::class, 'deleted_by');
     }
 
-    public function salesKaryawan(): BelongsTo
-    {
-        return $this->belongsTo(Karyawan::class, 'sales_karyawan_id');
-    }
-
-    /**
-     * Always set tanggal_transaksi to current date if not provided.
-     */
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function (TransaksiProduk $model) {
-            // Ensure transaction date exists
-            $date = $model->tanggal_transaksi ? Carbon::parse($model->tanggal_transaksi)->toDateString() : Carbon::now()->toDateString();
+        // Set created_by  when creating
+        static::creating(function (self $transaksiProduk): void {
+            if (auth()->check()) {
+                $transaksiProduk->created_by = auth()->id();
+                $transaksiProduk->updated_by = auth()->id();
+            }
+        });
 
-            $model->nomor_invoice = self::generateNomorInvoice($date);
-            $model->nomor_surat_jalan = self::generateNomorSuratJalan($date);
+        // Set updated_by when updating
+        static::updating(function (self $transaksiProduk): void {
+            if (auth()->check()) {
+                $transaksiProduk->updated_by = auth()->id();
+            }
+        });
+
+        // Set deleted_by when soft deleting
+        static::deleting(function (self $transaksiProduk): void {
+            if (! $transaksiProduk->isForceDeleting()) {
+                if (auth()->check()) {
+                    $transaksiProduk->deleted_by = auth()->id();
+                    $transaksiProduk->save(); // Save the model to persist the deleted_by value
+                }
+            }
         });
     }
 

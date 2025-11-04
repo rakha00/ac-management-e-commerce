@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\TransaksiProduk\Schemas;
 
-use App\Models\Karyawan;
-use App\Models\Konsumen;
 use App\Models\TransaksiProduk;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -11,7 +9,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Model;
 
 class TransaksiProdukForm
 {
@@ -23,48 +20,31 @@ class TransaksiProdukForm
                     ->schema([
                         DatePicker::make('tanggal_transaksi')
                             ->label('Tanggal Transaksi')
-                            ->required()
-                            ->disabled(fn (?Model $record) => $record !== null)
-                            ->reactive()
+                            ->live()
+                            ->disabled(fn (string $operation) => $operation === 'edit')
                             ->afterStateUpdated(function ($state, callable $set) {
                                 $set('nomor_invoice', $state ? TransaksiProduk::generateNomorInvoice((string) $state) : null);
                                 $set('nomor_surat_jalan', $state ? TransaksiProduk::generateNomorSuratJalan((string) $state) : null);
-                            }),
+                            })
+                            ->required(),
                         TextInput::make('nomor_invoice')
                             ->label('Nomor Invoice')
-                            ->required()
                             ->disabled()
-                            ->dehydrated(true)
-                            ->afterStateHydrated(function ($component, ?Model $record, callable $set) {
-                                if ($record && $record->nomor_invoice) {
-                                    $set('nomor_invoice', $record->nomor_invoice);
-                                }
-                            }),
+                            ->dehydrated(),
                         TextInput::make('nomor_surat_jalan')
                             ->label('Nomor Surat Jalan')
-                            ->required()
                             ->disabled()
-                            ->dehydrated(true)
-                            ->afterStateHydrated(function ($component, ?Model $record, callable $set) {
-                                if ($record && $record->nomor_surat_jalan) {
-                                    $set('nomor_surat_jalan', $record->nomor_surat_jalan);
-                                }
-                            }),
+                            ->dehydrated(),
                         Select::make('sales_karyawan_id')
                             ->label('Sales')
-                            ->options(fn () => Karyawan::query()
-                                ->where('jabatan', 'sales')
-                                ->orderBy('nama')
-                                ->pluck('nama', 'id')
-                                ->toArray())
+                            ->relationship('salesKaryawan', 'nama')
+                            ->preload()
                             ->searchable()
-                            ->reactive(),
+                            ->required(),
                         Select::make('konsumen_id')
                             ->label('Toko/Konsumen')
-                            ->options(fn () => Konsumen::query()
-                                ->orderBy('nama')
-                                ->pluck('nama', 'id')
-                                ->toArray())
+                            ->relationship('konsumen', 'nama')
+                            ->preload()
                             ->searchable()
                             ->required(),
                         Textarea::make('keterangan')

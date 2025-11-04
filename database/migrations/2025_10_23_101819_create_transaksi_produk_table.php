@@ -14,21 +14,21 @@ return new class extends Migration
         Schema::create('transaksi_produk', function (Blueprint $table) {
             $table->id();
 
+            $table->string('nomor_invoice')->unique();
+            $table->string('nomor_surat_jalan')->unique();
+
             $table->date('tanggal_transaksi');
-            $table->string('nomor_invoice');
-            $table->string('nomor_surat_jalan');
 
             $table->foreignId('sales_karyawan_id')->nullable()->constrained('karyawan')->onDelete('set null');
             $table->foreignId('konsumen_id')->nullable()->constrained('konsumen')->onDelete('set null');
 
             $table->text('keterangan')->nullable();
 
-            $table->unique(['tanggal_transaksi', 'nomor_invoice'], 'unique_invoice_per_tanggal');
-            $table->unique(['tanggal_transaksi', 'nomor_surat_jalan'], 'unique_surat_jalan_per_tanggal');
-
-            $table->timestamps();
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
+            $table->timestamps();
             $table->softDeletes();
         });
     }
