@@ -15,14 +15,13 @@ class SparepartKeluarDetail extends Model
     protected $fillable = [
         'sparepart_keluar_id',
         'sparepart_id',
-        'kode_sparepart',
-        'nama_sparepart',
         'jumlah_keluar',
         'harga_modal',
         'harga_jual',
         'keterangan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
@@ -33,6 +32,7 @@ class SparepartKeluarDetail extends Model
             'harga_jual' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
@@ -56,87 +56,54 @@ class SparepartKeluarDetail extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    /**
-     * Boot the model to handle events.
-     */
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
     protected static function boot()
     {
         parent::boot();
 
-        // Before creating, ensure denormalized fields are populated from Sparepart.
-        static::creating(function (SparepartKeluarDetail $detail) {
-            if ($detail->sparepart_id && (empty($detail->kode_sparepart) || empty($detail->nama_sparepart))) {
-                $sp = Sparepart::find($detail->sparepart_id);
-                if ($sp) {
-                    if (empty($detail->kode_sparepart)) {
-                        $detail->kode_sparepart = $sp->kode_sparepart;
-                    }
-                    if (empty($detail->nama_sparepart)) {
-                        $detail->nama_sparepart = $sp->nama_sparepart;
-                    }
-                }
-            }
-        });
-
-        // When a new detail is created
         static::created(function (SparepartKeluarDetail $detail) {
             $detail->updateStokSparepart((int) $detail->jumlah_keluar, 'out');
-            $detail->recalculateParent();
         });
 
-        // Before a detail is updated (handle change in qty or sparepart)
         static::updating(function (SparepartKeluarDetail $detail) {
-            $oldJumlah = (int) $detail->getOriginal('jumlah_keluar');
-            $newJumlah = (int) $detail->jumlah_keluar;
-            $oldSparepartId = $detail->getOriginal('sparepart_id');
-            $newSparepartId = $detail->sparepart_id;
+            $oldQty = (int) $detail->getOriginal('jumlah_keluar');
+            $newQty = (int) $detail->jumlah_keluar;
+            $oldSpId = $detail->getOriginal('sparepart_id');
+            $newSpId = $detail->sparepart_id;
 
-            // If the Sparepart has changed, revert from old and apply to new
-            if ($oldSparepartId != $newSparepartId) {
-                if ($oldSparepartId) {
-                    $detail->updateStokSparepart($oldJumlah, 'revert', $oldSparepartId);
+            if ($oldSpId != $newSpId) {
+                // Sparepart changed: revert old stock, apply new stock
+                if ($oldSpId) {
+                    $detail->updateStokSparepart($oldQty, 'revert', $oldSpId);
                 }
-                if ($newSparepartId) {
-                    $detail->updateStokSparepart($newJumlah, 'out', $newSparepartId);
+                if ($newSpId) {
+                    $detail->updateStokSparepart($newQty, 'out', $newSpId);
                 }
             } else {
-                // Sparepart unchanged, adjust by difference
-                $diff = $newJumlah - $oldJumlah;
+                // Sparepart unchanged: adjust stock by difference
+                $diff = $newQty - $oldQty;
                 if ($diff !== 0) {
-                    $detail->updateStokSparepart(abs($diff), $diff > 0 ? 'out' : 'revert', $newSparepartId);
+                    $detail->updateStokSparepart(abs($diff), $diff > 0 ? 'out' : 'revert', $newSpId);
                 }
             }
 
-            // Keep denormalized fields in sync if sparepart_id changed
-            if ($oldSparepartId != $newSparepartId && $newSparepartId) {
-                $sp = Sparepart::find($newSparepartId);
-                if ($sp) {
-                    $detail->kode_sparepart = $sp->kode_sparepart;
-                    $detail->nama_sparepart = $sp->nama_sparepart;
-                }
-            }
         });
 
-        // After update, keep parent totals in sync
-        static::updated(function (SparepartKeluarDetail $detail) {
-            $detail->recalculateParent();
-        });
-
-        // On soft delete, revert stok (return stok back)
         static::deleted(function (SparepartKeluarDetail $detail) {
             $detail->updateStokSparepart((int) $detail->jumlah_keluar, 'revert');
-            $detail->recalculateParent();
         });
 
-        // On restore, re-apply stok out
         static::restored(function (SparepartKeluarDetail $detail) {
             $detail->updateStokSparepart((int) $detail->jumlah_keluar, 'out');
-            $detail->recalculateParent();
         });
     }
 
     /**
-     * Update Sparepart stoks for 'out' (sale) or 'revert' (undo sale).
+     * Update Sparepart stock based on action ('out' or 'revert').
      */
     private function updateStokSparepart(int $jumlah, string $action, ?int $sparepartId = null): void
     {
@@ -149,20 +116,9 @@ class SparepartKeluarDetail extends Model
         if ($action === 'out') {
             $sp->increment('stok_keluar', $jumlah);
             $sp->decrement('stok_akhir', $jumlah);
-        } else {
+        } else { // action === 'revert'
             $sp->decrement('stok_keluar', $jumlah);
             $sp->increment('stok_akhir', $jumlah);
-        }
-    }
-
-    /**
-     * Recalculate parent totals based on current non-trashed details.
-     */
-    private function recalculateParent(): void
-    {
-        $parent = $this->sparepartKeluar;
-        if ($parent instanceof SparepartKeluar) {
-            $parent->recalcFromDetails();
         }
     }
 }

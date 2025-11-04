@@ -27,7 +27,7 @@ class SparepartKeluarTable
                     ->date()
                     ->sortable(),
 
-                TextColumn::make('konsumen_nama')
+                TextColumn::make('konsumen.nama')
                     ->label('Konsumen')
                     ->searchable()
                     ->sortable(),
@@ -35,20 +35,23 @@ class SparepartKeluarTable
                 TextColumn::make('total_modal')
                     ->label('Total Modal')
                     ->numeric()
-                    ->money('IDR', locale: 'id_ID')
+                    ->getStateUsing(fn ($record): int => $record->getTotalModal())
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
 
                 TextColumn::make('total_penjualan')
                     ->label('Total Penjualan')
                     ->numeric()
-                    ->money('IDR', locale: 'id_ID')
-                    ->sortable(),
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->sortable()
+                    ->getStateUsing(fn ($record): int => $record->getTotalPenjualan()),
 
                 TextColumn::make('total_keuntungan')
                     ->label('Total Keuntungan')
                     ->numeric()
-                    ->money('IDR', locale: 'id_ID')
-                    ->sortable(),
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->sortable()
+                    ->getStateUsing(fn ($record): int => $record->getTotalKeuntungan()),
             ])
             ->filters([
                 Filter::make('tanggal_keluar')

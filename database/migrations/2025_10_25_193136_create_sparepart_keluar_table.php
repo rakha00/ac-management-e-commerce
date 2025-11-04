@@ -15,22 +15,18 @@ return new class extends Migration
             $table->id();
 
             $table->date('tanggal_keluar');
-            $table->string('nomor_invoice');
+            $table->string('nomor_invoice')->unique();
 
             $table->foreignId('konsumen_id')->nullable()->constrained('konsumen')->onDelete('set null');
 
-            $table->integer('total_modal')->default(0);
-            $table->integer('total_penjualan')->default(0);
-            $table->integer('total_keuntungan')->default(0);
-
             $table->text('keterangan')->nullable();
 
-            $table->unique(['tanggal_keluar', 'nomor_invoice'], 'unique_sparepart_keluar_invoice_per_tanggal');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
 
             $table->timestamps();
             $table->softDeletes();
-            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
         });
     }
 

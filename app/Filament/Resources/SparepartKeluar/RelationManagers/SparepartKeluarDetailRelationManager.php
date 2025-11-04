@@ -39,41 +39,26 @@ class SparepartKeluarDetailRelationManager extends RelationManager
                     ->components([
                         Select::make('sparepart_id')
                             ->label('Kode Sparepart')
-                            ->options(fn () => Sparepart::query()
-                                ->orderBy('kode_sparepart')
-                                ->pluck('kode_sparepart', 'id')
-                                ->toArray())
+                            ->relationship('sparepart', 'kode_sparepart')
                             ->searchable()
                             ->preload()
-                            ->reactive()
+                            ->live()
                             ->required()
                             ->afterStateUpdated(function ($state, Set $set) {
                                 $sp = Sparepart::find($state);
                                 if ($sp) {
                                     $set('nama_sparepart', $sp->nama_sparepart);
-                                    $set('referensi_harga_modal', number_format($sp->harga_modal, 0, ',', ','));
-                                } else {
-                                    $set('nama_sparepart', null);
-                                    $set('referensi_harga_modal', null);
+                                    $set('referensi_harga_modal', number_format($sp->harga_modal));
                                 }
                             }),
-
                         TextInput::make('nama_sparepart')
                             ->label('Nama Sparepart')
-                            ->disabled()
-                            ->dehydrated(false),
+                            ->disabled(),
                         TextInput::make('referensi_harga_modal')
                             ->label('Harga Modal')
-                            ->disabled()
                             ->prefix('Rp')
-                            ->formatStateUsing(function ($state, Get $get) {
-                                $sparepart_id = $get('sparepart_id');
-                                $sp = Sparepart::find($sparepart_id);
-
-                                return $sp ? number_format($sp->harga_modal, 0, ',', ',') : null;
-                            })
-                            ->hint('Referensi dari sistem')
-                            ->dehydrated(false),
+                            ->disabled()
+                            ->hint('Referensi dari sistem'),
                     ])
                     ->columns(1),
 
@@ -83,41 +68,28 @@ class SparepartKeluarDetailRelationManager extends RelationManager
                         TextInput::make('jumlah_keluar')
                             ->label('Jumlah Keluar')
                             ->numeric()
-                            ->minValue(1)
-                            ->hint(function (Get $get) {
-                                $sparepart_id = $get('sparepart_id');
-                                $sp = Sparepart::find($sparepart_id);
-
-                                return $sp ? 'Stok tersedia: '.$sp->stok_akhir : null;
-                            })
+                            ->hint(fn (Get $get) => ($sp = Sparepart::find($get('sparepart_id'))) ? 'Stok tersedia: '.$sp->stok_akhir : null)
                             ->required(),
-
                         TextInput::make('harga_modal')
                             ->label('Harga Modal')
                             ->numeric()
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
-                            ->minValue(0)
                             ->required(),
-
                         TextInput::make('harga_jual')
                             ->label('Harga Jual')
                             ->numeric()
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
-                            ->minValue(0)
                             ->required(),
-                    ])
-                    ->columns(1),
+                    ]),
 
                 Section::make('Informasi Tambahan')
                     ->components([
                         TextInput::make('keterangan')
-                            ->label('Keterangan')
-                            ->nullable()
-                            ->columnSpanFull(),
+                            ->label('Keterangan'),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -143,17 +115,38 @@ class SparepartKeluarDetailRelationManager extends RelationManager
                 TextColumn::make('harga_modal')
                     ->label('Harga Modal')
                     ->numeric()
-                    ->prefix('Rp ')
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->sortable(),
                 TextColumn::make('harga_jual')
                     ->label('Harga Jual')
                     ->numeric()
-                    ->prefix('Rp ')
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->sortable(),
+                TextColumn::make('total_modal')
+                    ->label('Total Modal')
+                    ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(fn ($record) => $record->jumlah_keluar * $record->harga_modal)
+                    ->sortable(),
+                TextColumn::make('total_penjualan')
+                    ->label('Total Penjualan')
+                    ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(fn ($record) => $record->jumlah_keluar * $record->harga_jual)
+                    ->sortable(),
+                TextColumn::make('total_keuntungan')
+                    ->label('Total Keuntungan')
+                    ->numeric()
+                    ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
+                    ->getStateUsing(fn ($record) => $record->jumlah_keluar * $record->harga_jual - $record->jumlah_keluar * $record->harga_modal)
                     ->sortable(),
                 TextColumn::make('keterangan')
                     ->label('Keterangan')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
             ->filters([
                 TrashedFilter::make(),
             ])

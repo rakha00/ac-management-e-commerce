@@ -22,17 +22,12 @@ class SparepartKeluarForm
                         DatePicker::make('tanggal_keluar')
                             ->label('Tanggal Keluar')
                             ->required()
-                            ->reactive()
-                            ->afterStateUpdated(fn (callable $set, $state) => $set('nomor_invoice', SparepartKeluar::generateSequentialNumber(
-                                (string) $state,
-                                'INVSP'
-                            ))),
-
-                        // Read-only preview; value is auto-generated in model creating hook
+                            ->live()
+                            ->afterStateUpdated(fn (callable $set, $state) => $set('nomor_invoice', SparepartKeluar::generateSequentialNumber((string) $state))),
                         TextInput::make('nomor_invoice')
                             ->label('Nomor Invoice')
                             ->disabled()
-                            ->dehydrated(false),
+                            ->dehydrated(),
                         Select::make('konsumen_id')
                             ->label('Konsumen')
                             ->relationship('konsumen', 'nama')
@@ -43,8 +38,8 @@ class SparepartKeluarForm
                             ->label('Keterangan')
                             ->nullable()
                             ->columnSpanFull(),
-                    ]),
-            ])
-            ->columns(1);
+                    ])
+                    ->columnSpanFull(),
+            ]);
     }
 }
