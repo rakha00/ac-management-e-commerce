@@ -128,11 +128,12 @@ class TransaksiProdukDetailRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('sku')
+                TextColumn::make('unitAC.sku')
                     ->label('SKU')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('nama_unit')
+                TextColumn::make('unitAC.nama_unit')
+                    ->label('Nama Unit')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('jumlah_keluar')

@@ -31,6 +31,8 @@ class TransaksiProdukSeeder extends Seeder
                 'tanggal_transaksi' => $tanggalTransaksi,
                 'sales_karyawan_id' => $salesKaryawanId,
                 'konsumen_id' => $konsumenId,
+                'nomor_invoice' => TransaksiProduk::generateNomorInvoice($tanggalTransaksi->toDateString()),
+                'nomor_surat_jalan' => TransaksiProduk::generateNomorSuratJalan($tanggalTransaksi->toDateString()),
                 'keterangan' => 'Transaksi produk '.($i + 1),
             ]);
 

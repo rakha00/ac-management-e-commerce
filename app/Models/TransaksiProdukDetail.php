@@ -77,8 +77,7 @@ class TransaksiProdukDetail extends Model
         static::creating(function (TransaksiProdukDetail $detail) {
             if (
                 $detail->unit_ac_id && (
-                    empty($detail->sku) ||
-                    empty($detail->nama_unit) ||
+
                     $detail->harga_dealer === null ||
                     $detail->harga_ecommerce === null ||
                     $detail->harga_retail === null
@@ -86,14 +85,8 @@ class TransaksiProdukDetail extends Model
             ) {
                 $unit = UnitAC::withTrashed()->find($detail->unit_ac_id);
                 if ($unit) {
-                    if (empty($detail->sku)) {
-                        $detail->sku = $unit->sku;
-                    }
-                    if (empty($detail->nama_unit)) {
-                        $detail->nama_unit = $unit->nama_unit;
-                    }
-
                     if ($detail->transaksiProduk) {
+
                         $hargaHistory = $unit->hargaHistory()
                             ->where('created_at', '<=', $detail->transaksiProduk->created_at)
                             ->latest()
