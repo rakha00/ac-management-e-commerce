@@ -6,7 +6,6 @@ use App\Models\HutangProduk;
 use App\Models\HutangProdukCicilanDetail;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
@@ -16,9 +15,10 @@ use Filament\Support\RawJs;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Carbon;
 
 class HutangProdukTable
 {
@@ -37,8 +37,7 @@ class HutangProdukTable
                 TextColumn::make('sisa_hutang')
                     ->numeric()
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
-                    ->sortable()
-                    ->state(fn ($record): int => max(($record->total_hutang ?? 0) - (int) $record->hutangProdukCicilanDetail()->sum('nominal_cicilan'), 0)),
+                    ->sortable(),
                 TextColumn::make('barangMasuk.principal.nama')
                     ->label('Principal')
                     ->searchable()
@@ -56,6 +55,15 @@ class HutangProdukTable
                 TextColumn::make('jatuh_tempo')
                     ->date()
                     ->sortable(),
+                TextColumn::make('createdBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updatedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deletedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -64,17 +72,37 @@ class HutangProdukTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
             ->filters([
-                Filter::make('jatuh_tempo')
+                TrashedFilter::make(),
+                Filter::make('date_range')
                     ->form([
-                        DatePicker::make('from')->label('Dari Tanggal'),
-                        DatePicker::make('until')->label('Sampai Tanggal'),
+                        DatePicker::make('dari')
+                            ->maxDate(fn (callable $get) => $get('sampai') ?? null),
+                        DatePicker::make('sampai')
+                            ->minDate(fn (callable $get) => $get('dari')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from'] ?? null, fn (Builder $q, $date) => $q->whereDate('jatuh_tempo', '>=', $date))
-                            ->when($data['until'] ?? null, fn (Builder $q, $date) => $q->whereDate('jatuh_tempo', '<=', $date));
+                            ->when($data['dari'] ?? null, fn (Builder $q, $date) => $q->whereDate('jatuh_tempo', '>=', $date))
+                            ->when($data['sampai'] ?? null, fn (Builder $q, $date) => $q->whereDate('jatuh_tempo', '<=', $date));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['dari'] ?? null) {
+                            $indicators['dari'] = 'Dari '.Carbon::parse($data['dari'])->toFormattedDateString();
+                        }
+                        if ($data['sampai'] ?? null) {
+                            $indicators['sampai'] = 'Sampai '.Carbon::parse($data['sampai'])->toFormattedDateString();
+                        }
+
+                        return $indicators;
                     }),
                 SelectFilter::make('status_pembayaran')
                     ->label('Status Pembayaran')
@@ -85,6 +113,10 @@ class HutangProdukTable
                     ])
                     ->multiple()
                     ->preload(),
+                SelectFilter::make('principal')
+                    ->relationship('barangMasuk.principal', 'nama')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 Action::make('bayarCicilan')
@@ -92,8 +124,7 @@ class HutangProdukTable
                     ->color('primary')
                     ->icon('heroicon-o-banknotes')
                     ->hidden(
-                        fn (HutangProduk $record): bool => strtolower((string) $record->status_pembayaran) === 'sudah lunas' ||
-                        max(((int) ($record->total_hutang ?? 0)) - (int) $record->hutangProdukCicilanDetail()->sum('nominal_cicilan'), 0) <= 0
+                        fn (HutangProduk $record): bool => $record->status_pembayaran === 'sudah lunas' || (int) ($record->total_hutang <= 0)
                     )
                     ->modalHeading(fn ($record) => 'Cicilan: '.$record->barangMasuk->nomor_barang_masuk)
                     ->modalSubmitActionLabel('Bayar')
@@ -112,41 +143,19 @@ class HutangProdukTable
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
-                            ->minValue(1)
-                            ->required()
-                            ->helperText(fn (HutangProduk $record): string => 'Sisa: Rp '.number_format(max(((int) ($record->total_hutang ?? 0)) - (int) $record->hutangProdukCicilanDetail()->sum('nominal_cicilan'), 0), 0, ',', '.')),
+                            ->maxValue(fn ($record) => $record->sisa_hutang)
+                            ->helperText(fn ($record) => 'Sisa hutang: Rp '.number_format($record->sisa_hutang)),
                         DatePicker::make('tanggal_cicilan')
                             ->label('Tanggal Cicilan')
                             ->required(),
                     ])
                     ->action(function (array $data, HutangProduk $record): void {
-                        $total = (int) ($record->total_hutang ?? 0);
-                        $paid = (int) $record->hutangProdukCicilanDetail()->sum('nominal_cicilan');
-                        $sisa = max($total - $paid, 0);
-
                         $nominal = (int) ($data['nominal_cicilan'] ?? 0);
-                        if ($nominal < 1 || $nominal > $sisa) {
-                            throw ValidationException::withMessages([
-                                'nominal_cicilan' => 'Nominal melebihi sisa hutang (Rp '.number_format($sisa, 0, ',', '.').').',
-                            ]);
-                        }
                         HutangProdukCicilanDetail::create([
                             'hutang_produk_id' => $record->id,
                             'nominal_cicilan' => $nominal,
                             'tanggal_cicilan' => $data['tanggal_cicilan'],
                         ]);
-                        // Recalculate status pembayaran
-                        $paid2 = (int) $record->hutangProdukCicilanDetail()->sum('nominal_cicilan');
-                        $sisa2 = max((int) ($record->total_hutang ?? 0) - $paid2, 0);
-                        $status = 'belum lunas';
-                        if ($sisa2 <= 0 && ($record->total_hutang ?? 0) > 0) {
-                            $status = 'sudah lunas';
-                        } elseif ($sisa2 < ($record->total_hutang ?? 0) && $sisa2 > 0) {
-                            $status = 'tercicil';
-                        }
-                        $record->forceFill([
-                            'status_pembayaran' => $status,
-                        ])->save();
                         Notification::make()
                             ->title('Pembayaran cicilan berhasil')
                             ->success()
@@ -156,7 +165,7 @@ class HutangProdukTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    //
                 ]),
             ]);
     }

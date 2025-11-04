@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\HutangProduk\Schemas;
 
 use App\Models\BarangMasuk;
+use App\Models\HutangProduk;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -10,8 +11,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class HutangProdukForm
 {
@@ -26,59 +25,36 @@ class HutangProdukForm
                             ->relationship('barangMasuk', 'nomor_barang_masuk')
                             ->searchable()
                             ->preload()
-                            ->reactive()
+                            ->live()
                             ->required()
-                            ->dehydrated() // persist value even when disabled
-                            ->disabled(function (?Model $record): bool {
-                                // Make readonly on edit
-                                return (bool) $record;
-                            })
+                            ->dehydrated()
+                            ->disabled(fn (string $operation) => $operation === 'edit')
                             ->afterStateUpdated(function ($state, callable $set) {
-                                if (! $state) {
-                                    return;
-                                }
-
-                                $bm = BarangMasuk::query()
-                                    ->with('principal')
-                                    ->where('id', $state)
-                                    ->first();
+                                $bm = BarangMasuk::where('id', $state)->first();
 
                                 if (! $bm) {
                                     return;
                                 }
 
-                                // Calculate total_hutang from BarangMasukDetail * UnitAC.harga_dealer
-                                $total = (int) DB::table('barang_masuk_detail')
-                                    ->join('unit_ac', 'barang_masuk_detail.unit_ac_id', '=', 'unit_ac.id')
-                                    ->where('barang_masuk_detail.barang_masuk_id', '=', $bm->id)
-                                    ->sum(DB::raw('barang_masuk_detail.jumlah_barang_masuk * unit_ac.harga_dealer'));
+                                $total = HutangProduk::calculateTotalHutang($bm->id);
 
-                                $set('total_hutang', number_format($total, 0, ',', ','));
-                                // Set initial remaining debt equals to total (no installments yet on create)
-                                $set('sisa_hutang', number_format($total, 0, ',', ','));
+                                $set('total_hutang', number_format($total));
+                                $set('sisa_hutang', number_format($total));
                             }),
                         TextInput::make('total_hutang')
                             ->label('Total Hutang')
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
-                            ->disabled() // auto-filled
-                            ->dehydrated() // still saved to model
-                            ->required(),
+                            ->disabled()
+                            ->dehydrated(),
                         TextInput::make('sisa_hutang')
                             ->label('Sisa Hutang')
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
-                            ->disabled() // readonly display only
-                            ->dehydrated(false) // do not persist; not a column
-                            ->required()
-                            ->afterStateHydrated(function ($component, ?Model $record, callable $set) {
-                                if ($record) {
-                                    $totalCicilan = (int) $record->hutangProdukCicilanDetail()->sum('nominal_cicilan');
-                                    $sisa = max((int) ($record->total_hutang ?? 0) - $totalCicilan, 0);
-                                    $set('sisa_hutang', $sisa);
-                                }
-                            }),
+                            ->stripCharacters(',')
+                            ->disabled()
+                            ->dehydrated(),
                     ])
                     ->columnSpanFull(),
                 Section::make('Pembayaran')
@@ -90,9 +66,9 @@ class HutangProdukForm
                                 'tercicil' => 'Tercicil',
                                 'sudah lunas' => 'Sudah Lunas',
                             ])
-                            ->native(false)
-                            ->default('belum lunas')
-                            ->required(),
+                            ->disabled()
+                            ->dehydrated()
+                            ->default('belum lunas'),
                         DatePicker::make('jatuh_tempo')
                             ->label('Jatuh Tempo')
                             ->required(),

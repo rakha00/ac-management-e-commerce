@@ -14,12 +14,17 @@ return new class extends Migration
         Schema::create('hutang_produk', function (Blueprint $table) {
             $table->id();
             $table->foreignId('barang_masuk_id')->constrained('barang_masuk')->onDelete('cascade');
-            $table->integer('total_hutang')->index()->default(0);
-            $table->string('status_pembayaran');
-            $table->date('jatuh_tempo')->index();
+
+            $table->integer('total_hutang')->default(0);
+            $table->integer('sisa_hutang')->default(0);
+            $table->string('status_pembayaran')->nullable();
+            $table->date('jatuh_tempo')->nullable();
             $table->text('keterangan')->nullable();
+
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
             $table->softDeletes();
         });

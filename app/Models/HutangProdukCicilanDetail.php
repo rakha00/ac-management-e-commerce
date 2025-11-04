@@ -30,7 +30,19 @@ class HutangProdukCicilanDetail extends Model
         ];
     }
 
-    public function hutangProduk(): BelongsTo
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Otomatis hitung sisa hutang saat data cicilan berubah
+        static::created(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
+        static::updated(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
+        static::deleted(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
+        static::restored(fn (HutangProdukCicilanDetail $detail) => $detail->hutangProduk->recalculatePaymentStatus());
+    }
+
+    // Relasi ke model HutangProduk (pastikan ada)
+    public function hutangProduk()
     {
         return $this->belongsTo(HutangProduk::class);
     }
