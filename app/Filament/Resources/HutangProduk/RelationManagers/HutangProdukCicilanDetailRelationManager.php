@@ -33,6 +33,7 @@ class HutangProdukCicilanDetailRelationManager extends RelationManager
             ->components([
                 TextInput::make('nominal_cicilan')
                     ->numeric()
+                    ->prefix('Rp')
                     ->mask(RawJs::make('$money($input)'))
                     ->stripCharacters(',')
                     ->maxValue(fn () => $this->getOwnerRecord()->sisa_hutang)

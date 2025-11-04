@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PiutangProduk\Schemas;
 
+use App\Models\PiutangProduk;
 use App\Models\TransaksiProduk;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -9,7 +10,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Support\RawJs;
 
 class PiutangProdukForm
 {
@@ -21,48 +22,39 @@ class PiutangProdukForm
                     ->schema([
                         Select::make('transaksi_produk_id')
                             ->label('No Invoice')
-                            ->options(fn () => TransaksiProduk::query()
-                                ->orderBy('tanggal_transaksi', 'desc')
-                                ->pluck('nomor_invoice', 'id')
-                                ->toArray())
+                            ->relationship('transaksiProduk', 'nomor_invoice')
                             ->searchable()
-                            ->reactive()
+                            ->preload()
+                            ->live()
+                            ->required()
+                            ->disabled(fn (string $operation) => $operation === 'edit')
+                            ->dehydrated()
                             ->afterStateUpdated(function ($state, callable $set) {
-                                $trx = TransaksiProduk::find($state);
-                                if ($trx && $trx->transaksiProdukDetail) {
-                                    // Calculate total_penjualan from transaction details
-                                    $total = 0;
-                                    foreach ($trx->transaksiProdukDetail as $detail) {
-                                        $total += ($detail->harga_jual ?? 0) * ($detail->jumlah_keluar ?? 0);
-                                    }
-                                    $total = (int) $total;
-                                    // Auto-fill total_piutang from selected invoice
-                                    $set('total_piutang', number_format($total, 0, '', ','));
-                                    $set('sisa_piutang', number_format($total, 0, '', ','));
-                                    $set('status_pembayaran', 'belum lunas');
+                                $trx = TransaksiProduk::where('id', $state)->first();
+
+                                if (! $trx) {
+                                    return;
                                 }
-                            })
-                            ->required(),
+
+                                $total = PiutangProduk::calculateTotalPiutang($trx->id);
+
+                                $set('total_piutang', number_format($total));
+                                $set('sisa_piutang', number_format($total));
+                            }),
                         TextInput::make('total_piutang')
                             ->label('Total Piutang')
                             ->prefix('Rp')
+                            ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
-                            ->disabled() // auto-filled
-                            ->dehydrated()
-                            ->required(),
+                            ->disabled()
+                            ->dehydrated(),
                         TextInput::make('sisa_piutang')
                             ->label('Sisa Piutang')
                             ->prefix('Rp')
-                            ->disabled() // readonly display only
-                            ->dehydrated(false) // do not persist; not a column
-                            ->required()
-                            ->afterStateHydrated(function ($component, ?Model $record, callable $set) {
-                                if ($record) {
-                                    $totalCicilan = (int) $record->piutangProdukCicilanDetail()->sum('nominal_cicilan');
-                                    $sisa = max((int) ($record->total_piutang ?? 0) - $totalCicilan, 0);
-                                    $set('sisa_piutang', number_format($sisa, 0));
-                                }
-                            }),
+                            ->mask(RawJs::make('$money($input)'))
+                            ->stripCharacters(',')
+                            ->disabled()
+                            ->dehydrated(),
                     ])
                     ->columnSpanFull(),
                 Section::make('Pembayaran')
@@ -74,9 +66,9 @@ class PiutangProdukForm
                                 'tercicil' => 'Tercicil',
                                 'sudah lunas' => 'Sudah Lunas',
                             ])
-                            ->native(false)
-                            ->default('belum lunas')
-                            ->required(),
+                            ->disabled()
+                            ->dehydrated()
+                            ->default('belum lunas'),
                         DatePicker::make('jatuh_tempo')
                             ->label('Jatuh Tempo')
                             ->required(),

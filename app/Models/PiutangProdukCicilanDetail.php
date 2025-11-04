@@ -18,15 +18,18 @@ class PiutangProdukCicilanDetail extends Model
         'tanggal_cicilan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'piutang_produk_id' => 'integer',
             'nominal_cicilan' => 'integer',
             'tanggal_cicilan' => 'date',
             'created_by' => 'integer',
             'updated_by' => 'integer',
+            'deleted_by' => 'integer',
         ];
     }
 
@@ -43,5 +46,21 @@ class PiutangProdukCicilanDetail extends Model
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Otomatis hitung sisa piutang saat data cicilan berubah
+        static::created(fn (PiutangProdukCicilanDetail $detail) => $detail->piutangProduk->recalculatePaymentStatus());
+        static::updated(fn (PiutangProdukCicilanDetail $detail) => $detail->piutangProduk->recalculatePaymentStatus());
+        static::deleted(fn (PiutangProdukCicilanDetail $detail) => $detail->piutangProduk->recalculatePaymentStatus());
+        static::restored(fn (PiutangProdukCicilanDetail $detail) => $detail->piutangProduk->recalculatePaymentStatus());
     }
 }

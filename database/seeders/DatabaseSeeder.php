@@ -24,9 +24,9 @@ class DatabaseSeeder extends Seeder
             KonsumenSeeder::class,
 
             BarangMasukSeeder::class,
-            BarangMasukDetailSeeder::class,
             HutangProdukSeeder::class,
             TransaksiProdukSeeder::class,
+            PiutangProdukSeeder::class,
 
             // SparepartSeeder::class,
             // DistributorSeeder::class,

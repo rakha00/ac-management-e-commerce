@@ -27,8 +27,8 @@ class HutangProdukForm
                             ->preload()
                             ->live()
                             ->required()
-                            ->dehydrated()
                             ->disabled(fn (string $operation) => $operation === 'edit')
+                            ->dehydrated()
                             ->afterStateUpdated(function ($state, callable $set) {
                                 $bm = BarangMasuk::where('id', $state)->first();
 
@@ -77,8 +77,7 @@ class HutangProdukForm
                 Section::make('Keterangan')
                     ->schema([
                         Textarea::make('keterangan')
-                            ->label('Keterangan')
-                            ->columnSpanFull(),
+                            ->label('Keterangan'),
                     ])
                     ->columnSpanFull(),
             ]);

@@ -6,19 +6,19 @@ use App\Models\PiutangProduk;
 use App\Models\PiutangProdukCicilanDetail;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\View;
 use Filament\Support\RawJs;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class PiutangProdukTable
 {
@@ -53,6 +53,15 @@ class PiutangProdukTable
                 TextColumn::make('jatuh_tempo')
                     ->date()
                     ->sortable(),
+                TextColumn::make('createdBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updatedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deletedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -66,8 +75,42 @@ class PiutangProdukTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
             ->filters([
                 TrashedFilter::make(),
+                Filter::make('date_range')
+                    ->form([
+                        DatePicker::make('dari')
+                            ->maxDate(fn (callable $get) => $get('sampai') ?? null),
+                        DatePicker::make('sampai')
+                            ->minDate(fn (callable $get) => $get('dari')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['dari'] ?? null, fn (Builder $q, $date) => $q->whereDate('jatuh_tempo', '>=', $date))
+                            ->when($data['sampai'] ?? null, fn (Builder $q, $date) => $q->whereDate('jatuh_tempo', '<=', $date));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['dari'] ?? null) {
+                            $indicators['dari'] = 'Dari '.Carbon::parse($data['dari'])->toFormattedDateString();
+                        }
+                        if ($data['sampai'] ?? null) {
+                            $indicators['sampai'] = 'Sampai '.Carbon::parse($data['sampai'])->toFormattedDateString();
+                        }
+
+                        return $indicators;
+                    }),
+                SelectFilter::make('status_pembayaran')
+                    ->label('Status Pembayaran')
+                    ->options([
+                        'belum lunas' => 'Belum Lunas',
+                        'tercicil' => 'Tercicil',
+                        'sudah lunas' => 'Sudah Lunas',
+                    ])
+                    ->multiple()
+                    ->preload(),
             ])
             ->recordActions([
                 Action::make('bayarCicilan')
@@ -75,8 +118,7 @@ class PiutangProdukTable
                     ->color('primary')
                     ->icon('heroicon-o-banknotes')
                     ->hidden(
-                        fn (PiutangProduk $record): bool => strtolower((string) $record->status_pembayaran) === 'sudah lunas' ||
-                        max(((int) ($record->total_piutang ?? 0)) - (int) $record->piutangProdukCicilanDetail()->sum('nominal_cicilan'), 0) <= 0
+                        fn (PiutangProduk $record): bool => $record->status_pembayaran === 'sudah lunas' || (int) ($record->sisa_piutang <= 0)
                     )
                     ->modalHeading(fn ($record) => 'Cicilan: '.$record->transaksiProduk->nomor_invoice)
                     ->modalSubmitActionLabel('Bayar')
@@ -95,41 +137,19 @@ class PiutangProdukTable
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
-                            ->minValue(1)
-                            ->required()
-                            ->helperText(fn (PiutangProduk $record): string => 'Sisa: Rp '.number_format(max(((int) ($record->total_piutang ?? 0)) - (int) $record->piutangProdukCicilanDetail()->sum('nominal_cicilan'), 0), 0, ',', '.')),
+                            ->maxValue(fn ($record) => $record->sisa_piutang)
+                            ->helperText(fn ($record) => 'Sisa piutang: Rp '.number_format($record->sisa_piutang)),
                         DatePicker::make('tanggal_cicilan')
                             ->label('Tanggal Cicilan')
                             ->required(),
                     ])
                     ->action(function (array $data, PiutangProduk $record): void {
-                        $total = (int) ($record->total_piutang ?? 0);
-                        $paid = (int) $record->piutangProdukCicilanDetail()->sum('nominal_cicilan');
-                        $sisa = max($total - $paid, 0);
-
                         $nominal = (int) ($data['nominal_cicilan'] ?? 0);
-                        if ($nominal < 1 || $nominal > $sisa) {
-                            throw ValidationException::withMessages([
-                                'nominal_cicilan' => 'Nominal melebihi sisa piutang (Rp '.number_format($sisa, 0, ',', '.').').',
-                            ]);
-                        }
                         PiutangProdukCicilanDetail::create([
                             'piutang_produk_id' => $record->id,
                             'nominal_cicilan' => $nominal,
                             'tanggal_cicilan' => $data['tanggal_cicilan'],
                         ]);
-                        // Recalculate status pembayaran
-                        $paid2 = (int) $record->piutangProdukCicilanDetail()->sum('nominal_cicilan');
-                        $sisa2 = max((int) ($record->total_piutang ?? 0) - $paid2, 0);
-                        $status = 'belum lunas';
-                        if ($sisa2 <= 0 && ($record->total_piutang ?? 0) > 0) {
-                            $status = 'sudah lunas';
-                        } elseif ($sisa2 < ($record->total_piutang ?? 0) && $sisa2 > 0) {
-                            $status = 'tercicil';
-                        }
-                        $record->forceFill([
-                            'status_pembayaran' => $status,
-                        ])->save();
                         Notification::make()
                             ->title('Pembayaran cicilan berhasil')
                             ->success()
@@ -139,9 +159,7 @@ class PiutangProdukTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    //
                 ]),
             ]);
     }
