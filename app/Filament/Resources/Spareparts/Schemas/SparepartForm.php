@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Spareparts\Schemas;
 
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -21,13 +21,21 @@ class SparepartForm
                         TextInput::make('kode_sparepart')
                             ->label('Kode Sparepart')
                             ->required()
-                            ->maxLength(100)
                             ->unique(ignoreRecord: true),
 
                         TextInput::make('nama_sparepart')
                             ->label('Nama Sparepart')
-                            ->required()
-                            ->maxLength(255),
+                            ->required(),
+                    ]),
+                Section::make('Foto Sparepart')
+                    ->schema([
+                        FileUpload::make('path_foto_sparepart')
+                            ->label('Foto Sparepart')
+                            ->image()
+                            ->disk('public')
+                            ->multiple()
+                            ->directory('foto-sparepart')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp']),
                     ]),
                 Section::make('Harga Saat Ini')
                     ->columns(1)
@@ -36,19 +44,14 @@ class SparepartForm
                             ->label('Harga Modal')
                             ->numeric()
                             ->prefix('Rp')
-                            ->placeholder('0')
                             ->mask(RawJs::make('$money($input)'))
-                            ->stripCharacters(',')
-                            ->required(),
-
+                            ->stripCharacters(','),
                         TextInput::make('harga_ecommerce')
                             ->label('Harga E-commerce')
                             ->numeric()
                             ->prefix('Rp')
-                            ->placeholder('0')
                             ->mask(RawJs::make('$money($input)'))
-                            ->stripCharacters(',')
-                            ->required(),
+                            ->stripCharacters(','),
                     ]),
                 Section::make('Stok')
                     ->columns(2)
@@ -74,23 +77,10 @@ class SparepartForm
                             ->suffix('unit')
                             ->disabled(),
                     ]),
-                Section::make('Keterangan')
+                Section::make('Deskripsi Sparepart')
                     ->schema([
-                        Textarea::make('keterangan')
-                            ->label('Keterangan')
-                            ->nullable()
-                            ->columnSpanFull(),
-                    ]),
-                Section::make('Foto Sparepart')
-                    ->schema([
-                        FileUpload::make('path_foto_sparepart')
-                            ->label('Foto Sparepart')
-                            ->image()
-                            ->disk('public')
-                            ->multiple()
-                            ->directory('foto-sparepart')
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->nullable(),
+                        RichEditor::make('keterangan')
+                            ->label('Keterangan'),
                     ]),
             ])
             ->columns(1);

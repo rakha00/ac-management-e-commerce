@@ -17,6 +17,7 @@ return new class extends Migration
             $table->json('path_foto_sparepart')->nullable();
             $table->string('kode_sparepart')->unique();
             $table->string('nama_sparepart');
+
             $table->integer('harga_modal')->default(0);
             $table->integer('harga_ecommerce')->default(0);
 
@@ -29,6 +30,8 @@ return new class extends Migration
 
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('deleted_by')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
             $table->softDeletes();
         });

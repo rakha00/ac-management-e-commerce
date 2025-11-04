@@ -2,19 +2,16 @@
 
 namespace App\Filament\Resources\Spareparts\Tables;
 
-use App\Models\SparepartKeluarDetail;
-use App\Models\SparepartMasukDetail;
+use App\Models\Sparepart;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 class SparepartsTable
@@ -24,10 +21,11 @@ class SparepartsTable
         return $table
             ->columns([
                 ImageColumn::make('path_foto_sparepart')
-                    ->label('Foto')
                     ->disk('public')
+                    ->label('Foto')
                     ->size(50)
-                    ->limit(1),
+                    ->limit(1)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('kode_sparepart')
                     ->label('Kode Sparepart')
                     ->searchable(),
@@ -57,158 +55,114 @@ class SparepartsTable
                     ->label('Stok Masuk')
                     ->numeric()
                     ->sortable()
-                    ->getStateUsing(function ($record) {
-                        $dateFilter = session('date_filter');
+                    ->getStateUsing(function (Sparepart $record, HasTable $livewire): int {
+                        $tableFilters = $livewire->getTable()->getFilters();
+                        $tanggalAwal = null;
+                        $tanggalAkhir = null;
 
-                        if (empty($dateFilter)) {
-                            return $record->stok_masuk;
+                        if (isset($tableFilters['date_range'])) {
+                            $filterData = $tableFilters['date_range']->getState();
+                            $tanggalAwal = $filterData['dari'] ?? null;
+                            $tanggalAkhir = $filterData['sampai'] ?? null;
                         }
 
-                        $query = SparepartMasukDetail::where('sparepart_id', $record->id)
-                            ->join('sparepart_masuk', 'sparepart_masuk.id', '=', 'sparepart_masuk_detail.sparepart_masuk_id');
-
-                        if (! empty($dateFilter['from_date'])) {
-                            $query->whereDate('sparepart_masuk.tanggal_masuk', '>=', $dateFilter['from_date']);
-                        }
-
-                        if (! empty($dateFilter['until_date'])) {
-                            $query->whereDate('sparepart_masuk.tanggal_masuk', '<=', $dateFilter['until_date']);
-                        }
-
-                        return $query->sum('jumlah_masuk');
+                        return $record->getTotalStokMasuk($tanggalAwal, $tanggalAkhir);
                     }),
 
                 TextColumn::make('stok_keluar')
                     ->label('Stok Keluar')
                     ->numeric()
                     ->sortable()
-                    ->getStateUsing(function ($record) {
-                        $dateFilter = session('date_filter');
+                    ->getStateUsing(function (Sparepart $record, HasTable $livewire): int {
+                        $tableFilters = $livewire->getTable()->getFilters();
+                        $tanggalAwal = null;
+                        $tanggalAkhir = null;
 
-                        if (empty($dateFilter)) {
-                            return $record->stok_keluar;
+                        if (isset($tableFilters['date_range'])) {
+                            $filterData = $tableFilters['date_range']->getState();
+                            $tanggalAwal = $filterData['dari'] ?? null;
+                            $tanggalAkhir = $filterData['sampai'] ?? null;
                         }
 
-                        $query = SparepartKeluarDetail::where('sparepart_id', $record->id)
-                            ->join('sparepart_keluar', 'sparepart_keluar.id', '=', 'sparepart_keluar_detail.sparepart_keluar_id');
-
-                        if (! empty($dateFilter['from_date'])) {
-                            $query->whereDate('sparepart_keluar.tanggal_keluar', '>=', $dateFilter['from_date']);
-                        }
-
-                        if (! empty($dateFilter['until_date'])) {
-                            $query->whereDate('sparepart_keluar.tanggal_keluar', '<=', $dateFilter['until_date']);
-                        }
-
-                        return $query->sum('jumlah_keluar');
+                        return $record->getTotalStokKeluar($tanggalAwal, $tanggalAkhir);
                     }),
 
                 TextColumn::make('stok_akhir')
                     ->label('Stok Akhir')
                     ->numeric()
                     ->sortable()
-                    ->getStateUsing(function ($record) {
-                        $dateFilter = session('date_filter');
+                    ->getStateUsing(function (Sparepart $record, HasTable $livewire): int {
+                        $tableFilters = $livewire->getTable()->getFilters();
+                        $tanggalAwal = null;
+                        $tanggalAkhir = null;
 
-                        if (empty($dateFilter)) {
-                            return $record->stok_akhir;
+                        if (isset($tableFilters['date_range'])) {
+                            $filterData = $tableFilters['date_range']->getState();
+                            $tanggalAwal = $filterData['dari'] ?? null;
+                            $tanggalAkhir = $filterData['sampai'] ?? null;
                         }
 
-                        $stokAwal = $record->stok_awal;
-
-                        $stokMasukQuery = SparepartMasukDetail::where('sparepart_id', $record->id)
-                            ->join('sparepart_masuk', 'sparepart_masuk.id', '=', 'sparepart_masuk_detail.sparepart_masuk_id');
-
-                        if (! empty($dateFilter['from_date'])) {
-                            $stokMasukQuery->whereDate('sparepart_masuk.tanggal_masuk', '>=', $dateFilter['from_date']);
-                        }
-
-                        if (! empty($dateFilter['until_date'])) {
-                            $stokMasukQuery->whereDate('sparepart_masuk.tanggal_masuk', '<=', $dateFilter['until_date']);
-                        }
-
-                        $stokMasuk = $stokMasukQuery->sum('jumlah_masuk');
-
-                        $stokKeluarQuery = SparepartKeluarDetail::where('sparepart_id', $record->id)
-                            ->join('sparepart_keluar', 'sparepart_keluar.id', '=', 'sparepart_keluar_detail.sparepart_keluar_id');
-
-                        if (! empty($dateFilter['from_date'])) {
-                            $stokKeluarQuery->whereDate('sparepart_keluar.tanggal_keluar', '>=', $dateFilter['from_date']);
-                        }
-
-                        if (! empty($dateFilter['until_date'])) {
-                            $stokKeluarQuery->whereDate('sparepart_keluar.tanggal_keluar', '<=', $dateFilter['until_date']);
-                        }
-
-                        $stokKeluar = $stokKeluarQuery->sum('jumlah_keluar');
-
-                        return $stokAwal + $stokMasuk - $stokKeluar;
+                        return $record->getCalculatedStokAkhir($tanggalAwal, $tanggalAkhir);
                     }),
+                TextColumn::make('keterangan')
+                    ->label('Keterangan')
+                    ->limit(25)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('createdBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updatedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deletedBy.name')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->deferFilters(false)
+            ->deferColumnManager(false)
             ->filters([
                 TrashedFilter::make(),
                 Filter::make('date_range')
                     ->form([
-                        DatePicker::make('from_date')
-                            ->label('Dari Tanggal')
-                            ->placeholder('Dari Tanggal')
-                            ->afterStateUpdated(function ($state) {
-                                $dateFilter = session('date_filter', []);
-                                $dateFilter['from_date'] = $state;
-                                session(['date_filter' => $dateFilter]);
-                            }),
-                        DatePicker::make('until_date')
-                            ->label('Sampai Tanggal')
-                            ->placeholder('Sampai Tanggal')
-                            ->afterStateUpdated(function ($state) {
-                                $dateFilter = session('date_filter', []);
-                                $dateFilter['until_date'] = $state;
-                                session(['date_filter' => $dateFilter]);
-                            }),
+                        DatePicker::make('dari')
+                            ->maxDate(fn (callable $get) => $get('sampai') ?? null),
+                        DatePicker::make('sampai')
+                            ->minDate(fn (callable $get) => $get('dari')),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query;
-                    })
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
-                        if ($data['from_date'] ?? null) {
-                            $indicators['from_date'] = 'Dari '.Carbon::parse($data['from_date'])->toFormattedDateString();
+                        if ($data['dari'] ?? null) {
+                            $indicators['dari'] = 'Dari '.Carbon::parse($data['dari'])->toFormattedDateString();
                         }
-                        if ($data['until_date'] ?? null) {
-                            $indicators['until_date'] = 'Sampai '.Carbon::parse($data['until_date'])->toFormattedDateString();
+                        if ($data['sampai'] ?? null) {
+                            $indicators['sampai'] = 'Sampai '.Carbon::parse($data['sampai'])->toFormattedDateString();
                         }
 
                         return $indicators;
                     }),
                 Filter::make('stok_kosong')
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (isset($data['is_empty']) && $data['is_empty']) {
-                            $query->where('stok_akhir', 0);
-                        }
-
-                        return $query;
-                    })
-                    ->form([
-                        Checkbox::make('is_empty')
-                            ->label('Stok Kosong')
-                            ->default(false),
-                    ])
-                    ->indicateUsing(function (array $data): array {
-                        if (isset($data['is_empty']) && $data['is_empty']) {
-                            return ['Stok Kosong'];
-                        }
-
-                        return [];
-                    }),
+                    ->label('Stok Kosong')
+                    ->query(fn ($query) => $query->where('stok_akhir', '<=', 0)),
             ])
             ->recordActions([
                 EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    //
                 ]),
-            ])
-            ->deferFilters(false);
+            ]);
     }
 }

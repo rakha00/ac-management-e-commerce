@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('harga_sparepart_history', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sparepart_id')->constrained('spareparts')->onDelete('cascade');
-            $table->foreignId('karyawan_id')->nullable()->constrained('karyawan')->onDelete('set null');
+
             $table->integer('harga_modal');
             $table->integer('harga_ecommerce')->nullable();
+
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }

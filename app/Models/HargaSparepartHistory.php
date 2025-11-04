@@ -14,9 +14,9 @@ class HargaSparepartHistory extends Model
 
     protected $fillable = [
         'sparepart_id',
-        'karyawan_id',
         'harga_modal',
         'harga_ecommerce',
+        'updated_by',
     ];
 
     protected function casts(): array
@@ -24,6 +24,7 @@ class HargaSparepartHistory extends Model
         return [
             'harga_modal' => 'integer',
             'harga_ecommerce' => 'integer',
+            'updated_by' => 'integer',
         ];
     }
 
@@ -32,8 +33,8 @@ class HargaSparepartHistory extends Model
         return $this->belongsTo(Sparepart::class);
     }
 
-    public function karyawan(): BelongsTo
+    public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(Karyawan::class);
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

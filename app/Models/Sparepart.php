@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,11 +26,13 @@ class Sparepart extends Model
         'keterangan',
         'created_by',
         'updated_by',
+        'deleted_by',
     ];
 
     protected function casts(): array
     {
         return [
+            'path_foto_sparepart' => 'array',
             'harga_modal' => 'integer',
             'harga_ecommerce' => 'integer',
             'stok_awal' => 'integer',
@@ -39,7 +40,7 @@ class Sparepart extends Model
             'stok_keluar' => 'integer',
             'created_by' => 'string',
             'updated_by' => 'string',
-            'path_foto_sparepart' => 'array',
+            'deleted_by' => 'string',
         ];
     }
 
@@ -53,6 +54,11 @@ class Sparepart extends Model
         return $this->hasMany(SparepartKeluarDetail::class, 'sparepart_id');
     }
 
+    public function hargaHistory(): HasMany
+    {
+        return $this->hasMany(HargaSparepartHistory::class, 'sparepart_id');
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -63,48 +69,78 @@ class Sparepart extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    public function hargaHistory(): HasMany
+    public function deletedBy(): BelongsTo
     {
-        return $this->hasMany(HargaSparepartHistory::class, 'sparepart_id');
+        return $this->belongsTo(User::class, 'deleted_by');
     }
 
-    protected $appends = ['stok_akhir'];
-
-    /**
-     * Accessor for stok_akhir.
-     * Computed as: stok_awal + stok_masuk - stok_keluar
-     */
-    protected function stokAkhir(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => (int) ($this->stok_awal ?? 0) + (int) ($this->stok_masuk ?? 0) - (int) ($this->stok_keluar ?? 0),
-        );
-    }
-
-    /**
-     * Keep a physical column value in sync before saving if required in other places.
-     * Note: Even though it's computed, we mirror UnitAC behavior to provide a persisted value if needed by queries.
-     */
     protected static function booted(): void
     {
-        static::saving(function (Sparepart $sp) {
-            $sp->stok_akhir = (int) ($sp->stok_awal ?? 0)
-                + (int) ($sp->stok_masuk ?? 0)
-                - (int) ($sp->stok_keluar ?? 0);
+        static::creating(function (Sparepart $model) {
+            $model->stok_akhir = ($model->stok_awal ?? 0) + ($model->stok_masuk ?? 0) - ($model->stok_keluar ?? 0);
+        });
 
-            if ($sp->isDirty('harga_modal') && $sp->exists) {
-                $sp->hargaHistory()->create([
-                    'harga_modal' => $sp->harga_modal,
-                    'karyawan_id' => Auth::id(),
-                ]);
-            }
+        static::updating(function (Sparepart $model) {
+            $model->stok_akhir = ($model->stok_awal ?? 0) + ($model->stok_masuk ?? 0) - ($model->stok_keluar ?? 0);
+        });
 
-            if ($sp->isDirty('harga_ecommerce') && $sp->exists) {
-                $sp->hargaHistory()->create([
-                    'harga_ecommerce' => $sp->harga_ecommerce,
-                    'karyawan_id' => Auth::id(),
+        static::created(function (Sparepart $model) {
+            $model->hargaHistory()->create([
+                'harga_modal' => $model->harga_modal,
+                'harga_jual' => $model->harga_jual,
+                'updated_by' => Auth::id(),
+            ]);
+        });
+
+        static::updated(function (Sparepart $model) {
+            if ($model->isDirty('harga_modal') || $model->isDirty('harga_jual')) {
+                $model->hargaHistory()->create([
+                    'harga_modal' => $model->harga_modal,
+                    'harga_jual' => $model->harga_jual,
+                    'updated_by' => Auth::id(),
                 ]);
             }
         });
+    }
+
+    public function getTotalStokMasuk(?string $tanggalAwal, ?string $tanggalAkhir): int
+    {
+        $query = SparepartMasukDetail::where('sparepart_id', $this->id)
+            ->join('sparepart_masuk', 'sparepart_masuk.id', '=', 'sparepart_masuk_detail.sparepart_masuk_id');
+
+        if (! empty($tanggalAwal)) {
+            $query->whereDate('sparepart_masuk.tanggal_masuk', '>=', $tanggalAwal);
+        }
+
+        if (! empty($tanggalAkhir)) {
+            $query->whereDate('sparepart_masuk.tanggal_masuk', '<=', $tanggalAkhir);
+        }
+
+        return $query->sum('jumlah_masuk');
+    }
+
+    public function getTotalStokKeluar(?string $tanggalAwal, ?string $tanggalAkhir): int
+    {
+        $query = SparepartKeluarDetail::where('sparepart_id', $this->id)
+            ->join('sparepart_keluar', 'sparepart_keluar.id', '=', 'sparepart_keluar_detail.sparepart_keluar_id');
+
+        if (! empty($tanggalAwal)) {
+            $query->whereDate('sparepart_keluar.tanggal_keluar', '>=', $tanggalAwal);
+        }
+
+        if (! empty($tanggalAkhir)) {
+            $query->whereDate('sparepart_keluar.tanggal_keluar', '<=', $tanggalAkhir);
+        }
+
+        return $query->sum('jumlah_keluar');
+    }
+
+    public function getCalculatedStokAkhir(?string $tanggalAwal, ?string $tanggalAkhir): int
+    {
+        $stokAwal = $this->stok_awal;
+        $stokMasuk = $this->getTotalStokMasuk($tanggalAwal, $tanggalAkhir);
+        $stokKeluar = $this->getTotalStokKeluar($tanggalAwal, $tanggalAkhir);
+
+        return $stokAwal + $stokMasuk - $stokKeluar;
     }
 }
