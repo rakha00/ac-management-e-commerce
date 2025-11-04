@@ -9,11 +9,12 @@ class FrontendController extends Controller
 {
     public function home()
     {
+        return abort(503, 'Halaman sedang dalam perbaikan. Silakan coba lagi nanti.');
         // Logika untuk halaman beranda
-        $unitACs = UnitAC::limit(3)->get();
-        $spareparts = Sparepart::limit(3)->get();
+        // $unitACs = UnitAC::limit(3)->get();
+        // $spareparts = Sparepart::limit(3)->get();
 
-        return view('home', compact('unitACs', 'spareparts'));
+        // return view('home', compact('unitACs', 'spareparts'));
     }
 
     public function category($type)
