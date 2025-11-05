@@ -26,6 +26,14 @@ class TransaksiJasaTable
                     ->label('Kode Jasa')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('nomor_invoice_jasa')
+                    ->label('Nomor Invoice')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('nomor_surat_jalan_jasa')
+                    ->label('Nomor Surat Jalan')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('teknisi.nama')
                     ->label('Teknisi')
                     ->sortable()

@@ -33,8 +33,9 @@ class DatabaseSeeder extends Seeder
             // SparepartMasukSeeder::class,  NOT YET TESTED
             // SparepartKeluarSeeder::class, NOT YET TESTED
 
+            TransaksiJasaSeeder::class,
+
             // AbsensiSeeder::class, NOT YET TESTED
-            // TransaksiJasaSeeder::class, NOT YET TESTED
         ]);
     }
 }

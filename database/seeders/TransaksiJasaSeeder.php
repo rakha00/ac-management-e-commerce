@@ -3,13 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\Karyawan;
+use App\Models\Konsumen;
 use App\Models\TransaksiJasa;
 use App\Models\TransaksiJasaDetail;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class TransaksiJasaSeeder extends Seeder
 {
@@ -18,73 +17,30 @@ class TransaksiJasaSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ensure there's at least one user for created_by/updated_by
+
         $user = User::first();
-        if (! $user) {
-            $user = User::create([
-                'name' => 'Seeder User',
-                'email' => 'seeder@example.com',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-                'remember_token' => Str::random(10),
-            ]);
-        }
-
-        // Ensure there's at least one Teknisi
-        $teknisi = Karyawan::where('jabatan', 'teknisi')->first();
-        if (! $teknisi) {
-            Karyawan::create([
-                'nama' => 'Teknisi Seeder 1',
-                'alamat' => 'Alamat Teknisi 1',
-                'telepon' => '081234567890',
-                'jenis_kelamin' => 'Laki-laki',
-                'tanggal_lahir' => '1990-01-01',
-                'jabatan' => 'teknisi',
-                'gaji_pokok' => 5000000,
-                'tanggal_masuk' => '2020-01-01',
-                'status' => 'Aktif',
-                'created_by' => $user->id,
-                'updated_by' => $user->id,
-            ]);
-        }
-
-        // Ensure there's at least one Helper
-        $helper = Karyawan::where('jabatan', 'helper')->first();
-        if (! $helper) {
-            Karyawan::create([
-                'nama' => 'Helper Seeder 1',
-                'alamat' => 'Alamat Helper 1',
-                'telepon' => '081234567891',
-                'jenis_kelamin' => 'Perempuan',
-                'tanggal_lahir' => '1992-02-02',
-                'jabatan' => 'helper',
-                'gaji_pokok' => 3000000,
-                'tanggal_masuk' => '2021-01-01',
-                'status' => 'Aktif',
-                'created_by' => $user->id,
-                'updated_by' => $user->id,
-            ]);
-        }
-
-        // Fetch all Teknisi and Helper after ensuring they exist
         $teknisiKaryawan = Karyawan::where('jabatan', 'teknisi')->get();
         $helperKaryawan = Karyawan::where('jabatan', 'helper')->get();
+        $konsumen = Konsumen::all();
 
         for ($i = 0; $i < 3; $i++) {
             $tanggalTransaksi = Carbon::now()->subDays(rand(1, 365));
             $teknisi = $teknisiKaryawan->random();
             $helper = $helperKaryawan->random();
+            $randomKonsumen = $konsumen->random();
 
-            $kodeJasa = TransaksiJasa::generateSequentialNumber($tanggalTransaksi->toDateString(), 'KJ');
+            $kodeJasa = TransaksiJasa::generateSequentialNumber($tanggalTransaksi->toDateString(), 'kode_jasa', 'KJ');
+            $nomorInvoiceJasa = TransaksiJasa::generateSequentialNumber($tanggalTransaksi->toDateString(), 'nomor_invoice_jasa', 'INV-TJ');
+            $nomorSuratJalanJasa = TransaksiJasa::generateSequentialNumber($tanggalTransaksi->toDateString(), 'nomor_surat_jalan_jasa', 'SJ-TJ');
 
             $transaksiJasa = TransaksiJasa::create([
                 'tanggal_transaksi' => $tanggalTransaksi,
                 'kode_jasa' => $kodeJasa,
-                'nama_konsumen' => fake()->name(),
+                'nomor_invoice_jasa' => $nomorInvoiceJasa,
+                'nomor_surat_jalan_jasa' => $nomorSuratJalanJasa,
                 'teknisi_karyawan_id' => $teknisi->id,
                 'helper_karyawan_id' => $helper->id,
-                'teknisi_nama' => $teknisi->nama,
-                'helper_nama' => $helper->nama,
+                'konsumen_id' => $randomKonsumen->id,
                 'garansi_hari' => rand(30, 365),
                 'keterangan' => fake()->sentence,
                 'created_by' => $user->id,
@@ -98,7 +54,7 @@ class TransaksiJasaSeeder extends Seeder
 
                 TransaksiJasaDetail::create([
                     'transaksi_jasa_id' => $transaksiJasa->id,
-                    'jenis_data' => fake()->word,
+                    'jenis_jasa' => fake()->word,
                     'qty' => $qty,
                     'harga_jasa' => $hargaJasa,
                     'keterangan_jasa' => fake()->sentence,
