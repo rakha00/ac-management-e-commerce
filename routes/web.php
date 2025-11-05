@@ -14,6 +14,8 @@ Route::get('/tentang-kami', [FrontendController::class, 'aboutUs'])->name('about
 Route::get('/transaksi-produk/{record}/invoice', [PdfController::class, 'generateTransaksiProdukInvoice'])->name('transaksi-produk.invoice');
 Route::get('/transaksi-produk/{record}/surat-jalan', [PdfController::class, 'generateTransaksiProdukSuratJalan'])->name('transaksi-produk.surat-jalan');
 Route::get('/sparepart-keluar/{record}/invoice', [PdfController::class, 'generateSparepartKeluarInvoice'])->name('sparepart-keluar.invoice');
+Route::get('/transaksi-jasa/{record}/invoice', [PdfController::class, 'generateTransaksiJasaInvoice'])->name('transaksi-jasa.invoice');
+Route::get('/transaksi-jasa/{record}/surat-jalan', [PdfController::class, 'generateTransaksiJasaSuratJalan'])->name('transaksi-jasa.surat-jalan');
 
 Route::middleware(['auth'])->group(function () {
     // Alias to the ScanAbsensi page (to make the URL easy to reference from QR)

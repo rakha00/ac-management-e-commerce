@@ -2,9 +2,13 @@
 
 namespace App\Filament\Resources\TransaksiJasa\Tables;
 
+use App\Models\TransaksiJasa;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -121,6 +125,18 @@ class TransaksiJasaTable
                     }),
             ])
             ->recordActions([
+                ActionGroup::make([
+                    Action::make('print_invoice')
+                        ->label('Cetak Invoice')
+                        ->url(fn (TransaksiJasa $record): string => route('transaksi-jasa.invoice', $record)),
+                    Action::make('print_surat_jalan')
+                        ->label('Cetak Surat Jalan')
+                        ->url(fn (TransaksiJasa $record): string => route('transaksi-jasa.surat-jalan', $record)),
+                ])
+                    ->label('Cetak')
+                    ->icon('heroicon-s-printer')
+                    ->size(Size::Small)
+                    ->link(),
                 EditAction::make(),
             ])
             ->toolbarActions([
