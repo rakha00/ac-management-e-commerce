@@ -223,7 +223,6 @@ class ManageKaryawanPenghasilanDetail extends ManageRelatedRecords
             ])
             ->toolbarActions([
                 ExcelExportAction::make('export_excel')
-                    ->label('Export Excel')
                     ->exports([
                         ExcelExport::make('table')
                             ->withColumns([
