@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Http\Middleware\CheckKaryawanStatus;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -73,6 +74,13 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 CheckKaryawanStatus::class,
-            ]);
+            ])
+            ->font('Poppins')
+            ->defaultThemeMode(ThemeMode::Light)
+            ->darkMode(false)
+            ->brandLogo(asset('img/GSI-landscape.png'))
+            ->brandLogoHeight('3rem')
+            ->favicon(asset('img/GSI.png'));
+
     }
 }
