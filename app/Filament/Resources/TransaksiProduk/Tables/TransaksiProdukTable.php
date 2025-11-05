@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\TransaksiProduk\Tables;
 
 use App\Models\TransaksiProduk;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -126,6 +129,18 @@ class TransaksiProdukTable
                     }),
             ])
             ->recordActions([
+                ActionGroup::make([
+                    Action::make('print_invoice')
+                        ->label('Cetak Invoice')
+                        ->url(fn (TransaksiProduk $record): string => route('transaksi-produk.invoice', $record)),
+                    Action::make('print_surat_jalan')
+                        ->label('Cetak Surat Jalan')
+                        ->url(fn (TransaksiProduk $record): string => route('transaksi-produk.surat-jalan', $record)),
+                ])
+                    ->label('Cetak')
+                    ->icon('heroicon-s-printer')
+                    ->size(Size::Small)
+                    ->link(),
                 EditAction::make(),
             ])
             ->toolbarActions([
