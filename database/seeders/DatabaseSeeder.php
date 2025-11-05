@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
 
             SparepartSeeder::class,
             // SparepartMasukSeeder::class,  NOT YET TESTED
-            // SparepartKeluarSeeder::class, NOT YET TESTED
+            SparepartKeluarSeeder::class,
 
             TransaksiJasaSeeder::class,
 

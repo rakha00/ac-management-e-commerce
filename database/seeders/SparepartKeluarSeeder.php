@@ -28,15 +28,12 @@ class SparepartKeluarSeeder extends Seeder
         for ($i = 0; $i < 5; $i++) {
             $sparepartKeluar = SparepartKeluar::create([
                 'tanggal_keluar' => $faker->date(),
-                'nomor_invoice' => 'INVSP-'.date('Ymd').'-'.str_pad($i + 1, 2, '0', STR_PAD_LEFT),
+                'nomor_invoice' => 'INV-SP-'.date('Ymd').'-'.str_pad($i + 1, 2, '0', STR_PAD_LEFT),
                 'konsumen_id' => $faker->randomElement($konsumen->pluck('id')->toArray()),
                 'keterangan' => $faker->sentence(),
                 'created_by' => $users->random()->id,
                 'updated_by' => $users->random()->id,
             ]);
-
-            $totalModal = 0;
-            $totalPenjualan = 0;
 
             for ($j = 0; $j < rand(2, 5); $j++) {
                 $sparepart = $spareparts->random();
@@ -49,8 +46,6 @@ class SparepartKeluarSeeder extends Seeder
                 SparepartKeluarDetail::create([
                     'sparepart_keluar_id' => $sparepartKeluar->id,
                     'sparepart_id' => $sparepart->id,
-                    'kode_sparepart' => $sparepart->kode_sparepart,
-                    'nama_sparepart' => $sparepart->nama_sparepart,
                     'jumlah_keluar' => $jumlahKeluar,
                     'harga_modal' => $hargaModal,
                     'harga_jual' => $hargaJual,
@@ -58,16 +53,7 @@ class SparepartKeluarSeeder extends Seeder
                     'created_by' => $users->random()->id,
                     'updated_by' => $users->random()->id,
                 ]);
-
-                $totalModal += ($hargaModal * $jumlahKeluar);
-                $totalPenjualan += ($hargaJual * $jumlahKeluar);
             }
-
-            $sparepartKeluar->update([
-                'total_modal' => $totalModal,
-                'total_penjualan' => $totalPenjualan,
-                'total_keuntungan' => $totalPenjualan - $totalModal,
-            ]);
         }
     }
 }

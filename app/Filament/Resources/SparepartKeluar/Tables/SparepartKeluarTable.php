@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\SparepartKeluar\Tables;
 
+use App\Models\SparepartKeluar;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -73,6 +75,10 @@ class SparepartKeluarTable
                     }),
             ])
             ->recordActions([
+                Action::make('print_invoice')
+                    ->label('Cetak Invoice')
+                    ->icon('heroicon-s-printer')
+                    ->url(fn (SparepartKeluar $record): string => route('sparepart-keluar.invoice', $record)),
                 EditAction::make(),
             ])
             ->toolbarActions([
