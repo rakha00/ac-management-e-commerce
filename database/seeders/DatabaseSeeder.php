@@ -30,11 +30,11 @@ class DatabaseSeeder extends Seeder
             PiutangProdukSeeder::class,
 
             SparepartSeeder::class,
-            // SparepartMasukSeeder::class,  NEED TO BE FIX
-            // SparepartKeluarSeeder::class, NEED TO BE FIX
+            // SparepartMasukSeeder::class,  NOT YET TESTED
+            // SparepartKeluarSeeder::class, NOT YET TESTED
 
-            // AbsensiSeeder::class,
-            // TransaksiJasaSeeder::class,
+            // AbsensiSeeder::class, NOT YET TESTED
+            // TransaksiJasaSeeder::class, NOT YET TESTED
         ]);
     }
 }
