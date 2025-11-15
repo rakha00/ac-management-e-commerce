@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Filament\Resources\SparepartMasuk\Pages;
+
+use App\Filament\Resources\SparepartMasuk\SparepartMasukResource;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\EditRecord;
+
+class EditSparepartMasuk extends EditRecord
+{
+    protected static string $resource = SparepartMasukResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
+}

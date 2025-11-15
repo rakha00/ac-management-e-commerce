@@ -1,0 +1,145 @@
+<header x-data="{ open: false }" @click.outside="open = false" class="bg-white shadow-md sticky top-0 z-50">
+
+    <!-- Top Bar -->
+    <div class="bg-gray-800 text-white text-xs py-1.5 hidden md:block">
+        <div class="container mx-auto px-4 md:px-6 flex justify-between items-center">
+            <span>Solusi AC Profesional: Dealer, Servis, Instalasi</span>
+
+            <a href="https://wa.me/628123456789" target="_blank" class="flex items-center hover:text-gsi-green">
+                <x-fab-whatsapp class="w-4 h-4 mr-1.5" />
+                <span>(021) 1234 5678 / sales@gsi.co.id</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <div class="container mx-auto px-4 md:px-6 py-3">
+        <div class="flex justify-between items-center gap-4">
+
+            <!-- Logo -->
+            <a href="/" class="flex-shrink-0">
+                <img class="h-10 md:h-12 w-auto" src="/img/GSI-landscape.png" alt="Logo Global Servis Int.">
+            </a>
+
+            <!-- Desktop Search -->
+            <div class="flex-grow max-w-2xl hidden md:block">
+                <form action="/produk" method="GET" class="relative group">
+                    <input type="search" name="search" placeholder="Cari AC Daikin, Servis, Spare Part..."
+                        class="w-full pl-5 pr-28 py-3 text-sm text-gray-700 bg-gray-100 border border-gray-200 rounded-lg
+                               focus:outline-none focus:ring-2 focus:ring-gsi-red/50 focus:border-gsi-red transition-all">
+                    <button type="submit"
+                        class="absolute right-0 top-0 h-full px-5 py-3 bg-gsi-red text-white rounded-r-lg
+                               hover:bg-red-700 font-semibold text-sm">
+                        <x-heroicon-o-magnifying-glass class="w-5 h-5" />
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Section -->
+            <div class="flex items-center space-x-4">
+                <a href="https://wa.me/628123456789" target="_blank"
+                    class="hidden md:flex items-center text-gray-600 hover:text-gsi-red">
+                    <x-heroicon-o-chat-bubble-left-right class="w-7 h-7" />
+                    <span class="ml-2 text-sm font-medium hidden lg:block">Konsultasi</span>
+                </a>
+
+                <a href="/cart" class="flex items-center text-gray-600 hover:text-gsi-red relative">
+                    <x-heroicon-o-shopping-cart class="w-7 h-7" />
+                    <span class="ml-2 text-sm font-medium hidden lg:block">Keranjang</span>
+                    <span
+                        class="absolute -top-2 left-4 bg-gsi-red text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                        0
+                    </span>
+                </a>
+
+                <div class="md:hidden">
+                    <button @click="open = !open" class="text-gray-700 hover:text-gsi-red focus:outline-none">
+                        <x-heroicon-o-bars-3 class="w-6 h-6" />
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="bg-white border-t border-gray-100 hidden md:block">
+        <div class="container mx-auto px-4 md:px-6 py-2.5 flex items-center space-x-6">
+            <a href="/" class="text-gray-800 hover:text-gsi-red font-semibold">Home</a>
+
+            @foreach ($tipeAC as $tipe)
+                <a href="/produk?tipe={{ $tipe->id }}" class="text-gray-700 hover:text-gsi-red font-medium">
+                    {{ $tipe->tipe_ac }}
+                </a>
+            @endforeach
+
+            <a href="/servis" class="text-gray-700 hover:text-gsi-red font-medium">Pesan Servis</a>
+            <a href="/produk?promo=true" class="text-gsi-red hover:text-red-700 font-semibold">Promo Spesial</a>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" x-collapse class="md:hidden border-t bg-white">
+        <div class="px-4 py-4 space-y-4">
+
+            <!-- Mobile Search -->
+            <form action="/produk" method="GET" class="relative group">
+                <input type="search" name="search" placeholder="Cari AC Daikin, Servis, Spare Part..."
+                    class="w-full pl-5 pr-12 py-3 text-sm text-gray-700 bg-gray-100 border border-gray-200 rounded-lg
+                           focus:outline-none focus:ring-2 focus:ring-gsi-red/50 focus:border-gsi-red transition-all">
+                <button type="submit"
+                    class="absolute right-0 top-0 h-full px-4 py-3 bg-gsi-red text-white rounded-r-lg
+                           hover:bg-red-700 font-semibold text-sm">
+                    <x-heroicon-o-magnifying-glass class="w-4 h-4" />
+                </button>
+            </form>
+
+            <!-- Mobile Navigation Links -->
+            <div class="space-y-2">
+
+                <a href="/"
+                    class="block text-gray-800 hover:text-gsi-red font-semibold py-2 border-b border-gray-100">
+                    Home
+                </a>
+
+                @foreach ($tipeAC as $tipe)
+                    <a href="/produk?tipe={{ $tipe->id }}"
+                        class="block text-gray-700 hover:text-gsi-red font-medium py-2 border-b border-gray-100">
+                        {{ $tipe->tipe_ac }}
+                    </a>
+                @endforeach
+
+                <a href="/servis"
+                    class="block text-gray-700 hover:text-gsi-red font-medium py-2 border-b border-gray-100">
+                    Pesan Servis
+                </a>
+
+                <a href="/produk?promo=true"
+                    class="block text-gsi-red hover:text-red-700 font-semibold py-2 border-b border-gray-100">
+                    Promo Spesial
+                </a>
+            </div>
+
+            <!-- Mobile Contact -->
+            <div class="pt-4 space-y-3">
+                <a href="https://wa.me/628123456789" target="_blank"
+                    class="flex items-center text-gray-600 hover:text-gsi-red">
+                    <x-heroicon-o-chat-bubble-left-right class="w-5 h-5 mr-3" />
+                    <span class="text-sm font-medium">Konsultasi</span>
+                </a>
+
+                <a href="/cart" class="flex items-center text-gray-600 hover:text-gsi-red">
+                    <x-heroicon-o-shopping-cart class="w-5 h-5 mr-3" />
+                    <span class="text-sm font-medium">Keranjang</span>
+
+                    <span
+                        class="ml-auto bg-gsi-red text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                        0
+                    </span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</header>
