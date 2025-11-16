@@ -19,7 +19,7 @@
 
                 <div class="md:col-span-2 bg-white p-6 md:p-8 rounded-lg shadow-lg" x-data="{
                     /* Ganti '628123456789' dengan nomor WA admin servis Anda */
-                    nomorWa: '628123456789',
+                    nomorWa: '6285156167795',
                     nama: '',
                     alamat: '',
                     pesan: '',
@@ -31,19 +31,15 @@
                             return;
                         }
                 
-                        let templatePesan = `--- FORMULIR ORDER SERVIS ---
-                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                            *Nama Lengkap:*
-                                                                                                                                                                                                                                                                            ${this.nama}
-                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                            *Alamat Lengkap:*
-                                                                                                                                                                                                                                                                            ${this.alamat}
-                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                            *Keluhan / Pesan:*
-                                                                                                                                                                                                                                                                            ${this.pesan}
-                                                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                                            Saya ingin memesan servis sesuai data di atas. Mohon konfirmasi jadwal dan ketersediaan teknisi. Terima kasih.
-                                                                                                                                                                                                                                                                            `;
+let templatePesan = `--- ORDER SERVIS AC ---
+
+Nama Lengkap: ${this.nama}
+Alamat Lengkap: ${this.alamat}
+
+Keluhan / Pesan:
+${this.pesan}
+
+Saya ingin memesan servis. Mohon konfirmasi jadwal. Terima kasih.`;
                         /* Encode pesan untuk URL */
                         let urlWa = `https://wa.me/${this.nomorWa}?text=${encodeURIComponent(templatePesan)}`;
                 

@@ -33,7 +33,7 @@ class AbsensiController extends Controller
         if ($now->lt($waktuAbsen)) {
             return response()->json([
                 'ok' => false,
-                'message' => 'Belum waktunya absen. Absensi dapat dilakukan mulai ' . $waktuAbsen->format('H:i') . ' WIB.',
+                'message' => 'Belum waktunya absen. Absensi dapat dilakukan mulai '.$waktuAbsen->format('H:i').' WIB.',
             ], 400);
         }
 
@@ -50,7 +50,7 @@ class AbsensiController extends Controller
 
         // Check if already absen today
         $karyawanId = auth()->user()?->karyawan?->id;
-        if (!$karyawanId) {
+        if (! $karyawanId) {
             return response()->json([
                 'ok' => false,
                 'message' => 'Profil karyawan tidak ditemukan.',
@@ -112,7 +112,7 @@ class AbsensiController extends Controller
 
         // Get karyawan
         $karyawanId = auth()->user()?->karyawan?->id;
-        if (!$karyawanId) {
+        if (! $karyawanId) {
             return response()->json([
                 'ok' => false,
                 'message' => 'Profil karyawan tidak ditemukan.',
@@ -125,7 +125,7 @@ class AbsensiController extends Controller
         if ($absensi) {
             // Hapus foto lama jika ada
             if ($absensi->foto_bukti) {
-                $oldFotoPath = storage_path('app/private/' . $absensi->foto_bukti);
+                $oldFotoPath = storage_path('app/private/'.$absensi->foto_bukti);
                 if (file_exists($oldFotoPath)) {
                     unlink($oldFotoPath);
                 }
