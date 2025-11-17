@@ -7,6 +7,7 @@ use App\Models\TransaksiJasa;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Support\Enums\Size;
@@ -177,6 +178,7 @@ class TransaksiJasaTable
                     ->icon('heroicon-s-printer')
                     ->size(Size::Small)
                     ->link(),
+                ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([

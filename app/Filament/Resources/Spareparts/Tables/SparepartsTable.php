@@ -33,15 +33,18 @@ class SparepartsTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('kode_sparepart')
                     ->label('Kode Sparepart')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('nama_sparepart')
                     ->label('Nama Sparepart')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('merkSparepart.merk_spareparts')
-                    ->label('Nama Sparepart')
-                    ->searchable(),
+                    ->label('Merk')
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('harga_modal')
                     ->label('Harga Modal')
