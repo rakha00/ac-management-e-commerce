@@ -65,7 +65,8 @@ class AbsensiController extends Controller
             return response()->json([
                 'ok' => true,
                 'created' => false,
-                'message' => 'Anda sudah absen hari ini.',
+                'requires_photo' => true,
+                'message' => 'Silakan ambil foto bukti (memperbarui foto lama).',
             ]);
         }
 
@@ -119,13 +120,15 @@ class AbsensiController extends Controller
             ], 400);
         }
 
-        // Check if absensi exists with the provided token
-        $absensi = Absensi::where('token', $request->token)->first();
+        // Check if this specific employee already has attendance today
+        $existing = Absensi::where('karyawan_id', $karyawanId)
+            ->whereDate('waktu_absen', $today)
+            ->first();
 
-        if ($absensi) {
+        if ($existing) {
             // Hapus foto lama jika ada
-            if ($absensi->foto_bukti) {
-                $oldFotoPath = storage_path('app/private/' . $absensi->foto_bukti);
+            if ($existing->foto_bukti) {
+                $oldFotoPath = storage_path('app/private/' . $existing->foto_bukti);
                 if (file_exists($oldFotoPath)) {
                     unlink($oldFotoPath);
                 }
@@ -133,7 +136,7 @@ class AbsensiController extends Controller
 
             // Update only the foto_bukti field
             $fotoPath = $request->file('foto_bukti')->store('foto-bukti-absensi', 'local');
-            $absensi->update([
+            $existing->update([
                 'foto_bukti' => $fotoPath,
             ]);
 
@@ -142,22 +145,9 @@ class AbsensiController extends Controller
                 'created' => false,
                 'updated' => true,
                 'message' => 'Foto bukti berhasil diperbarui.',
-                'absensi_id' => $absensi->id,
+                'absensi_id' => $existing->id,
             ]);
         } else {
-            // Double check not already absen today
-            $existing = Absensi::where('karyawan_id', $karyawanId)
-                ->whereDate('waktu_absen', $today)
-                ->exists();
-
-            if ($existing) {
-                return response()->json([
-                    'ok' => true,
-                    'created' => false,
-                    'message' => 'Anda sudah absen hari ini.',
-                ]);
-            }
-
             // Store photo
             $fotoPath = $request->file('foto_bukti')->store('foto-bukti-absensi', 'local');
 
