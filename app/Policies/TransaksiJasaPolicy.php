@@ -32,7 +32,6 @@ class TransaksiJasaPolicy
         return $jabatan === 'admin' || $jabatan === 'staff';
     }
 
-
     /**
      * Determine whether the user can create models.
      */

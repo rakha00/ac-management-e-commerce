@@ -9,22 +9,20 @@
 
             <div class="mb-6 md:mb-8 pb-4 border-b border-gray-200">
                 <h1 class="text-2xl lg:text-3xl font-semibold text-gray-900">
-                    AC DAIKIN STANDART THAILAND 1 PK FTC25NV14 + RC25NV14
+                    {{ $product->nama_unit }}
                 </h1>
-                <span class="text-sm text-gray-500 mt-1">Kategori: <a href="#" class="text-gsi-red hover:underline">AC
-                        Split</a></span>
+                <span class="text-sm text-gray-500 mt-1">Kategori: <a href="#"
+                        class="text-gsi-red hover:underline">{{ $product->tipeAC->tipe_ac }}</a></span>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
 
                 <div x-data="{
-                    images: [
-                        { main: 'https://placehold.co/600x450/e0e0e0/969696?text=AC+Indoor', thumb: 'https://placehold.co/100x100/e0e0e0/969696?text=Indoor' },
-                        { main: 'https://placehold.co/600x450/cccccc/969696?text=AC+Outdoor', thumb: 'https://placehold.co/100x100/cccccc/969696?text=Outdoor' },
-                        { main: 'https://placehold.co/600x450/e0e0e0/969696?text=Remote', thumb: 'https://placehold.co/100x100/e0e0e0/969696?text=Remote' },
-                        { main: 'https://placehold.co/600x450/cccccc/969696?text=Ruang+Tamu', thumb: 'https://placehold.co/100x100/cccccc/969696?text=Suasana' },
-                        { main: 'https://placehold.co/600x450/e0e0e0/969696?text=Fitur', thumb: 'https://placehold.co/100x100/e0e0e0/969696?text=Fitur' }
-                    ],
-                    activeImageSrc: 'https://placehold.co/600x450/e0e0e0/969696?text=AC+Indoor'
+                    images: @if ($product->path_foto_produk && is_array($product->path_foto_produk)) @json($product->path_foto_produk)
+                    @else
+                        [{ main: 'https://placehold.co/600x450/e0e0e0/969696?text=No+Image', thumb: 'https://placehold.co/100x100/e0e0e0/969696?text=No+Image' }] @endif,
+                    activeImageSrc: @if ($product->path_foto_produk && is_array($product->path_foto_produk) && count($product->path_foto_produk) > 0) '{{ $product->path_foto_produk[0]['main'] ?? 'https://placehold.co/600x450/e0e0e0/969696?text=No+Image' }}'
+                    @else
+                        'https://placehold.co/600x450/e0e0e0/969696?text=No+Image' @endif
                 }">
                     <div class="mb-4 border border-gray-200 rounded-lg overflow-hidden">
                         <img x-bind:src="activeImageSrc" alt="Produk Utama"
@@ -47,7 +45,7 @@
                 <div>
                     <div class="mb-5">
                         <span class="text-4xl font-bold text-gsi-red">
-                            Rp 4.489.000
+                            Rp {{ number_format($product->harga_ecommerce, 0, ',', '.') }}
                         </span>
                     </div>
 
@@ -72,27 +70,23 @@
                         <div class="space-y-2">
                             <div class="flex items-center p-3 bg-gray-50 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">SKU Produk</span>
-                                <span class="w-2/3 text-sm text-gray-800 font-medium">1</span>
-                            </div>
-                            <div class="flex items-center p-3 rounded">
-                                <span class="w-1/3 text-sm font-semibold text-gray-600">Made In</span>
-                                <span class="w-2/3 text-sm text-gray-800 font-medium">MADE IN THAILAND</span>
+                                <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->sku }}</span>
                             </div>
                             <div class="flex items-center p-3 bg-gray-50 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">Merek</span>
-                                <span class="w-2/3 text-sm text-gray-800 font-medium">Daikin</span>
+                                <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->merk->merk }}</span>
                             </div>
                             <div class="flex items-center p-3 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">Tipe AC</span>
-                                <span class="w-2/3 text-sm text-gray-800 font-medium">Split</span>
+                                <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->tipeAC->tipe_ac }}</span>
                             </div>
                             <div class="flex items-center p-3 bg-gray-50 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">Daya Watt</span>
-                                <span class="w-2/3 text-sm text-gray-800 font-medium">220</span>
+                                <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->pk }} PK</span>
                             </div>
                             <div class="flex items-center p-3 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">BTU</span>
-                                <span class="w-2/3 text-sm text-gray-800 font-medium">9000</span>
+                                <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->pk * 9000 }} BTU</span>
                             </div>
                         </div>
                     </div>
@@ -104,25 +98,12 @@
                     Deskripsi Produk
                 </h2>
 
-                <div class_alias="text-gray-700 leading-relaxed space-y-4">
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore
-                        et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                        aliquip ex ea commodo consequat.
-                    </p>
-                    <p>
-                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
-                        anim id est laborum.
-                    </p>
-                    <h4 class="text-lg font-semibold text-gray-800 pt-2">Fitur Utama:</h4>
-                    <ul class="list-disc list-inside space-y-2 pl-4">
-                        <li><strong>Mode Econo:</strong> Mengurangi konsumsi daya listrik agar hemat energi.</li>
-                        <li><strong>Filter Gin-Ion:</strong> Menghilangkan partikel debu dan bau tak sedap.</li>
-                        <li><strong>Blue Fin Kondensor:</strong> Sirip kondensor anti karat untuk durabilitas lebih lama.
-                        </li>
-                        <li><strong>Refrigeran R32:</strong> Ramah lingkungan dan lebih cepat mendinginkan.</li>
-                    </ul>
+                <div class="text-gray-700 leading-relaxed space-y-4">
+                    @if ($product->keterangan)
+                        {!! nl2br(e($product->keterangan)) !!}
+                    @else
+                        <p>Deskripsi produk belum tersedia.</p>
+                    @endif
                 </div>
             </div>
         </div>

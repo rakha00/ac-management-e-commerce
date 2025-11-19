@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Models\Absensi;
 use BackedEnum;
-use DebugBar\DebugBar;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Infolists\Components\ImageEntry;
@@ -18,7 +17,6 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 use UnitEnum;
 
 class RiwayatAbsensi extends Page implements HasTable
@@ -74,13 +72,13 @@ class RiwayatAbsensi extends Page implements HasTable
 
                 TextColumn::make('waktu_absen_time')
                     ->label('Waktu Absen')
-                    ->getStateUsing(fn($record) => \Carbon\Carbon::parse($record->waktu_absen)->format('H:i:s'))
+                    ->getStateUsing(fn ($record) => \Carbon\Carbon::parse($record->waktu_absen)->format('H:i:s'))
                     ->sortable(),
 
                 IconColumn::make('is_telat')
                     ->label('Tepat Waktu')
                     ->state(function (Absensi $record): bool {
-                        return !$record->is_telat;
+                        return ! $record->is_telat;
                     })
                     ->boolean(),
 
@@ -97,7 +95,7 @@ class RiwayatAbsensi extends Page implements HasTable
                         return $query
                             ->when(
                                 $data['waktu_absen'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('waktu_absen', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('waktu_absen', $date),
                             );
                     }),
             ])
@@ -105,7 +103,7 @@ class RiwayatAbsensi extends Page implements HasTable
                 Action::make('lihat-foto-bukti')
                     ->label('Lihat Foto Bukti')
                     ->icon('heroicon-o-photo')
-                    ->visible(fn($record) => !empty($record->foto_bukti))
+                    ->visible(fn ($record) => ! empty($record->foto_bukti))
                     ->schema([
                         Grid::make()
                             ->schema([
@@ -124,14 +122,14 @@ class RiwayatAbsensi extends Page implements HasTable
                 Action::make('kirim-ulang-foto')
                     ->label('Kirim Ulang Foto')
                     ->icon('heroicon-o-arrow-path')
-                    ->visible(fn($record) => !empty($record->foto_bukti) && !$record->is_terkonfirmasi)
+                    ->visible(fn ($record) => ! empty($record->foto_bukti) && ! $record->is_terkonfirmasi)
                     ->requiresConfirmation()
                     ->modalHeading('Kirim Ulang Foto Bukti')
                     ->modalDescription('Apakah Anda yakin ingin mengirim ulang foto bukti kehadiran ini?')
                     ->modalSubmitActionLabel('Kirim Ulang')
                     ->action(function ($record) {
                         // Redirect to the photo capture page with the token
-                        return redirect()->to(route('absensi.foto-bukti') . '?token=' . $record->token);
+                        return redirect()->to(route('absensi.foto-bukti').'?token='.$record->token);
                     }),
             ])
             ->paginated([10, 25, 50])

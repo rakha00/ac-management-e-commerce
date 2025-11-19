@@ -1,6 +1,6 @@
 <div class="bg-white p-4 rounded-lg shadow-sm mt-6" x-data="{
     /* Ganti '628123456789' dengan nomor WA admin servis Anda */
-    nomorWa: '628123456789',
+    nomorWa: '6285156167795',
     nama: '',
     alamat: '',
     pesan: '',
@@ -14,14 +14,13 @@
 
         let templatePesan = `--- ORDER SERVIS AC ---
 
-                        Nama Lengkap: ${this.nama}
-                        Alamat Lengkap: ${this.alamat}
+Nama Lengkap: ${this.nama}
+Alamat Lengkap: ${this.alamat}
 
-                        Keluhan / Pesan:
-                        ${this.pesan || '(Tidak ada keluhan spesifik, mohon dijadwalkan inspeksi)'}
+Keluhan / Pesan:
+${this.pesan || '(Tidak ada keluhan spesifik, mohon dijadwalkan inspeksi)'}
 
-                        Saya ingin memesan servis. Mohon konfirmasi jadwal. Terima kasih.
-                        `;
+Saya ingin memesan servis. Mohon konfirmasi jadwal. Terima kasih.`;
         /* Encode pesan untuk URL */
         let urlWa = `https://wa.me/${this.nomorWa}?text=${encodeURIComponent(templatePesan)}`;
 

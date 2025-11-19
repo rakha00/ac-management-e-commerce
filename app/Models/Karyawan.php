@@ -119,7 +119,7 @@ class Karyawan extends Model
 
         // On soft delete: delete related User first; FK is SET NULL so user_id becomes null automatically.
         static::deleting(function (self $karyawan): void {
-            if (!$karyawan->isForceDeleting()) {
+            if (! $karyawan->isForceDeleting()) {
                 if (auth()->check()) {
                     $karyawan->deleted_by = auth()->id();
                     $karyawan->save(); // Save the model to persist the deleted_by value

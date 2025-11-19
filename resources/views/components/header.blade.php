@@ -23,16 +23,7 @@
 
             <!-- Desktop Search -->
             <div class="flex-grow max-w-2xl hidden md:block">
-                <form action="/produk" method="GET" class="relative group">
-                    <input type="search" name="search" placeholder="Cari AC Daikin, Servis, Spare Part..."
-                        class="w-full pl-5 pr-28 py-3 text-sm text-gray-700 bg-gray-100 border border-gray-200 rounded-lg
-                               focus:outline-none focus:ring-2 focus:ring-gsi-red/50 focus:border-gsi-red transition-all">
-                    <button type="submit"
-                        class="absolute right-0 top-0 h-full px-5 py-3 bg-gsi-red text-white rounded-r-lg
-                               hover:bg-red-700 font-semibold text-sm">
-                        <x-heroicon-o-magnifying-glass class="w-5 h-5" />
-                    </button>
-                </form>
+                @livewire('global-search')
             </div>
 
             <!-- Right Section -->
@@ -83,16 +74,7 @@
         <div class="px-4 py-4 space-y-4">
 
             <!-- Mobile Search -->
-            <form action="/produk" method="GET" class="relative group">
-                <input type="search" name="search" placeholder="Cari AC Daikin, Servis, Spare Part..."
-                    class="w-full pl-5 pr-12 py-3 text-sm text-gray-700 bg-gray-100 border border-gray-200 rounded-lg
-                           focus:outline-none focus:ring-2 focus:ring-gsi-red/50 focus:border-gsi-red transition-all">
-                <button type="submit"
-                    class="absolute right-0 top-0 h-full px-4 py-3 bg-gsi-red text-white rounded-r-lg
-                           hover:bg-red-700 font-semibold text-sm">
-                    <x-heroicon-o-magnifying-glass class="w-4 h-4" />
-                </button>
-            </form>
+            @livewire('global-search')
 
             <!-- Mobile Navigation Links -->
             <div class="space-y-2">

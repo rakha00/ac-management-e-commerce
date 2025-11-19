@@ -24,7 +24,7 @@ class AbsensiTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn(Builder $query) => $query->with('karyawan'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('karyawan'))
             ->columns([
                 TextColumn::make('karyawan.nama')
                     ->label('Nama Karyawan')
@@ -33,7 +33,7 @@ class AbsensiTable
                 TextColumn::make('karyawan.jabatan')
                     ->label('Jabatan')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'admin' => 'danger',
                         'gudang' => 'warning',
                         'helper' => 'info',
@@ -50,11 +50,11 @@ class AbsensiTable
                     ->sortable(),
                 TextColumn::make('waktu_absen_time')
                     ->label('Waktu Absen')
-                    ->getStateUsing(fn($record) => \Carbon\Carbon::parse($record->waktu_absen)->format('H:i:s'))
+                    ->getStateUsing(fn ($record) => \Carbon\Carbon::parse($record->waktu_absen)->format('H:i:s'))
                     ->sortable(),
                 IconColumn::make('is_telat')
                     ->label('Tepat Waktu')
-                    ->getStateUsing(fn($record) => !(bool) $record->is_telat)
+                    ->getStateUsing(fn ($record) => ! (bool) $record->is_telat)
                     ->boolean(),
                 IconColumn::make('is_terkonfirmasi')
                     ->label('Terkonfirmasi')
@@ -108,7 +108,7 @@ class AbsensiTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             filled($data['tanggal'] ?? null),
-                            fn(Builder $q): Builder => $q->whereDate('waktu_absen', $data['tanggal'])
+                            fn (Builder $q): Builder => $q->whereDate('waktu_absen', $data['tanggal'])
                         );
                     }),
             ])
@@ -116,7 +116,7 @@ class AbsensiTable
                 Action::make('lihat-foto-bukti')
                     ->label('Lihat Foto Bukti')
                     ->icon('heroicon-o-photo')
-                    ->visible(fn($record) => !empty($record->foto_bukti))
+                    ->visible(fn ($record) => ! empty($record->foto_bukti))
                     ->schema([
                         Grid::make()
                             ->schema([
@@ -136,7 +136,7 @@ class AbsensiTable
                     ->label('Konfirmasi')
                     ->icon('heroicon-o-check')
                     ->requiresConfirmation()
-                    ->visible(fn($record) => !$record->is_terkonfirmasi)
+                    ->visible(fn ($record) => ! $record->is_terkonfirmasi)
                     ->action(function (\App\Models\Absensi $record) {
                         $record->forceFill([
                             'is_terkonfirmasi' => true,
@@ -151,12 +151,12 @@ class AbsensiTable
                         ExcelExport::make()
                             ->withColumns([
                                 Column::make('waktu_absen'),
-                                Column::make('is_telat')->heading('Tepat Waktu')->formatStateUsing(fn($state) => $state ? 'Tidak' : 'Ya'),
-                                Column::make('is_terkonfirmasi')->heading('Terkonfirmasi')->formatStateUsing(fn($state) => $state ? 'Ya' : 'Tidak'),
+                                Column::make('is_telat')->heading('Tepat Waktu')->formatStateUsing(fn ($state) => $state ? 'Tidak' : 'Ya'),
+                                Column::make('is_terkonfirmasi')->heading('Terkonfirmasi')->formatStateUsing(fn ($state) => $state ? 'Ya' : 'Tidak'),
                                 Column::make('dikonfirmasiOleh.name')->heading('Dikonfirmasi Oleh'),
                                 Column::make('dikonfirmasi_pada')->heading('Waktu Konfirmasi'),
                             ])
-                            ->withFilename(fn() => 'absensi_' . now()->format('Ymd_His'))
+                            ->withFilename(fn () => 'absensi_'.now()->format('Ymd_His'))
                             ->fromTable(),
                     ]),
                 BulkActionGroup::make([

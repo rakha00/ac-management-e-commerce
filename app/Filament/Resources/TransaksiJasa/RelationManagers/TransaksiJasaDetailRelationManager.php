@@ -26,8 +26,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TransaksiJasaDetailRelationManager extends RelationManager
 {
-
-
     protected static string $relationship = 'detailTransaksiJasa';
 
     public function form(Schema $schema): Schema

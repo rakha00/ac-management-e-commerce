@@ -56,35 +56,29 @@ class TransaksiJasaTable
                 TextColumn::make('total_pendapatan_jasa')
                     ->label('Total Pendapatan')
                     ->sortable(
-                        query: fn (Builder $query, $direction) =>
-                            $query->withSum('detailTransaksiJasa as total_pendapatan_sum', 'subtotal_pendapatan')
-                                  ->orderBy('total_pendapatan_sum', $direction)
+                        query: fn (Builder $query, $direction) => $query->withSum('detailTransaksiJasa as total_pendapatan_sum', 'subtotal_pendapatan')
+                            ->orderBy('total_pendapatan_sum', $direction)
                     )
-                    ->getStateUsing(fn ($record) => 
-                        'Rp '.number_format($record->detailTransaksiJasa->sum('subtotal_pendapatan'))
+                    ->getStateUsing(fn ($record) => 'Rp '.number_format($record->detailTransaksiJasa->sum('subtotal_pendapatan'))
                     ),
 
                 TextColumn::make('total_pengeluaran_jasa')
                     ->label('Total Pengeluaran')
                     ->sortable(
-                        query: fn (Builder $query, $direction) =>
-                            $query->withSum('detailTransaksiJasa as total_pengeluaran_sum', 'pengeluaran_jasa')
-                                  ->orderBy('total_pengeluaran_sum', $direction)
+                        query: fn (Builder $query, $direction) => $query->withSum('detailTransaksiJasa as total_pengeluaran_sum', 'pengeluaran_jasa')
+                            ->orderBy('total_pengeluaran_sum', $direction)
                     )
-                    ->getStateUsing(fn ($record) => 
-                        'Rp '.number_format($record->detailTransaksiJasa->sum('pengeluaran_jasa'))
+                    ->getStateUsing(fn ($record) => 'Rp '.number_format($record->detailTransaksiJasa->sum('pengeluaran_jasa'))
                     ),
 
-                    TextColumn::make('total_keuntungan_jasa')
-                        ->label('Total Keuntungan')
-                        ->sortable(
-                            query: fn (Builder $query, $direction) =>
-                                $query->withSum('detailTransaksiJasa as total_keuntungan_sum', 'subtotal_keuntungan')
-                                      ->orderBy('total_keuntungan_sum', $direction)
-                        )
-                        ->getStateUsing(fn ($record) => 
-                            'Rp '.number_format($record->detailTransaksiJasa->sum('subtotal_keuntungan'))
-                        ),
+                TextColumn::make('total_keuntungan_jasa')
+                    ->label('Total Keuntungan')
+                    ->sortable(
+                        query: fn (Builder $query, $direction) => $query->withSum('detailTransaksiJasa as total_keuntungan_sum', 'subtotal_keuntungan')
+                            ->orderBy('total_keuntungan_sum', $direction)
+                    )
+                    ->getStateUsing(fn ($record) => 'Rp '.number_format($record->detailTransaksiJasa->sum('subtotal_keuntungan'))
+                    ),
 
                 TextColumn::make('createdBy.name')
                     ->sortable()

@@ -56,8 +56,12 @@ class FrontendController extends Controller
         return view('pages.services');
     }
 
-    public function detailProducts()
+    public function detailProducts($slug)
     {
-        return view('pages.detail-products');
+        $product = UnitAC::with(['merk', 'tipeAC'])
+            ->where('nama_unit', str_replace('-', ' ', $slug))
+            ->firstOrFail();
+
+        return view('pages.detail-products', compact('product'));
     }
 }

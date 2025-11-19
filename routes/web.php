@@ -14,7 +14,7 @@ Route::get('/servis', [FrontendController::class, 'services'])->name('services')
 Route::get('/produk/{slug}', [FrontendController::class, 'detailProducts'])->name('detail-products');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/scan-absensi', fn() => redirect(ScanAbsensi::getUrl()))->name('absensi.scan.page');
+    Route::get('/scan-absensi', fn () => redirect(ScanAbsensi::getUrl()))->name('absensi.scan.page');
 
     Route::get('/absensi/foto-bukti', function () {
         $token = request()->query('token');
@@ -30,10 +30,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sparepart-keluar/{record}/invoice/{format_type?}', [PdfController::class, 'generateSparepartKeluarInvoice'])->name('sparepart-keluar.invoice');
     Route::get('/transaksi-jasa/{record}/invoice/{format_type?}', [PdfController::class, 'generateTransaksiJasaInvoice'])->name('transaksi-jasa.invoice');
     Route::get('/storage/private/{path}', function ($path) {
-        $fullPath = storage_path('app/private/' . $path);
-        if (!file_exists($fullPath)) {
+        $fullPath = storage_path('app/private/'.$path);
+        if (! file_exists($fullPath)) {
             abort(404);
         }
+
         return response()->file($fullPath);
     })->where('path', '.*')->name('storage.private');
     Route::get('/transaksi-jasa/{record}/surat-jalan/{format_type?}', [PdfController::class, 'generateTransaksiJasaSuratJalan'])->name('transaksi-jasa.surat-jalan');
