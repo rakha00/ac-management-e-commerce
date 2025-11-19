@@ -2,14 +2,12 @@
 @livewireStyles
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
-<!-- Alpine.js -->
+<!-- Scripts -->
 <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-
-<!-- Swiper.js -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-<!-- TailwindCSS -->
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Tailwind Config -->
 <script>
     tailwind.config = {
         theme: {
@@ -65,12 +63,7 @@
         background-color: #F4F7F6;
     }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
+    h1, h2, h3, h4, h5, h6 {
         font-family: 'Poppins', sans-serif;
         font-weight: 700;
     }

@@ -34,14 +34,7 @@
                     <span class="ml-2 text-sm font-medium hidden lg:block">Konsultasi</span>
                 </a>
 
-                <a href="/cart" class="flex items-center text-gray-600 hover:text-gsi-red relative">
-                    <x-heroicon-o-shopping-cart class="w-7 h-7" />
-                    <span class="ml-2 text-sm font-medium hidden lg:block">Keranjang</span>
-                    <span
-                        class="absolute -top-2 left-4 bg-gsi-red text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                        0
-                    </span>
-                </a>
+@livewire('cart-counter')
 
                 <div class="md:hidden">
                     <button @click="open = !open" class="text-gray-700 hover:text-gsi-red focus:outline-none">
@@ -110,15 +103,7 @@
                     <span class="text-sm font-medium">Konsultasi</span>
                 </a>
 
-                <a href="/cart" class="flex items-center text-gray-600 hover:text-gsi-red">
-                    <x-heroicon-o-shopping-cart class="w-5 h-5 mr-3" />
-                    <span class="text-sm font-medium">Keranjang</span>
-
-                    <span
-                        class="ml-auto bg-gsi-red text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                        0
-                    </span>
-                </a>
+@livewire('cart-counter')
             </div>
 
         </div>

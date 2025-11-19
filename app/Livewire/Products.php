@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\Merk;
+use App\Models\Sparepart;
 use App\Models\TipeAC;
 use App\Models\UnitAC;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,6 +21,9 @@ class Products extends Component
 
     #[Url(except: null)]
     public $tipe = null;
+
+    #[Url(except: 'all')]
+    public $category = 'all';
 
     #[Url(except: null)]
     public $merk = null;
@@ -64,7 +69,7 @@ class Products extends Component
      *  ───────────────────────────── */
     public function updated($property): void
     {
-        if (in_array($property, ['tipe', 'merk', 'sortBy'])) {
+        if (in_array($property, ['tipe', 'merk', 'sortBy', 'category'])) {
             $this->resetPage();
         }
     }
@@ -88,11 +93,11 @@ class Products extends Component
     public function resetFilters(): void
     {
         $this->reset([
-            'query',
             'searchTerm',
             'tipe',
             'merk',
             'sortBy',
+            'category',
         ]);
 
         $this->minPrice = $this->priceLimitMin;
@@ -108,45 +113,90 @@ class Products extends Component
      *  ───────────────────────────── */
     private function getFilteredProducts()
     {
-        $term = '%'.$this->searchTerm.'%';
+        $term = '%' . $this->searchTerm . '%';
 
-        return UnitAC::query()
-            ->selectRaw('
-            unit_ac.*,
-            COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail) AS display_price,
-            COALESCE(SUM(transaksi_produk_detail.jumlah_keluar), 0) AS total_sold
-        ')
-            ->leftJoin('transaksi_produk_detail', 'unit_ac.id', '=', 'transaksi_produk_detail.unit_ac_id')
-            ->leftJoin('transaksi_produk', 'transaksi_produk.id', '=', 'transaksi_produk_detail.transaksi_produk_id')
-            ->with(['tipeAC:id,tipe_ac', 'merk:id,merk'])
+        // Query for UnitAC
+        $units = UnitAC::query()
+            ->select([
+                'unit_ac.id',
+                'unit_ac.nama_unit as name',
+                DB::raw("COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail) as price"),
+                'unit_ac.path_foto_produk as image_path',
+                DB::raw("'unit' as type"),
+                'tipe_ac.tipe_ac as category',
+                'unit_ac.created_at',
+                'unit_ac.stok_keluar'
+            ])
+            ->leftJoin('tipe_ac', 'unit_ac.tipe_ac_id', '=', 'tipe_ac.id')
+            ->leftJoin('merk', 'unit_ac.merk_id', '=', 'merk.id')
             ->when($this->searchTerm, function (Builder $q) use ($term) {
                 $q->where(function ($sub) use ($term) {
                     $sub->where('unit_ac.nama_unit', 'like', $term)
                         ->orWhere('unit_ac.sku', 'like', $term)
                         ->orWhere('unit_ac.keterangan', 'like', $term)
-                        ->orWhereHas('merk', fn ($m) => $m->where('merk', 'like', $term))
-                        ->orWhereHas('tipeAC', fn ($t) => $t->where('tipe_ac', 'like', $term));
+                        ->orWhere('merk.merk', 'like', $term)
+                        ->orWhere('tipe_ac.tipe_ac', 'like', $term);
                 });
             })
-            ->when($this->tipe, fn ($q) => $q->where('unit_ac.tipe_ac_id', $this->tipe))
-            ->when($this->merk, fn ($q) => $q->where('unit_ac.merk_id', $this->merk))
+            ->when($this->tipe, fn($q) => $q->where('unit_ac.tipe_ac_id', $this->tipe))
+            ->when($this->merk, fn($q) => $q->where('unit_ac.merk_id', $this->merk))
             ->whereBetween(
-                \DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'),
+                DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'),
                 [$this->minPrice, $this->maxPrice]
-            )
-            ->groupBy('unit_ac.id')
-            ->when($this->sortBy, function ($q) {
-                return match ($this->sortBy) {
-                    'price_asc' => $q->orderBy('display_price', 'asc'),
-                    'price_desc' => $q->orderBy('display_price', 'desc'),
-                    'newest' => $q->orderByDesc('unit_ac.created_at'),
-                    'name_asc' => $q->orderBy('unit_ac.nama_unit'),
-                    'name_desc' => $q->orderByDesc('unit_ac.nama_unit'),
-                    default => $q->orderByDesc('total_sold')
-                        ->orderByDesc('unit_ac.created_at'),
-                };
+            );
+
+        // Query for Sparepart
+        // Only include if no specific AC Type/Brand filter is applied, or handle logic if needed.
+        // Assuming Spareparts shouldn't show if AC Type/Brand filters are active (as they don't match).
+        $spareparts = Sparepart::query()
+            ->select([
+                'spareparts.id',
+                'spareparts.nama_sparepart as name',
+                'spareparts.harga_ecommerce as price',
+                'spareparts.path_foto_sparepart as image_path',
+                DB::raw("'sparepart' as type"),
+                DB::raw("'Sparepart' as category"), // Placeholder category
+                'spareparts.created_at',
+                'spareparts.stok_keluar'
+            ])
+            ->when($this->searchTerm, function (Builder $q) use ($term) {
+                $q->where(function ($sub) use ($term) {
+                    $sub->where('spareparts.nama_sparepart', 'like', $term)
+                        ->orWhere('spareparts.kode_sparepart', 'like', $term)
+                        ->orWhere('spareparts.keterangan', 'like', $term);
+                });
             })
-            ->paginate($this->perPage);
+            ->whereBetween('spareparts.harga_ecommerce', [$this->minPrice, $this->maxPrice]);
+
+        // If filters for AC Type or AC Brand are active, we might want to exclude spareparts
+        // because they don't belong to those AC Types/Brands (they have their own).
+        if ($this->tipe || $this->merk || $this->category === 'unit') {
+            // Return only units
+            $query = $units;
+        } elseif ($this->category === 'sparepart') {
+            // Return only spareparts
+            $query = $spareparts;
+        } else {
+            // Union both
+            $query = $units->union($spareparts);
+        }
+
+        // Apply sorting to the combined query
+        // Note: Union results can be ordered by wrapping or just ordering the final builder.
+        // Laravel's union allows orderBy on the final query.
+
+        return $query->orderBy(match ($this->sortBy) {
+            'price_asc' => 'price',
+            'price_desc' => 'price',
+            'newest' => 'created_at',
+            'name_asc' => 'name',
+            'name_desc' => 'name',
+            default => 'stok_keluar', // Default sort
+        }, match ($this->sortBy) {
+            'price_asc', 'name_asc' => 'asc',
+            default => 'desc',
+        })
+        ->paginate($this->perPage);
     }
 
     /** ─────────────────────────────
@@ -164,8 +214,8 @@ class Products extends Component
     {
         return view('pages.products', [
             'products' => $this->getFilteredProducts(),
-            'types' => TipeAC::select('id', 'tipe_ac')->get(),
-            'brands' => Merk::select('id', 'merk')->get(),
+            'types' => TipeAC::whereHas('unitAC')->select('id', 'tipe_ac')->get(),
+            'brands' => Merk::whereHas('unitAC')->select('id', 'merk')->get(),
         ])->extends('layouts.app');
     }
 }

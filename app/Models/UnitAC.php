@@ -68,6 +68,11 @@ class UnitAC extends Model
         return $this->hasMany(HargaUnitACHistory::class, 'unit_ac_id');
     }
 
+    public function transaksiProdukDetails(): HasMany
+    {
+        return $this->hasMany(TransaksiProdukDetail::class, 'unit_ac_id');
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

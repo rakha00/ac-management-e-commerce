@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [FrontendController::class, 'home'])->name('home');
 Route::get('/produk', Products::class)->name('products');
 Route::get('/servis', [FrontendController::class, 'services'])->name('services');
-Route::get('/produk/{slug}', [FrontendController::class, 'detailProducts'])->name('detail-products');
+Route::get('/produk/{id}', [FrontendController::class, 'detailProducts'])->name('detail-products');
+Route::get('/produk/sparepart/{id}', [FrontendController::class, 'detailSparepart'])->name('detail-sparepart');
+Route::get('/cart', \App\Livewire\Cart::class)->name('cart');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/scan-absensi', fn () => redirect(ScanAbsensi::getUrl()))->name('absensi.scan.page');

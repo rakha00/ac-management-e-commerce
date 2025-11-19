@@ -71,12 +71,33 @@
             </div>
 
             {{-- Main Content --}}
-            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
                 @forelse($products as $product)
-                    <x-product-card category="{{ $product->tipeAC->tipe_ac ?? 'AC' }}" title="{{ $product->nama_unit }}"
-                        price="{{ $this->formatPrice($product->display_price) }}"
-                        image="{{ $product->path_foto_produk[0] ?? 'https://placehold.co/300x300/e0e0e0/969696?text=AC' }}"
-                        href="/produk/{{ Str::slug($product->nama_unit) }}" />
+                    @php
+                        $image = $product->image_path;
+                        if (is_string($image)) {
+                            $decoded = json_decode($image, true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                $image = $decoded[0] ?? null;
+                            }
+                        } elseif (is_array($image)) {
+                            $image = $image[0] ?? null;
+                        }
+                        
+                        $image = $image ?? 'https://placehold.co/300x300/e0e0e0/969696?text=' . urlencode($product->category ?? 'Product');
+                        
+                        $href = $product->type === 'sparepart' 
+                            ? route('detail-sparepart', $product->id) 
+                            : route('detail-products', $product->id);
+                    @endphp
+                    <x-product-card 
+                        :id="$product->id" 
+                        :type="$product->type"
+                        category="{{ $product->category }}" 
+                        title="{{ $product->name }}"
+                        price="{{ $this->formatPrice($product->price) }}"
+                        image="{{ $image }}"
+                        href="{{ $href }}" />
                 @empty
                     <div class="col-span-full text-center py-12">
                         <x-heroicon-o-magnifying-glass class="mx-auto h-12 w-12 text-gray-400" />

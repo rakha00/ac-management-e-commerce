@@ -22,10 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Cache TipeAC data for header component
         View::composer('components.header', function ($view) {
             $tipeAC = Cache::remember('header_tipe_ac', 3600, function () {
-                return TipeAC::limit(3)->get();
+                return TipeAC::has('unitAC')->limit(3)->get();
             });
 
             $view->with('tipeAC', $tipeAC);

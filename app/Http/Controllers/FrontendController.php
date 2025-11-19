@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sparepart;
 use App\Models\TipeAC;
 use App\Models\UnitAC;
+use Illuminate\Support\Str;
 
 class FrontendController extends Controller
 {
@@ -16,32 +17,38 @@ class FrontendController extends Controller
             ->take(8)
             ->get();
 
-        // Categories (first 4)
-        $categories = TipeAC::take(4)->get();
+        // Categories (first 4) that have units
+        $categories = TipeAC::has('unitAC')->take(4)->get();
 
         // Products by category (4 each)
         $sections = [];
         foreach ($categories as $category) {
-            $sections[] = [
-                'categoryId' => $category->id,
-                'title' => $category->tipe_ac,
-                'slug' => strtolower(str_replace(' ', '-', $category->tipe_ac)),
-                'products' => UnitAC::with('tipeAC')
-                    ->where('tipe_ac_id', $category->id)
-                    ->take(4)
-                    ->get(),
-            ];
+            $products = UnitAC::with('tipeAC')
+                ->where('tipe_ac_id', $category->id)
+                ->take(4)
+                ->get();
+
+            if ($products->isNotEmpty()) {
+                $sections[] = [
+                    'categoryId' => $category->id,
+                    'title' => $category->tipe_ac,
+                    'slug' => Str::slug($category->tipe_ac),
+                    'products' => $products,
+                ];
+            }
         }
 
         // Sparepart section
-        $sections[] = [
-            'categoryId' => 'Spare Part',
-            'title' => 'Spare Part',
-            'slug' => 'spare-part',
-            'products' => Sparepart::orderByDesc('stok_keluar')
-                ->take(4)
-                ->get(),
-        ];
+        $spareparts = Sparepart::orderByDesc('stok_keluar')->take(4)->get();
+        
+        if ($spareparts->isNotEmpty()) {
+            $sections[] = [
+                'categoryId' => 'sparepart',
+                'title' => 'Spare Part',
+                'slug' => 'spare-part',
+                'products' => $spareparts,
+            ];
+        }
 
         return view('pages.home', compact('popularProducts', 'sections'));
     }
@@ -56,12 +63,21 @@ class FrontendController extends Controller
         return view('pages.services');
     }
 
-    public function detailProducts($slug)
+    public function detailProducts($id)
     {
         $product = UnitAC::with(['merk', 'tipeAC'])
-            ->where('nama_unit', str_replace('-', ' ', $slug))
+            ->where('id', $id)
             ->firstOrFail();
 
         return view('pages.detail-products', compact('product'));
+    }
+
+    public function detailSparepart($id)
+    {
+        $product = Sparepart::with(['merkSparepart'])
+            ->where('id', $id)
+            ->firstOrFail();
+
+        return view('pages.detail-sparepart', compact('product'));
     }
 }
