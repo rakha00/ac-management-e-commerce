@@ -16,18 +16,18 @@
         <div
             class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
             @foreach ($results as $product)
-                <a href="#" wire:click.prevent="selectProduct('{{ str_replace(' ', '-', $product->nama_unit) }}')"
+                <a href="#" wire:click.prevent="selectProduct({{ $product->id }})"
                     class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
                     <div class="flex items-center space-x-3">
                         <div class="flex-shrink-0">
-                            @if ($product->path_foto_produk && is_array($product->path_foto_produk) && count($product->path_foto_produk) > 0)
-                                <img src="{{ $product->path_foto_produk[0]['thumb'] ?? '/img/placeholder.png' }}"
-                                    alt="{{ $product->nama_unit }}" class="w-10 h-10 object-cover rounded">
-                            @else
-                                <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
-                                    <x-heroicon-o-photo class="w-6 h-6 text-gray-400" />
-                                </div>
-                            @endif
+                            @php
+                                $image = asset('img/produk/placeholder.png');
+                                if (!empty($product->path_foto_produk) && is_array($product->path_foto_produk) && count($product->path_foto_produk) > 0) {
+                                    $image = asset('storage/' . $product->path_foto_produk[0]);
+                                }
+                            @endphp
+                            <img src="{{ $image }}"
+                                alt="{{ $product->nama_unit }}" class="w-10 h-10 object-cover rounded">
                         </div>
                         <div class="flex-grow min-w-0">
                             <div class="text-sm font-medium text-gray-900 truncate">

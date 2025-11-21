@@ -16,9 +16,9 @@ class GlobalSearch extends Component
         $this->showResults = strlen($this->query) > 0;
     }
 
-    public function selectProduct($slug)
+    public function selectProduct($id)
     {
-        return redirect()->route('detail-products', $slug);
+        return redirect()->route('detail-products', $id);
     }
 
     public function render()
