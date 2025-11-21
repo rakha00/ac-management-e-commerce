@@ -39,11 +39,11 @@ class Cart extends Component
                 $this->total += $subtotal;
 
                 // Handle image
-                $image = 'https://placehold.co/100x100';
+                $image = asset('img/produk/placeholder.png');
                 if ($item['type'] === 'unit' && ! empty($product->path_foto_produk) && is_array($product->path_foto_produk)) {
-                    $image = $product->path_foto_produk[0];
+                    $image = asset('storage/'.$product->path_foto_produk[0]);
                 } elseif ($item['type'] === 'sparepart' && ! empty($product->path_foto_sparepart) && is_array($product->path_foto_sparepart)) {
-                    $image = $product->path_foto_sparepart[0];
+                    $image = asset('storage/'.$product->path_foto_sparepart[0]);
                 }
 
                 $this->cartItems[] = [

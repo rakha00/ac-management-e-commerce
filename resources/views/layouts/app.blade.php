@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Global Servis Int. - Pusat Dealer & Servis AC')</title>
+    <link rel="icon" href="{{ asset('img/GSI.png') }}" type="image/png">
 
     @include('components.assets')
 </head>
