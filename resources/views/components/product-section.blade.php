@@ -21,15 +21,15 @@
                 $productImage = null;
                 if ($isSparepart) {
                     if (!empty($product->path_foto_sparepart) && is_array($product->path_foto_sparepart) && count($product->path_foto_sparepart) > 0) {
-                        $productImage = $product->path_foto_sparepart[0];
+                        $productImage = asset('storage/' . $product->path_foto_sparepart[0]);
                     }
                 } else {
                     if (!empty($product->path_foto_produk) && is_array($product->path_foto_produk) && count($product->path_foto_produk) > 0) {
-                        $productImage = $product->path_foto_produk[0];
+                        $productImage = asset('storage/' . $product->path_foto_produk[0]);
                     }
                 }
                 
-                $productImage = $productImage ?? 'https://placehold.co/300x300/e0e0e0/969696?text=' . urlencode($category);
+                $productImage = $productImage ?? asset('img/produk/placeholder.png');
                 
                 $href = $isSparepart ? route('detail-sparepart', $product->id) : route('detail-products', $product->id);
             @endphp
