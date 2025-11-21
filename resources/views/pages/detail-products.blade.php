@@ -11,7 +11,7 @@
                 <h1 class="text-2xl lg:text-3xl font-semibold text-gray-900">
                     {{ $product->nama_unit }}
                 </h1>
-                <span class="text-sm text-gray-500 mt-1">Kategori: <a href="#"
+                <span class="text-sm text-gray-500 mt-1">Kategori: <a href="/produk?tipe={{ $product->tipeAC->id }}"
                         class="text-gsi-red hover:underline">{{ $product->tipeAC->tipe_ac }}</a></span>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
