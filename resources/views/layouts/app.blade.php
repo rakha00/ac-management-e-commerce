@@ -19,6 +19,7 @@
 
     @include('components.footer')
 
+    @livewire('cart-handler')
     @livewireScripts
     @stack('scripts')
 </body>
