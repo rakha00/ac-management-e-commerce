@@ -55,7 +55,7 @@
 
                                             {{-- Subtotal & Remove --}}
                                             <div class="text-right min-w-0 md:min-w-[150px]">
-                                                <p class="text-sm md:text-base font-bold text-gsi-red mb-1">
+                                                <p class="text-xs md:text-base font-bold text-gsi-red mb-1">
                                                     Rp {{ number_format($item['subtotal'], 0, ',', '.') }}
                                                 </p>
                                                 <button wire:click="remove('{{ $item['key'] }}')" 
