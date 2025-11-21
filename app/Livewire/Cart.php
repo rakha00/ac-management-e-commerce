@@ -10,6 +10,7 @@ use Livewire\Component;
 class Cart extends Component
 {
     public $cartItems = [];
+
     public $total = 0;
 
     public function mount()
@@ -36,13 +37,13 @@ class Cart extends Component
                 $price = $product->harga_ecommerce;
                 $subtotal = $price * $item['quantity'];
                 $this->total += $subtotal;
-                
+
                 // Handle image
                 $image = 'https://placehold.co/100x100';
-                if ($item['type'] === 'unit' && !empty($product->path_foto_produk) && is_array($product->path_foto_produk)) {
-                     $image = $product->path_foto_produk[0];
-                } elseif ($item['type'] === 'sparepart' && !empty($product->path_foto_sparepart) && is_array($product->path_foto_sparepart)) {
-                     $image = $product->path_foto_sparepart[0];
+                if ($item['type'] === 'unit' && ! empty($product->path_foto_produk) && is_array($product->path_foto_produk)) {
+                    $image = $product->path_foto_produk[0];
+                } elseif ($item['type'] === 'sparepart' && ! empty($product->path_foto_sparepart) && is_array($product->path_foto_sparepart)) {
+                    $image = $product->path_foto_sparepart[0];
                 }
 
                 $this->cartItems[] = [
@@ -99,12 +100,12 @@ class Cart extends Component
     public function checkout()
     {
         $message = "Halo Global Servis Int., saya ingin memesan produk berikut:\n\n";
-        
+
         foreach ($this->cartItems as $item) {
-            $message .= "- " . $item['name'] . " (" . $item['quantity'] . "x) - Rp " . number_format($item['subtotal'], 0, ',', '.') . "\n";
+            $message .= '- '.$item['name'].' ('.$item['quantity'].'x) - Rp '.number_format($item['subtotal'], 0, ',', '.')."\n";
         }
-        
-        $message .= "\nTotal: Rp " . number_format($this->total, 0, ',', '.') . "\n";
+
+        $message .= "\nTotal: Rp ".number_format($this->total, 0, ',', '.')."\n";
         $message .= "\nMohon info ketersediaan dan cara pembayarannya. Terima kasih.";
 
         $encodedMessage = urlencode($message);

@@ -113,19 +113,19 @@ class Products extends Component
      *  ───────────────────────────── */
     private function getFilteredProducts()
     {
-        $term = '%' . $this->searchTerm . '%';
+        $term = '%'.$this->searchTerm.'%';
 
         // Query for UnitAC
         $units = UnitAC::query()
             ->select([
                 'unit_ac.id',
                 'unit_ac.nama_unit as name',
-                DB::raw("COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail) as price"),
+                DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail) as price'),
                 'unit_ac.path_foto_produk as image_path',
                 DB::raw("'unit' as type"),
                 'tipe_ac.tipe_ac as category',
                 'unit_ac.created_at',
-                'unit_ac.stok_keluar'
+                'unit_ac.stok_keluar',
             ])
             ->leftJoin('tipe_ac', 'unit_ac.tipe_ac_id', '=', 'tipe_ac.id')
             ->leftJoin('merk', 'unit_ac.merk_id', '=', 'merk.id')
@@ -138,8 +138,8 @@ class Products extends Component
                         ->orWhere('tipe_ac.tipe_ac', 'like', $term);
                 });
             })
-            ->when($this->tipe, fn($q) => $q->where('unit_ac.tipe_ac_id', $this->tipe))
-            ->when($this->merk, fn($q) => $q->where('unit_ac.merk_id', $this->merk))
+            ->when($this->tipe, fn ($q) => $q->where('unit_ac.tipe_ac_id', $this->tipe))
+            ->when($this->merk, fn ($q) => $q->where('unit_ac.merk_id', $this->merk))
             ->whereBetween(
                 DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'),
                 [$this->minPrice, $this->maxPrice]
@@ -157,7 +157,7 @@ class Products extends Component
                 DB::raw("'sparepart' as type"),
                 DB::raw("'Sparepart' as category"), // Placeholder category
                 'spareparts.created_at',
-                'spareparts.stok_keluar'
+                'spareparts.stok_keluar',
             ])
             ->when($this->searchTerm, function (Builder $q) use ($term) {
                 $q->where(function ($sub) use ($term) {
@@ -196,7 +196,7 @@ class Products extends Component
             'price_asc', 'name_asc' => 'asc',
             default => 'desc',
         })
-        ->paginate($this->perPage);
+            ->paginate($this->perPage);
     }
 
     /** ─────────────────────────────

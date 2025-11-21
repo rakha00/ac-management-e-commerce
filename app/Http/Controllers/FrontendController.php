@@ -40,7 +40,7 @@ class FrontendController extends Controller
 
         // Sparepart section
         $spareparts = Sparepart::orderByDesc('stok_keluar')->take(4)->get();
-        
+
         if ($spareparts->isNotEmpty()) {
             $sections[] = [
                 'categoryId' => 'sparepart',

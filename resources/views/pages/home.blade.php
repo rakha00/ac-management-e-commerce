@@ -76,7 +76,7 @@
                             <x-product-card :id="$product->id" category="{{ $product->tipeAC->tipe_ac ?? 'AC' }}"
                                 title="{{ $product->nama_unit }}"
                                 price="Rp {{ number_format($product->harga_ecommerce, 0, ',', '.') }}"
-                                image="{{ !empty($product->path_foto_produk) && is_array($product->path_foto_produk) && count($product->path_foto_produk) > 0 ? $product->path_foto_produk[0] : 'https://placehold.co/300x300/e0e0e0/969696?text=AC' }}"
+                                image="{{ !empty($product->path_foto_produk) && is_array($product->path_foto_produk) && count($product->path_foto_produk) > 0 ? asset($product->path_foto_produk[0]) : asset('img/produk/placeholder.png') }}"
                                 href="/produk/{{ $product->id }}" />
                         @endforeach
                     </div>

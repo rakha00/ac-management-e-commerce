@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class CartCounter extends Component
 {
@@ -25,8 +25,8 @@ class CartCounter extends Component
     public function addToCart($productId, $type = 'unit')
     {
         $cart = session()->get('cart', []);
-        $key = $type . '-' . $productId;
-        
+        $key = $type.'-'.$productId;
+
         if (isset($cart[$key])) {
             $cart[$key]['quantity']++;
         } else {
@@ -36,12 +36,12 @@ class CartCounter extends Component
                 'quantity' => 1,
             ];
         }
-        
+
         session()->put('cart', $cart);
         $this->updateCount();
-        
+
         // Dispatch event for other components if needed
-        $this->dispatch('cart-updated'); 
+        $this->dispatch('cart-updated');
     }
 
     public function render()
