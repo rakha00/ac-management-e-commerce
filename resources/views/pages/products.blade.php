@@ -84,7 +84,7 @@
                             $image = $image[0] ?? null;
                         }
                         
-                        $image = $image ?? 'https://placehold.co/300x300/e0e0e0/969696?text=' . urlencode($product->category ?? 'Product');
+                        $image = $image ? asset('storage/' . $image) : asset('img/produk/placeholder.png');
                         
                         $href = $product->type === 'sparepart' 
                             ? route('detail-sparepart', $product->id) 

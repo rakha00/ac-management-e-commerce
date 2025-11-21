@@ -16,13 +16,27 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
 
+                @php
+                    $productImages = [];
+                    if (!empty($product->path_foto_produk) && is_array($product->path_foto_produk)) {
+                        foreach ($product->path_foto_produk as $foto) {
+                            $productImages[] = [
+                                'main' => asset('storage/' . $foto),
+                                'thumb' => asset('storage/' . $foto),
+                            ];
+                        }
+                    }
+                    
+                    if (empty($productImages)) {
+                        $productImages[] = [
+                            'main' => asset('img/produk/placeholder.png'),
+                            'thumb' => asset('img/produk/placeholder.png'),
+                        ];
+                    }
+                @endphp
                 <div x-data="{
-                    images: @if ($product->path_foto_produk && is_array($product->path_foto_produk)) @json($product->path_foto_produk)
-                    @else
-                        [{ main: 'https://placehold.co/600x450/e0e0e0/969696?text=No+Image', thumb: 'https://placehold.co/100x100/e0e0e0/969696?text=No+Image' }] @endif,
-                    activeImageSrc: @if ($product->path_foto_produk && is_array($product->path_foto_produk) && count($product->path_foto_produk) > 0) '{{ $product->path_foto_produk[0]['main'] ?? 'https://placehold.co/600x450/e0e0e0/969696?text=No+Image' }}'
-                    @else
-                        'https://placehold.co/600x450/e0e0e0/969696?text=No+Image' @endif
+                    images: {{ json_encode($productImages) }},
+                    activeImageSrc: '{{ $productImages[0]['main'] }}'
                 }">
                     <div class="mb-4 border border-gray-200 rounded-lg overflow-hidden">
                         <img x-bind:src="activeImageSrc" alt="Produk Utama"
