@@ -34,18 +34,22 @@ class UnitACTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sku')
                     ->label('SKU')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('nama_unit')
                     ->label('Nama Unit')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('merk.merk')
                     ->label('Merk')
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->sortable(),
                 TextColumn::make('pk')
                     ->label('PK')
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->sortable(),
                 TextColumn::make('tipeAC.tipe_ac')
                     ->label('Tipe AC')
                     ->searchable()
