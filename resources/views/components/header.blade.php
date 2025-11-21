@@ -7,7 +7,7 @@
 
             <a href="https://wa.me/6285695643257" target="_blank" class="flex items-center hover:text-gsi-green">
                 <x-fab-whatsapp class="w-4 h-4 mr-1.5" />
-                <span>0856-9564-3257 / sales@gsi.co.id</span>
+                <span>0856-9564-3257 / cs.globalservis.int@gmail.com</span>
             </a>
         </div>
     </div>

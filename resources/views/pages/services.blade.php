@@ -123,7 +123,7 @@ Saya ingin memesan servis. Mohon konfirmasi jadwal. Terima kasih.`;
                                 </li>
                                 <li class="flex items-center">
                                     <x-heroicon-o-envelope class="w-4 h-4 mr-2" />
-                                    <span>sales@gsi.co.id</span>
+                                    <span>cs.globalservis.int@gmail.com</span>
                                 </li>
                             </ul>
                         </div>
