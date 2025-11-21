@@ -6,10 +6,5 @@
             class="absolute -top-2 left-4 bg-gsi-red text-white text-xs w-5 h-5 rounded-full flex items-center justify-center animate-bounce">
             {{ $count }}
         </span>
-    @else
-        <span
-            class="absolute -top-2 left-4 bg-gray-400 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-            0
-        </span>
     @endif
 </a>
