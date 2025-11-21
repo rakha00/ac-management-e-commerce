@@ -54,7 +54,7 @@
                                             </div>
 
                                             {{-- Subtotal & Remove --}}
-                                            <div class="text-right min-w-[80px]">
+                                            <div class="text-right min-w-[150px]">
                                                 <p class="text-sm md:text-base font-bold text-gsi-red mb-1">
                                                     Rp {{ number_format($item['subtotal'], 0, ',', '.') }}
                                                 </p>
