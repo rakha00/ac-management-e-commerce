@@ -119,7 +119,7 @@ Saya ingin memesan servis. Mohon konfirmasi jadwal. Terima kasih.`;
                             <ul class="space-y-2 text-gray-600">
                                 <li class="flex items-center">
                                     <x-heroicon-o-phone class="w-4 h-4 mr-2" />
-                                    <span>(021) 1234 5678</span>
+                                    <span>(085) 6956-43257</span>
                                 </li>
                                 <li class="flex items-center">
                                     <x-heroicon-o-envelope class="w-4 h-4 mr-2" />
