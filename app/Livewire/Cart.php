@@ -109,7 +109,7 @@ class Cart extends Component
         $message .= "\nMohon info ketersediaan dan cara pembayarannya. Terima kasih.";
 
         $encodedMessage = urlencode($message);
-        $whatsappUrl = "https://wa.me/628123456789?text={$encodedMessage}"; // Replace with actual number
+        $whatsappUrl = "https://wa.me/6285695643257?text={$encodedMessage}"; // Replace with actual number
 
         return redirect()->away($whatsappUrl);
     }

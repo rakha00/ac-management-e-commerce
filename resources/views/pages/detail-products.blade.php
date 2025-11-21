@@ -82,7 +82,12 @@
                                 Menambahkan...
                             </span>
                         </button>
-                        <a href="https://wa.me/628123456789" target="_blank"
+                        @php
+                            $message = "Halo Global Servis Int., saya tertarik dengan produk {$product->nama_unit}. Mohon info lebih lanjut.";
+                            $encodedMessage = urlencode($message);
+                            $whatsappUrl = "https://wa.me/6285695643257?text={$encodedMessage}";
+                        @endphp
+                        <a href="{{ $whatsappUrl }}" target="_blank"
                             class="w-full px-6 py-4 bg-green-500 text-white text-base font-semibold rounded-lg shadow-md hover:bg-green-600 transition-colors flex items-center justify-center">
                             <x-heroicon-o-chat-bubble-left-right class="w-5 h-5 mr-2.5" />
                             Order Cepat via WhatsApp

@@ -5,9 +5,9 @@
         <div class="container mx-auto px-4 md:px-6 flex justify-between items-center">
             <span>Solusi AC Profesional: Dealer, Servis, Instalasi</span>
 
-            <a href="https://wa.me/628123456789" target="_blank" class="flex items-center hover:text-gsi-green">
+            <a href="https://wa.me/6285695643257" target="_blank" class="flex items-center hover:text-gsi-green">
                 <x-fab-whatsapp class="w-4 h-4 mr-1.5" />
-                <span>(021) 1234 5678 / sales@gsi.co.id</span>
+                <span>0856-9564-3257 / sales@gsi.co.id</span>
             </a>
         </div>
     </div>
@@ -28,7 +28,7 @@
 
             <!-- Right Section -->
             <div class="flex items-center space-x-4">
-                <a href="https://wa.me/628123456789" target="_blank"
+                <a href="https://wa.me/6285695643257" target="_blank"
                     class="hidden md:flex items-center text-gray-600 hover:text-gsi-red">
                     <x-heroicon-o-chat-bubble-left-right class="w-7 h-7" />
                     <span class="ml-2 text-sm font-medium hidden lg:block">Konsultasi</span>
@@ -97,7 +97,7 @@
 
             <!-- Mobile Contact -->
             <div class="pt-4 space-y-3">
-                <a href="https://wa.me/628123456789" target="_blank"
+                <a href="https://wa.me/6285695643257" target="_blank"
                     class="flex items-center text-gray-600 hover:text-gsi-red">
                     <x-heroicon-o-chat-bubble-left-right class="w-5 h-5 mr-3" />
                     <span class="text-sm font-medium">Konsultasi</span>

@@ -1,6 +1,6 @@
 <div class="bg-white p-4 rounded-lg shadow-sm mt-6" x-data="{
     /* Ganti '628123456789' dengan nomor WA admin servis Anda */
-    nomorWa: '6285156167795',
+    nomorWa: '6285695643257',
     nama: '',
     alamat: '',
     pesan: '',

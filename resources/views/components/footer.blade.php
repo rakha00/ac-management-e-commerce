@@ -33,7 +33,7 @@
                     </li>
                     <li class="flex items-center">
                         <x-heroicon-o-phone class="flex-shrink-0 w-5 h-5 mr-2" />
-                        <span>(021) 1234 5678</span>
+                        <span>0856-9564-3257</span>
                     </li>
                     <li class="flex items-center">
                         <x-heroicon-o-envelope class="flex-shrink-0 w-5 h-5 mr-2" />
