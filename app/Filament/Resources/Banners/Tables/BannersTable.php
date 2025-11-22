@@ -18,7 +18,8 @@ class BannersTable
     {
         return $table
             ->columns([
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                    ->disk('public'),
                 IconColumn::make('active')
                     ->boolean(),
                 TextColumn::make('order')

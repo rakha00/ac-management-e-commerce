@@ -19,6 +19,10 @@ class BannerForm
                             ->disk('public')
                             ->directory('banner')
                             ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '16:9',
+                            ])
                             ->imageCropAspectRatio('16:9')
                             ->imageResizeMode('cover')
                             ->imageResizeTargetWidth('1280')
