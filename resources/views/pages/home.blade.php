@@ -58,7 +58,7 @@
             <main class="w-full md:w-3/4 lg:w-4/5">
 
                 <!-- Banner Slider -->
-                <x-banner-slider />
+                <x-banner-slider :banners="$banners" />
 
                 <!-- Features -->
                 <x-features />

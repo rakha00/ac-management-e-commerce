@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banner;
 use App\Models\Sparepart;
 use App\Models\TipeAC;
 use App\Models\UnitAC;
@@ -11,6 +12,11 @@ class FrontendController extends Controller
 {
     public function home()
     {
+        // Fetch active banners ordered by order
+        $banners = Banner::where('active', true)
+            ->orderBy('order')
+            ->get();
+
         // Popular products (top 8 by stok_keluar)
         $popularProducts = UnitAC::with('tipeAC')
             ->orderByDesc('stok_keluar')
@@ -50,7 +56,7 @@ class FrontendController extends Controller
             ];
         }
 
-        return view('pages.home', compact('popularProducts', 'sections'));
+        return view('pages.home', compact('banners', 'popularProducts', 'sections'));
     }
 
     public function products()
