@@ -29,7 +29,11 @@
                 <ul class="space-y-2 text-gray-400">
                     <li class="flex items-start">
                         <x-heroicon-o-map-pin class="flex-shrink-0 w-5 h-5 mt-1 mr-2" />
-                        <span>Jl. Placeholder No. 123, Jakarta, Indonesia</span>
+                        <span>JL.CEMPAKA RAYA NO 25 BINTARO, JAKARTA SELATAN</span>
+                    </li>
+                    <li class="flex items-start">
+                        <x-heroicon-o-map-pin class="flex-shrink-0 w-5 h-5 mt-1 mr-2" />
+                        <span>JL IR H JUANDA NO 20 CIPUTAT, TANGERANG SELATAN</span>
                     </li>
                     <li class="flex items-center">
                         <x-heroicon-o-phone class="flex-shrink-0 w-5 h-5 mr-2" />
