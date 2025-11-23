@@ -115,8 +115,14 @@
                 @endforelse
             </div>
 
-            {{-- Pagination --}}
-            <x-pagination :paginator="$products" />
+            {{-- Pagination - Floating at Bottom --}}
+            @if($products->hasPages())
+            <div class="sticky bottom-0 left-0 right-0 z-20 mt-8">
+                <div class="bg-white/95 backdrop-blur-sm shadow-lg border-t border-gray-200 rounded-t-xl p-4">
+                    <x-pagination :paginator="$products" />
+                </div>
+            </div>
+            @endif
 
         </main>
     </div>
