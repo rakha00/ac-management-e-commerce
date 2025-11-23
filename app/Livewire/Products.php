@@ -42,9 +42,13 @@ class Products extends Component
 
     public $perPage = 12;
 
-    public $priceLimitMin = 1_000_000; // 1 Juta
+    // Default price limits for Unit AC
+    public $priceLimitMinUnit = 1_000_000; // 1 Juta
+    public $priceLimitMaxUnit = 50_000_000; // 50 Juta
 
-    public $priceLimitMax = 50_000_000; // 50 Juta
+    // Price limits for Sparepart
+    public $priceLimitMinSparepart = 1_000; // 1 Ribu
+    public $priceLimitMaxSparepart = 10_000_000; // 10 Juta
 
     public $tempMinPrice;
 
@@ -57,8 +61,8 @@ class Products extends Component
      *  ───────────────────────────── */
     public function mount(): void
     {
-        $this->minPrice ??= $this->priceLimitMin;
-        $this->maxPrice ??= $this->priceLimitMax;
+        $this->minPrice ??= $this->getPriceLimitMin();
+        $this->maxPrice ??= $this->getPriceLimitMax();
 
         $this->query = $this->searchTerm;
         $this->tempMinPrice = $this->minPrice;
@@ -66,14 +70,37 @@ class Products extends Component
     }
 
     /** ─────────────────────────────
+     *  Computed Properties
+     *  ───────────────────────────── */
+    public function getPriceLimitMin()
+    {
+        return $this->category === 'sparepart'
+            ? $this->priceLimitMinSparepart
+            : $this->priceLimitMinUnit;
+    }
+
+    public function getPriceLimitMax()
+    {
+        return $this->category === 'sparepart'
+            ? $this->priceLimitMaxSparepart
+            : $this->priceLimitMaxUnit;
+    }
+
+    /** ─────────────────────────────
      *  Reactive Handlers
      *  ───────────────────────────── */
     public function updated($property): void
     {
-        // Reset tipe and merk when category changes
+        // Reset filters and price range when category changes
         if ($property === 'category') {
             $this->tipe = null;
             $this->merk = null;
+
+            // Reset price to new category limits
+            $this->minPrice = $this->getPriceLimitMin();
+            $this->maxPrice = $this->getPriceLimitMax();
+            $this->tempMinPrice = $this->minPrice;
+            $this->tempMaxPrice = $this->maxPrice;
         }
 
         if (in_array($property, ['tipe', 'merk', 'sortBy', 'category'])) {
@@ -107,10 +134,10 @@ class Products extends Component
             'category',
         ]);
 
-        $this->minPrice = $this->priceLimitMin;
-        $this->maxPrice = $this->priceLimitMax;
-        $this->tempMinPrice = $this->priceLimitMin;
-        $this->tempMaxPrice = $this->priceLimitMax;
+        $this->minPrice = $this->getPriceLimitMin();
+        $this->maxPrice = $this->getPriceLimitMax();
+        $this->tempMinPrice = $this->minPrice;
+        $this->tempMaxPrice = $this->maxPrice;
 
         $this->resetPage();
     }
@@ -239,6 +266,8 @@ class Products extends Component
             'types' => TipeAC::whereHas('unitAC')->select('id', 'tipe_ac')->get(),
             'brands' => $brands,
             'category' => $this->category,
+            'priceLimitMin' => $this->getPriceLimitMin(),
+            'priceLimitMax' => $this->getPriceLimitMax(),
         ])->extends('layouts.app');
     }
 }

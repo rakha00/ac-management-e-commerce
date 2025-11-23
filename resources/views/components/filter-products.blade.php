@@ -75,7 +75,22 @@
             tempMinPrice: @entangle('tempMinPrice'),
             tempMaxPrice: @entangle('tempMaxPrice'),
             priceLimitMax: @js($priceLimitMax),
-            priceLimitMin: @js($priceLimitMin)
+            priceLimitMin: @js($priceLimitMin),
+            formatPrice(price) {
+                if (this.priceLimitMax <= 10000000) {
+                    // For sparepart (max 10 juta), show in ribu (Rb)
+                    if (price >= 1000000) {
+                        return 'Rp ' + (price / 1000000).toFixed(1) + ' Jt';
+                    }
+                    return 'Rp ' + Math.round(price / 1000) + ' Rb';
+                } else {
+                    // For unit AC (max 50 juta), show in juta (Jt)
+                    return 'Rp ' + (price / 1000000).toFixed(1) + ' Jt';
+                }
+            },
+            getStep() {
+                return this.priceLimitMax <= 10000000 ? 10000 : 1000000;
+            }
         }" x-init="$watch('tempMinPrice', value => {
             if (value > tempMaxPrice) tempMinPrice = tempMaxPrice;
         });
@@ -87,27 +102,27 @@
             {{-- Display Harga --}}
             <div class="flex justify-between items-center text-xs sm:text-sm mb-4 gap-2">
                 <span class="px-2 py-1 bg-gray-100 rounded flex-1 text-center"
-                    x-text="'Rp ' + Math.round(tempMinPrice / 1000000) + ' Jt'"></span>
+                    x-text="formatPrice(tempMinPrice)"></span>
                 <span class="flex-shrink-0">-</span>
                 <span class="px-2 py-1 bg-gray-100 rounded flex-1 text-center"
-                    x-text="'Rp ' + Math.round(tempMaxPrice / 1000000) + ' Jt'"></span>
+                    x-text="formatPrice(tempMaxPrice)"></span>
             </div>
 
             {{-- Range Slider --}}
             <div class="relative h-2 w-full mb-4">
                 <div class="absolute bg-gray-200 rounded-full h-1.5 w-full top-0"></div>
                 <div class="absolute bg-gsi-red rounded-full h-1.5 top-0"
-                    :style="`left: ${(tempMinPrice / priceLimitMax) * 100}%; right: ${100 - (tempMaxPrice / priceLimitMax) * 100}%`">
+                    :style="`left: ${((tempMinPrice - priceLimitMin) / (priceLimitMax - priceLimitMin)) * 100}%; right: ${100 - ((tempMaxPrice - priceLimitMin) / (priceLimitMax - priceLimitMin)) * 100}%`">
                 </div>
                 <input type="range" :min="priceLimitMin" :max="priceLimitMax" :value="tempMinPrice"
-                    step="1000000"
+                    :step="getStep()"
                     x-on:input="
                         tempMinPrice = $event.target.valueAsNumber;
                         if (tempMinPrice > tempMaxPrice) tempMinPrice = tempMaxPrice;
                     "
                     class="absolute w-full h-1.5 appearance-none bg-transparent m-0 p-0 top-0">
                 <input type="range" :min="priceLimitMin" :max="priceLimitMax" :value="tempMaxPrice"
-                    step="1000000"
+                    :step="getStep()"
                     x-on:input="
                         tempMaxPrice = $event.target.valueAsNumber;
                         if (tempMaxPrice < tempMinPrice) tempMaxPrice = tempMinPrice;
@@ -225,7 +240,22 @@
                 tempMinPrice: @entangle('tempMinPrice'),
                 tempMaxPrice: @entangle('tempMaxPrice'),
                 priceLimitMax: @js($priceLimitMax),
-                priceLimitMin: @js($priceLimitMin)
+                priceLimitMin: @js($priceLimitMin),
+                formatPrice(price) {
+                    if (this.priceLimitMax <= 10000000) {
+                        // For sparepart (max 10 juta), show in ribu (Rb)
+                        if (price >= 1000000) {
+                            return 'Rp ' + (price / 1000000).toFixed(1) + ' Jt';
+                        }
+                        return 'Rp ' + Math.round(price / 1000) + ' Rb';
+                    } else {
+                        // For unit AC (max 50 juta), show in juta (Jt)
+                        return 'Rp ' + (price / 1000000).toFixed(1) + ' Jt';
+                    }
+                },
+                getStep() {
+                    return this.priceLimitMax <= 10000000 ? 10000 : 1000000;
+                }
             }" x-init="$watch('tempMinPrice', value => {
                 if (value > tempMaxPrice) tempMinPrice = tempMaxPrice;
             });
@@ -236,26 +266,26 @@
 
                 <div class="flex justify-between items-center text-xs sm:text-sm mb-4 gap-2">
                     <span class="px-2 py-1 bg-white rounded border flex-1 text-center"
-                        x-text="'Rp ' + Math.round(tempMinPrice / 1000000) + ' Jt'"></span>
+                        x-text="formatPrice(tempMinPrice)"></span>
                     <span class="flex-shrink-0">-</span>
                     <span class="px-2 py-1 bg-white rounded border flex-1 text-center"
-                        x-text="'Rp ' + Math.round(tempMaxPrice / 1000000) + ' Jt'"></span>
+                        x-text="formatPrice(tempMaxPrice)"></span>
                 </div>
 
                 <div class="relative h-2 w-full mb-4">
                     <div class="absolute bg-gray-200 rounded-full h-1.5 w-full top-0"></div>
                     <div class="absolute bg-gsi-red rounded-full h-1.5 top-0"
-                        :style="`left: ${(tempMinPrice / priceLimitMax) * 100}%; right: ${100 - (tempMaxPrice / priceLimitMax) * 100}%`">
+                        :style="`left: ${((tempMinPrice - priceLimitMin) / (priceLimitMax - priceLimitMin)) * 100}%; right: ${100 - ((tempMaxPrice - priceLimitMin) / (priceLimitMax - priceLimitMin)) * 100}%`">
                     </div>
                     <input type="range" :min="priceLimitMin" :max="priceLimitMax" :value="tempMinPrice"
-                        step="1000000"
+                        :step="getStep()"
                         x-on:input="
                             tempMinPrice = $event.target.valueAsNumber;
                             if (tempMinPrice > tempMaxPrice) tempMinPrice = tempMaxPrice;
                         "
                         class="absolute w-full h-1.5 appearance-none bg-transparent m-0 p-0 top-0">
                     <input type="range" :min="priceLimitMin" :max="priceLimitMax" :value="tempMaxPrice"
-                        step="1000000"
+                        :step="getStep()"
                         x-on:input="
                             tempMaxPrice = $event.target.valueAsNumber;
                             if (tempMaxPrice < tempMinPrice) tempMaxPrice = tempMinPrice;
