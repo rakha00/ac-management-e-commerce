@@ -74,6 +74,12 @@ class Products extends Component
         $this->resetPage();
     }
 
+    public function updatedTipe()
+    {
+        $this->reset('merk');
+        $this->resetPage();
+    }
+
     public function updated($property): void
     {
         if (in_array($property, ['tipe', 'merk', 'sortBy'])) {
@@ -173,7 +179,7 @@ class Products extends Component
                         ->orWhere('spareparts.keterangan', 'like', $term);
                 });
             })
-            ->when($this->merk && $this->category === 'sparepart', fn ($q) => $q->where('spareparts.merk_spareparts_id', $this->merk))
+            ->when($this->merk && $this->category === 'sparepart', fn ($q) => $q->where('merk_spareparts_id', $this->merk))
             ->whereBetween('spareparts.harga_ecommerce', [$this->minPrice, $this->maxPrice]);
 
         // If filters for AC Type or AC Brand are active, we might want to exclude spareparts
@@ -232,7 +238,9 @@ class Products extends Component
                 ->orderBy('merk_spareparts')
                 ->get(),
             default => Merk::query()
-                ->whereHas('unitAC')
+                ->whereHas('unitAC', function ($query) {
+                    $query->when($this->tipe, fn ($q) => $q->where('tipe_ac_id', $this->tipe));
+                })
                 ->select('id', 'merk')
                 ->orderBy('merk')
                 ->get(),
