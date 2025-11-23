@@ -91,22 +91,23 @@
         <div x-data="{
             tempMinPrice: @entangle('tempMinPrice').live,
             tempMaxPrice: @entangle('tempMaxPrice').live,
-            priceLimitMax: @entangle('priceLimitMax').live,
-            priceLimitMin: @entangle('priceLimitMin').live,
+            priceLimitMax: @js($priceLimitMax),
+            priceLimitMin: @js($priceLimitMin),
             formatPrice(price) {
-                if (this.priceLimitMax <= 10000000) {
-                    // For sparepart (max 10 juta), show in ribu (Rb)
-                    if (price >= 1000000) {
-                        return 'Rp ' + (price / 1000000).toFixed(1) + ' Jt';
-                    }
-                    return 'Rp ' + Math.round(price / 1000) + ' Rb';
+                if (price >= 1000000) {
+                    // Format dalam juta untuk harga >= 1 juta
+                    return 'Rp ' + (price / 1000000).toFixed(price % 1000000 === 0 ? 0 : 1) + ' Jt';
+                } else if (price >= 1000) {
+                    // Format dalam ribu untuk harga >= 1 ribu
+                    return 'Rp ' + (price / 1000).toFixed(price % 1000 === 0 ? 0 : 0) + ' Rb';
                 } else {
-                    // For unit AC (max 50 juta), show in juta (Jt)
-                    return 'Rp ' + (price / 1000000).toFixed(1) + ' Jt';
+                    // Format langsung untuk harga dibawah 1 ribu
+                    return 'Rp ' + price;
                 }
             },
             getStep() {
-                return this.priceLimitMax <= 10000000 ? 10000 : 1000000;
+                // Step 100k untuk range yang besar
+                return 100000;
             }
         }" x-init="$watch('tempMinPrice', value => {
             if (value > tempMaxPrice) tempMinPrice = tempMaxPrice;
@@ -273,22 +274,23 @@
             <div x-data="{
                 tempMinPrice: @entangle('tempMinPrice').live,
                 tempMaxPrice: @entangle('tempMaxPrice').live,
-                priceLimitMax: @entangle('priceLimitMax').live,
-                priceLimitMin: @entangle('priceLimitMin').live,
+                priceLimitMax: @js($priceLimitMax),
+                priceLimitMin: @js($priceLimitMin),
                 formatPrice(price) {
-                    if (this.priceLimitMax <= 10000000) {
-                        // For sparepart (max 10 juta), show in ribu (Rb)
-                        if (price >= 1000000) {
-                            return 'Rp ' + (price / 1000000).toFixed(1) + ' Jt';
-                        }
-                        return 'Rp ' + Math.round(price / 1000) + ' Rb';
+                    if (price >= 1000000) {
+                        // Format dalam juta untuk harga >= 1 juta
+                        return 'Rp ' + (price / 1000000).toFixed(price % 1000000 === 0 ? 0 : 1) + ' Jt';
+                    } else if (price >= 1000) {
+                        // Format dalam ribu untuk harga >= 1 ribu
+                        return 'Rp ' + (price / 1000).toFixed(price % 1000 === 0 ? 0 : 0) + ' Rb';
                     } else {
-                        // For unit AC (max 50 juta), show in juta (Jt)
-                        return 'Rp ' + (price / 1000000).toFixed(1) + ' Jt';
+                        // Format langsung untuk harga dibawah 1 ribu
+                        return 'Rp ' + price;
                     }
                 },
                 getStep() {
-                    return this.priceLimitMax <= 10000000 ? 10000 : 1000000;
+                    // Step 100k untuk range yang besar
+                    return 100000;
                 }
             }" x-init="$watch('tempMinPrice', value => {
                 if (value > tempMaxPrice) tempMinPrice = tempMaxPrice;

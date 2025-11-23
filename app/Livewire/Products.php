@@ -46,13 +46,9 @@ class Products extends Component
 
     public $perPage = 12;
 
-    // Default price limits for Unit AC
-    public $priceLimitMinUnit = 1_000_000; // 1 Juta
-    public $priceLimitMaxUnit = 50_000_000; // 50 Juta
+    public $priceLimitMin = 0; // 0 Rupiah (untuk produk murah)
 
-    // Price limits for Sparepart
-    public $priceLimitMinSparepart = 1_000; // 1 Ribu
-    public $priceLimitMaxSparepart = 10_000_000; // 10 Juta
+    public $priceLimitMax = 50_000_000; // 50 Juta
 
     public $tempMinPrice;
 
@@ -65,45 +61,12 @@ class Products extends Component
      *  ───────────────────────────── */
     public function mount(): void
     {
-        $this->minPrice ??= $this->getPriceLimitMin();
-        $this->maxPrice ??= $this->getPriceLimitMax();
+        $this->minPrice ??= $this->priceLimitMin;
+        $this->maxPrice ??= $this->priceLimitMax;
 
         $this->query = $this->searchTerm;
         $this->tempMinPrice = $this->minPrice;
         $this->tempMaxPrice = $this->maxPrice;
-    }
-
-    /** ─────────────────────────────
-     *  Computed Properties
-     *  ───────────────────────────── */
-    #[Computed]
-    public function priceLimitMin()
-    {
-        return $this->category === 'sparepart'
-            ? $this->priceLimitMinSparepart
-            : $this->priceLimitMinUnit;
-    }
-
-    #[Computed]
-    public function priceLimitMax()
-    {
-        return $this->category === 'sparepart'
-            ? $this->priceLimitMaxSparepart
-            : $this->priceLimitMaxUnit;
-    }
-
-    public function getPriceLimitMin()
-    {
-        return $this->category === 'sparepart'
-            ? $this->priceLimitMinSparepart
-            : $this->priceLimitMinUnit;
-    }
-
-    public function getPriceLimitMax()
-    {
-        return $this->category === 'sparepart'
-            ? $this->priceLimitMaxSparepart
-            : $this->priceLimitMaxUnit;
     }
 
     /** ─────────────────────────────
@@ -150,10 +113,10 @@ class Products extends Component
             'category',
         ]);
 
-        $this->minPrice = $this->getPriceLimitMin();
-        $this->maxPrice = $this->getPriceLimitMax();
-        $this->tempMinPrice = $this->minPrice;
-        $this->tempMaxPrice = $this->maxPrice;
+        $this->minPrice = $this->priceLimitMin;
+        $this->maxPrice = $this->priceLimitMax;
+        $this->tempMinPrice = $this->priceLimitMin;
+        $this->tempMaxPrice = $this->priceLimitMax;
 
         $this->resetPage();
     }
@@ -343,8 +306,6 @@ class Products extends Component
             'category' => $this->category,
             'merkUnit' => $this->merkUnit,
             'merkSparepart' => $this->merkSparepart,
-            'priceLimitMin' => $this->getPriceLimitMin(),
-            'priceLimitMax' => $this->getPriceLimitMax(),
         ])->extends('layouts.app');
     }
 }
