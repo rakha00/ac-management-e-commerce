@@ -101,10 +101,10 @@
 
             {{-- Display Harga --}}
             <div class="flex justify-between items-center text-xs sm:text-sm mb-4 gap-2">
-                <span class="px-2 py-1 bg-gray-100 rounded flex-1 text-center"
+                <span class="px-2 py-1 bg-gray-100 rounded flex-1 text-center text-xs" style="min-height: 28px; display: flex; align-items: center; justify-content: center;"
                     x-text="formatPrice(tempMinPrice)"></span>
                 <span class="flex-shrink-0">-</span>
-                <span class="px-2 py-1 bg-gray-100 rounded flex-1 text-center"
+                <span class="px-2 py-1 bg-gray-100 rounded flex-1 text-center text-xs" style="min-height: 28px; display: flex; align-items: center; justify-content: center;"
                     x-text="formatPrice(tempMaxPrice)"></span>
             </div>
 
@@ -265,10 +265,10 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Filter Harga</h3>
 
                 <div class="flex justify-between items-center text-xs sm:text-sm mb-4 gap-2">
-                    <span class="px-2 py-1 bg-white rounded border flex-1 text-center"
+                    <span class="px-2 py-1 bg-white rounded border flex-1 text-center text-xs" style="min-height: 28px; display: flex; align-items: center; justify-content: center;"
                         x-text="formatPrice(tempMinPrice)"></span>
                     <span class="flex-shrink-0">-</span>
-                    <span class="px-2 py-1 bg-white rounded border flex-1 text-center"
+                    <span class="px-2 py-1 bg-white rounded border flex-1 text-center text-xs" style="min-height: 28px; display: flex; align-items: center; justify-content: center;"
                         x-text="formatPrice(tempMaxPrice)"></span>
                 </div>
 

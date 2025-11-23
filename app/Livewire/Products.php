@@ -157,7 +157,7 @@ class Products extends Component
                 DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail) as price'),
                 'unit_ac.path_foto_produk as image_path',
                 DB::raw("'unit' as type"),
-                'tipe_ac.tipe_ac as category',
+                DB::raw('COALESCE(tipe_ac.tipe_ac, "Lainnya") as category'),
                 'unit_ac.created_at',
                 'unit_ac.stok_keluar',
             ])
@@ -172,8 +172,22 @@ class Products extends Component
                         ->orWhere('tipe_ac.tipe_ac', 'like', $term);
                 });
             })
-            ->when($this->tipe, fn($q) => $q->where('unit_ac.tipe_ac_id', $this->tipe))
-            ->when($this->merk, fn($q) => $q->where('unit_ac.merk_id', $this->merk))
+            ->when($this->tipe !== null, function ($q) {
+                if ($this->tipe == 0) {
+                    // Filter untuk "Lainnya" - unit yang tidak punya tipe_ac_id
+                    $q->whereNull('unit_ac.tipe_ac_id');
+                } else {
+                    $q->where('unit_ac.tipe_ac_id', $this->tipe);
+                }
+            })
+            ->when($this->merk !== null, function ($q) {
+                if ($this->merk == 0) {
+                    // Filter untuk "Lainnya" - unit yang tidak punya merk_id
+                    $q->whereNull('unit_ac.merk_id');
+                } else {
+                    $q->where('unit_ac.merk_id', $this->merk);
+                }
+            })
             ->whereBetween(
                 DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'),
                 [$this->minPrice, $this->maxPrice]
@@ -202,7 +216,14 @@ class Products extends Component
                         ->orWhere('merk_spareparts.merk_spareparts', 'like', $term);
                 });
             })
-            ->when($this->merk, fn($q) => $q->where('spareparts.merk_spareparts_id', $this->merk))
+            ->when($this->merk !== null && $this->category === 'sparepart', function ($q) {
+                if ($this->merk == 0) {
+                    // Filter untuk "Lainnya" - sparepart yang tidak punya merk
+                    $q->whereNull('spareparts.merk_spareparts_id');
+                } else {
+                    $q->where('spareparts.merk_spareparts_id', $this->merk);
+                }
+            })
             ->whereBetween('spareparts.harga_ecommerce', [$this->minPrice, $this->maxPrice]);
 
         // If filters for AC Type or AC Brand are active, we might want to exclude spareparts
@@ -254,16 +275,37 @@ class Products extends Component
             $brands = MerkSparepart::whereHas('spareparts')
                 ->select('id', 'merk_spareparts as merk')
                 ->get();
+
+            // Add "Lainnya" option for spareparts without merk
+            $hasUnbranded = Sparepart::whereNull('merk_spareparts_id')->exists();
+            if ($hasUnbranded) {
+                $brands->prepend((object) ['id' => 0, 'merk' => 'Lainnya']);
+            }
         } else {
             // For 'unit' or 'all' category, show AC unit brands
             $brands = Merk::whereHas('unitAC')
                 ->select('id', 'merk')
                 ->get();
+
+            // Add "Lainnya" option for units without merk
+            $hasUnbranded = UnitAC::whereNull('merk_id')->exists();
+            if ($hasUnbranded) {
+                $brands->prepend((object) ['id' => 0, 'merk' => 'Lainnya']);
+            }
+        }
+
+        // Get types with "Lainnya" option
+        $types = TipeAC::whereHas('unitAC')->select('id', 'tipe_ac')->get();
+
+        // Add "Lainnya" option for units without tipe_ac
+        $hasUntypedUnits = UnitAC::whereNull('tipe_ac_id')->exists();
+        if ($hasUntypedUnits) {
+            $types->prepend((object) ['id' => 0, 'tipe_ac' => 'Lainnya']);
         }
 
         return view('pages.products', [
             'products' => $this->getFilteredProducts(),
-            'types' => TipeAC::whereHas('unitAC')->select('id', 'tipe_ac')->get(),
+            'types' => $types,
             'brands' => $brands,
             'category' => $this->category,
             'priceLimitMin' => $this->getPriceLimitMin(),
