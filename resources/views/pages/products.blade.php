@@ -117,8 +117,8 @@
 
             {{-- Pagination - Floating at Bottom --}}
             @if($products->hasPages())
-            <div class="sticky bottom-0 left-0 right-0 z-20 mt-8">
-                <div class="bg-white/95 backdrop-blur-sm shadow-lg border-t border-gray-200 rounded-t-xl p-4">
+            <div class="sticky bottom-0 left-0 right-0 z-20 mt-6">
+                <div class="bg-white/90 backdrop-blur-md shadow-2xl border-t border-gray-200 py-3 px-2 sm:px-4">
                     <x-pagination :paginator="$products" />
                 </div>
             </div>

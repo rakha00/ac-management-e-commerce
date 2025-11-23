@@ -1,19 +1,19 @@
 @props(['paginator', 'showInfo' => true])
 
 @if ($paginator->hasPages())
-    <nav class="mt-8" aria-label="Pagination">
-        <ul class="flex justify-center items-center space-x-2 text-sm">
+    <nav aria-label="Pagination">
+        <ul class="flex justify-center items-center gap-1 sm:gap-2">
             {{-- Previous Button --}}
             <li>
                 @if ($paginator->onFirstPage())
                     <span
-                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
+                        class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border-2 border-gray-300 text-gray-400 cursor-not-allowed bg-transparent">
                         <span class="sr-only">Previous</span>
                         <x-heroicon-s-chevron-left class="w-4 h-4" />
                     </span>
                 @else
                     <button type="button" wire:click="previousPage"
-                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white hover:bg-gray-100 text-gray-700 transition-colors">
+                        class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border-2 border-gray-300 hover:border-gsi-red hover:text-gsi-red text-gray-700 transition-all bg-transparent">
                         <span class="sr-only">Previous</span>
                         <x-heroicon-s-chevron-left class="w-4 h-4" />
                     </button>
@@ -32,12 +32,12 @@
             @if ($start > 1)
                 <li>
                     <button type="button" wire:click="gotoPage(1)"
-                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white hover:bg-gray-100 text-gray-700 transition-colors">1</button>
+                        class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border-2 border-gray-300 hover:border-gsi-red hover:text-gsi-red text-gray-700 transition-all bg-transparent text-sm font-medium">1</button>
                 </li>
                 @if ($start > 2)
-                    <li>
+                    <li class="hidden sm:inline-flex">
                         <span
-                            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white text-gray-700">...</span>
+                            class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 text-gray-500">...</span>
                     </li>
                 @endif
             @endif
@@ -47,10 +47,10 @@
                 <li>
                     @if ($page == $currentPage)
                         <span aria-current="page"
-                            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gsi-red text-white font-semibold">{{ $page }}</span>
+                            class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gsi-red border-2 border-gsi-red text-white font-semibold text-sm shadow-md">{{ $page }}</span>
                     @else
                         <button type="button" wire:click="gotoPage({{ $page }})"
-                            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white hover:bg-gray-100 text-gray-700 transition-colors">{{ $page }}</button>
+                            class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border-2 border-gray-300 hover:border-gsi-red hover:text-gsi-red text-gray-700 transition-all bg-transparent text-sm font-medium">{{ $page }}</button>
                     @endif
                 </li>
             @endfor
@@ -58,14 +58,14 @@
             {{-- Last page --}}
             @if ($end < $lastPage)
                 @if ($end < $lastPage - 1)
-                    <li>
+                    <li class="hidden sm:inline-flex">
                         <span
-                            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white text-gray-700">...</span>
+                            class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 text-gray-500">...</span>
                     </li>
                 @endif
                 <li>
                     <button type="button" wire:click="gotoPage({{ $lastPage }})"
-                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white hover:bg-gray-100 text-gray-700 transition-colors">{{ $lastPage }}</button>
+                        class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border-2 border-gray-300 hover:border-gsi-red hover:text-gsi-red text-gray-700 transition-all bg-transparent text-sm font-medium">{{ $lastPage }}</button>
                 </li>
             @endif
 
@@ -73,13 +73,13 @@
             <li>
                 @if ($paginator->hasMorePages())
                     <button type="button" wire:click="nextPage"
-                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white hover:bg-gray-100 text-gray-700 transition-colors">
+                        class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border-2 border-gray-300 hover:border-gsi-red hover:text-gsi-red text-gray-700 transition-all bg-transparent">
                         <span class="sr-only">Next</span>
                         <x-heroicon-s-chevron-right class="w-4 h-4" />
                     </button>
                 @else
                     <span
-                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
+                        class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg border-2 border-gray-300 text-gray-400 cursor-not-allowed bg-transparent">
                         <span class="sr-only">Next</span>
                         <x-heroicon-s-chevron-right class="w-4 h-4" />
                     </span>
