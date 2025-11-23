@@ -34,7 +34,16 @@
                                 {{ $product->nama_unit }}
                             </div>
                             <div class="text-xs text-gray-500">
-                                {{ $product->merk->nama_merk ?? 'N/A' }} • {{ $product->tipeAC->tipe_ac ?? 'N/A' }}
+                                @php
+                                    $merk = $product->merk->merk ?? null;
+                                    $tipe = $product->tipeAC->tipe_ac ?? null;
+                                    $info = array_filter([$merk, $tipe]); // Remove null values
+                                @endphp
+                                @if(count($info) > 0)
+                                    {{ implode(' • ', $info) }}
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
                             </div>
                         </div>
                         <div class="text-sm font-semibold text-gsi-red">

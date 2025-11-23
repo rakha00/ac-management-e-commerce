@@ -11,8 +11,13 @@
                 <h1 class="text-2xl lg:text-3xl font-semibold text-gray-900">
                     {{ $product->nama_unit }}
                 </h1>
-                <span class="text-sm text-gray-500 mt-1">Kategori: <a href="/produk?tipe={{ $product->tipeAC->id }}"
-                        class="text-gsi-red hover:underline">{{ $product->tipeAC->tipe_ac }}</a></span>
+                <span class="text-sm text-gray-500 mt-1">Kategori: 
+                    @if($product->tipeAC)
+                        <a href="/produk?tipe={{ $product->tipeAC->id }}" class="text-gsi-red hover:underline">{{ $product->tipeAC->tipe_ac }}</a>
+                    @else
+                        <span class="text-gray-400">-</span>
+                    @endif
+                </span>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
 
@@ -104,14 +109,18 @@
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">SKU Produk</span>
                                 <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->sku }}</span>
                             </div>
+                            @if($product->merk)
                             <div class="flex items-center p-3 bg-gray-50 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">Merek</span>
                                 <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->merk->merk }}</span>
                             </div>
+                            @endif
+                            @if($product->tipeAC)
                             <div class="flex items-center p-3 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">Tipe AC</span>
                                 <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->tipeAC->tipe_ac }}</span>
                             </div>
+                            @endif
                             <div class="flex items-center p-3 bg-gray-50 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">Daya Watt</span>
                                 <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->pk }} PK</span>

@@ -103,10 +103,12 @@
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">Kode Sparepart</span>
                                 <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->kode_sparepart }}</span>
                             </div>
+                            @if($product->merkSparepart)
                             <div class="flex items-center p-3 bg-gray-50 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">Merek</span>
-                                <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->merkSparepart->merk_spareparts ?? '-' }}</span>
+                                <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->merkSparepart->merk_spareparts }}</span>
                             </div>
+                            @endif
                         </div>
                     </div>
 
