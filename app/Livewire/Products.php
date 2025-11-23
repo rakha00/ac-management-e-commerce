@@ -68,13 +68,15 @@ class Products extends Component
     /** ─────────────────────────────
      *  Reactive Handlers
      *  ───────────────────────────── */
+    public function updatedCategory()
+    {
+        $this->reset(['merk', 'tipe']);
+        $this->resetPage();
+    }
+
     public function updated($property): void
     {
-        if ($property === 'category') {
-            $this->reset(['merk', 'tipe']);
-        }
-
-        if (in_array($property, ['tipe', 'merk', 'sortBy', 'category'])) {
+        if (in_array($property, ['tipe', 'merk', 'sortBy'])) {
             $this->resetPage();
         }
     }
@@ -118,7 +120,7 @@ class Products extends Component
      *  ───────────────────────────── */
     private function getFilteredProducts()
     {
-        $term = '%' . $this->searchTerm . '%';
+        $term = '%'.$this->searchTerm.'%';
 
         // Query for UnitAC
         $units = UnitAC::query()
@@ -143,8 +145,8 @@ class Products extends Component
                         ->orWhere('tipe_ac.tipe_ac', 'like', $term);
                 });
             })
-            ->when($this->tipe, fn($q) => $q->where('unit_ac.tipe_ac_id', $this->tipe))
-            ->when($this->merk && $this->category !== 'sparepart', fn($q) => $q->where('unit_ac.merk_id', $this->merk))
+            ->when($this->tipe, fn ($q) => $q->where('unit_ac.tipe_ac_id', $this->tipe))
+            ->when($this->merk && $this->category !== 'sparepart', fn ($q) => $q->where('unit_ac.merk_id', $this->merk))
             ->whereBetween(
                 DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'),
                 [$this->minPrice, $this->maxPrice]
@@ -171,7 +173,7 @@ class Products extends Component
                         ->orWhere('spareparts.keterangan', 'like', $term);
                 });
             })
-            ->when($this->merk && $this->category === 'sparepart', fn($q) => $q->where('spareparts.merk_spareparts_id', $this->merk))
+            ->when($this->merk && $this->category === 'sparepart', fn ($q) => $q->where('spareparts.merk_spareparts_id', $this->merk))
             ->whereBetween('spareparts.harga_ecommerce', [$this->minPrice, $this->maxPrice]);
 
         // If filters for AC Type or AC Brand are active, we might want to exclude spareparts
@@ -215,7 +217,7 @@ class Products extends Component
      *  ───────────────────────────── */
     public function formatPrice($price): string
     {
-        return 'Rp ' . number_format($price, 0, ',', '.');
+        return 'Rp '.number_format($price, 0, ',', '.');
     }
 
     /** ─────────────────────────────
@@ -224,15 +226,21 @@ class Products extends Component
     public function render()
     {
         $brands = match ($this->category) {
-            'sparepart' => MerkSparepart::whereHas('spareparts')
+            'sparepart' => MerkSparepart::query()
+                ->whereHas('spareparts')
                 ->select('id', 'merk_spareparts as merk')
+                ->orderBy('merk_spareparts')
                 ->get(),
-            default => Merk::whereHas('unitAC')->select('id', 'merk')->get(),
+            default => Merk::query()
+                ->whereHas('unitAC')
+                ->select('id', 'merk')
+                ->orderBy('merk')
+                ->get(),
         };
 
         return view('pages.products', [
             'products' => $this->getFilteredProducts(),
-            'types' => TipeAC::whereHas('unitAC')->select('id', 'tipe_ac')->get(),
+            'types' => TipeAC::whereHas('unitAC')->select('id', 'tipe_ac')->orderBy('tipe_ac')->get(),
             'brands' => $brands,
         ])->extends('layouts.app');
     }
