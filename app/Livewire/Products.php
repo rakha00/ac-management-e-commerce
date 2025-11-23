@@ -207,7 +207,12 @@ class Products extends Component
             ->whereBetween(
                 DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'),
                 [$this->minPrice, $this->maxPrice]
-            );
+            )
+            ->where(function ($q) {
+                // Ensure we don't exclude products with valid prices
+                $q->whereNotNull(DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'))
+                    ->where(DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'), '>', 0);
+            });
 
         // Query for Sparepart
         // Only include if no specific AC Type/Brand filter is applied, or handle logic if needed.
@@ -240,18 +245,22 @@ class Products extends Component
                     $q->where('spareparts.merk_spareparts_id', $this->merkSparepart);
                 }
             })
-            ->whereBetween('spareparts.harga_ecommerce', [$this->minPrice, $this->maxPrice]);
+            ->whereBetween('spareparts.harga_ecommerce', [$this->minPrice, $this->maxPrice])
+            ->where(function ($q) {
+                // Ensure we don't exclude products with valid prices
+                $q->whereNotNull('spareparts.harga_ecommerce')
+                    ->where('spareparts.harga_ecommerce', '>', 0);
+            });
 
-        // If filters for AC Type or AC Brand are active, we might want to exclude spareparts
-        // because they don't belong to those AC Types/Brands (they have their own).
-        if ($this->tipe || $this->merkUnit || $this->category === 'unit') {
-            // Return only units
+        // Determine which query to use based on filters
+        if ($this->tipe !== null || $this->merkUnit !== null || $this->category === 'unit') {
+            // Return only units if there's a unit-specific filter active
             $query = $units;
-        } elseif ($this->category === 'sparepart') {
-            // Return only spareparts
+        } elseif ($this->category === 'sparepart' || $this->merkSparepart !== null) {
+            // Return only spareparts if category is sparepart or sparepart filter active
             $query = $spareparts;
         } else {
-            // Union both
+            // Union both when category is 'all' and no specific filters
             $query = $units->union($spareparts);
         }
 
