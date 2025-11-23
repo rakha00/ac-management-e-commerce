@@ -50,8 +50,7 @@
         </div>
 
         {{-- === Filter Tipe AC === --}}
-        @if($category !== 'sparepart')
-        <div x-data="{ open: true }" class="bg-white p-4 rounded-lg shadow-sm">
+        <div x-data="{ open: true }" x-show="localCategory !== 'sparepart'" class="bg-white p-4 rounded-lg shadow-sm">
             <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
                 <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
                 <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
@@ -67,7 +66,6 @@
                 @endforeach
             </div>
         </div>
-        @endif
 
         {{-- === Filter Merek === --}}
         <div x-data="{ open: true }" class="bg-white p-4 rounded-lg shadow-sm">
@@ -233,8 +231,7 @@
             </div>
 
             {{-- Tipe AC --}}
-            @if($category !== 'sparepart')
-            <div x-data="{ open: true }" class="bg-gray-50 p-4 rounded-lg">
+            <div x-data="{ open: true }" x-show="localCategory !== 'sparepart'" class="bg-gray-50 p-4 rounded-lg">
                 <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
                     <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
                     <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
@@ -250,7 +247,6 @@
                     @endforeach
                 </div>
             </div>
-            @endif
 
             {{-- Merek --}}
             <div x-data="{ open: true }" class="bg-gray-50 p-4 rounded-lg">
