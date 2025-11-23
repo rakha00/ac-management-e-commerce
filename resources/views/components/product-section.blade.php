@@ -29,7 +29,7 @@
                     }
                 }
                 
-                $productImage = $productImage ?? asset('img/GSI.png');
+                $productImage = $productImage ?? asset('img/produk/placeholder.png');
                 
                 $href = $isSparepart ? route('detail-sparepart', $product->id) : route('detail-products', $product->id);
             @endphp

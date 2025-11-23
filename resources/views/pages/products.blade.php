@@ -84,7 +84,7 @@
                             $image = $image[0] ?? null;
                         }
                         
-                        $image = $image ? asset('storage/' . $image) : asset('img/GSI.png');
+                        $image = $image ? asset('storage/' . $image) : asset('img/produk/placeholder.png');
                         
                         $href = $product->type === 'sparepart' 
                             ? route('detail-sparepart', $product->id) 
