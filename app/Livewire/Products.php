@@ -252,15 +252,23 @@ class Products extends Component
                     ->where('spareparts.harga_ecommerce', '>', 0);
             });
 
-        // Determine which query to use based on filters
-        if ($this->tipe !== null || $this->merkUnit !== null || $this->category === 'unit') {
-            // Return only units if there's a unit-specific filter active
+        // Determine which query to use based on filters and search
+        // Priority: Search across all when category is 'all' and no specific filters
+        if ($this->category === 'unit' || $this->tipe !== null || $this->merkUnit !== null) {
+            // Return only units if:
+            // - Category explicitly set to 'unit', OR
+            // - There's a unit-specific filter active (tipe or merkUnit)
             $query = $units;
         } elseif ($this->category === 'sparepart' || $this->merkSparepart !== null) {
-            // Return only spareparts if category is sparepart or sparepart filter active
+            // Return only spareparts if:
+            // - Category explicitly set to 'sparepart', OR
+            // - There's a sparepart-specific filter active (merkSparepart)
             $query = $spareparts;
         } else {
-            // Union both when category is 'all' and no specific filters
+            // Union both when:
+            // - Category is 'all' (default), AND
+            // - No specific filters are active
+            // This allows searching across ALL products
             $query = $units->union($spareparts);
         }
 
