@@ -1,8 +1,25 @@
 {{-- Filter Component --}}
 <aside class="w-full md:w-1/4 lg:w-1/5 flex-shrink-0 hidden md:block" x-data="{
-    localCategory: @entangle('category').defer,
-    localTipe: @entangle('tipe').defer,
-    localMerk: @entangle('merk').defer
+    localCategory: @entangle('category').live,
+    localTipe: @entangle('tipe').live,
+    localMerkUnit: @entangle('merkUnit').live,
+    localMerkSparepart: @entangle('merkSparepart').live,
+    get currentMerk() {
+        return this.localCategory === 'sparepart' ? this.localMerkSparepart : this.localMerkUnit;
+    },
+    setMerk(value) {
+        if (this.localCategory === 'sparepart') {
+            this.localMerkSparepart = this.localMerkSparepart == value ? null : value;
+        } else {
+            this.localMerkUnit = this.localMerkUnit == value ? null : value;
+        }
+    },
+    toggleCategory(value) {
+        this.localCategory = this.localCategory == value ? 'all' : value;
+    },
+    toggleTipe(value) {
+        this.localTipe = this.localTipe == value ? null : value;
+    }
 }">
     <div class="space-y-6">
 
@@ -15,17 +32,17 @@
             </button>
             <div x-show="open" x-collapse class="space-y-3 pt-2">
                 <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                    <input type="radio" name="category-filter" x-model="localCategory" value="all" @change="$wire.set('category', localCategory)"
+                    <input type="radio" name="category-filter" :checked="localCategory == 'all'" @click="toggleCategory('all')"
                         class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                     <span class="ml-2">Semua</span>
                 </label>
                 <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                    <input type="radio" name="category-filter" x-model="localCategory" value="unit" @change="$wire.set('category', localCategory)"
+                    <input type="radio" name="category-filter" :checked="localCategory == 'unit'" @click="toggleCategory('unit')"
                         class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                     <span class="ml-2">Unit AC</span>
                 </label>
                 <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                    <input type="radio" name="category-filter" x-model="localCategory" value="sparepart" @change="$wire.set('category', localCategory)"
+                    <input type="radio" name="category-filter" :checked="localCategory == 'sparepart'" @click="toggleCategory('sparepart')"
                         class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                     <span class="ml-2">Sparepart</span>
                 </label>
@@ -43,7 +60,7 @@
             <div x-show="open" x-collapse class="space-y-3 pt-2">
                 @foreach ($types as $type)
                     <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" name="tipe-filter" x-model="localTipe" value="{{ $type->id }}" @change="$wire.set('tipe', localTipe)"
+                        <input type="radio" name="tipe-filter" :checked="localTipe == {{ $type->id }}" @click="toggleTipe({{ $type->id }})"
                             class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                         <span class="ml-2">{{ $type->tipe_ac }}</span>
                     </label>
@@ -62,7 +79,7 @@
             <div x-show="open" x-collapse class="space-y-3 pt-2">
                 @foreach ($brands as $brand)
                     <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" name="merk-filter" x-model="localMerk" value="{{ $brand->id }}" @change="$wire.set('merk', localMerk)"
+                        <input type="radio" name="merk-filter" :checked="currentMerk == {{ $brand->id }}" @click="setMerk({{ $brand->id }})"
                             class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                         <span class="ml-2">{{ $brand->merk }}</span>
                     </label>
@@ -72,10 +89,10 @@
 
         {{-- === Filter Harga === --}}
         <div x-data="{
-            tempMinPrice: @entangle('tempMinPrice'),
-            tempMaxPrice: @entangle('tempMaxPrice'),
-            priceLimitMax: @js($priceLimitMax),
-            priceLimitMin: @js($priceLimitMin),
+            tempMinPrice: @entangle('tempMinPrice').live,
+            tempMaxPrice: @entangle('tempMaxPrice').live,
+            priceLimitMax: @entangle('priceLimitMax').live,
+            priceLimitMin: @entangle('priceLimitMin').live,
             formatPrice(price) {
                 if (this.priceLimitMax <= 10000000) {
                     // For sparepart (max 10 juta), show in ribu (Rb)
@@ -148,9 +165,26 @@
 
 {{-- === Mobile Filter === --}}
 <div x-data="{
-    localCategory: @entangle('category').defer,
-    localTipe: @entangle('tipe').defer,
-    localMerk: @entangle('merk').defer
+    localCategory: @entangle('category').live,
+    localTipe: @entangle('tipe').live,
+    localMerkUnit: @entangle('merkUnit').live,
+    localMerkSparepart: @entangle('merkSparepart').live,
+    get currentMerk() {
+        return this.localCategory === 'sparepart' ? this.localMerkSparepart : this.localMerkUnit;
+    },
+    setMerk(value) {
+        if (this.localCategory === 'sparepart') {
+            this.localMerkSparepart = this.localMerkSparepart == value ? null : value;
+        } else {
+            this.localMerkUnit = this.localMerkUnit == value ? null : value;
+        }
+    },
+    toggleCategory(value) {
+        this.localCategory = this.localCategory == value ? 'all' : value;
+    },
+    toggleTipe(value) {
+        this.localTipe = this.localTipe == value ? null : value;
+    }
 }" x-show="filtersOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
     x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
@@ -180,17 +214,17 @@
                 </button>
                 <div x-show="open" x-collapse class="space-y-3 pt-2">
                     <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" name="category-filter-mobile" x-model="localCategory" value="all" @change="$wire.set('category', localCategory)"
+                        <input type="radio" name="category-filter-mobile" :checked="localCategory == 'all'" @click="toggleCategory('all')"
                             class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                         <span class="ml-2">Semua</span>
                     </label>
                     <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" name="category-filter-mobile" x-model="localCategory" value="unit" @change="$wire.set('category', localCategory)"
+                        <input type="radio" name="category-filter-mobile" :checked="localCategory == 'unit'" @click="toggleCategory('unit')"
                             class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                         <span class="ml-2">Unit AC</span>
                     </label>
                     <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" name="category-filter-mobile" x-model="localCategory" value="sparepart" @change="$wire.set('category', localCategory)"
+                        <input type="radio" name="category-filter-mobile" :checked="localCategory == 'sparepart'" @click="toggleCategory('sparepart')"
                             class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                         <span class="ml-2">Sparepart</span>
                     </label>
@@ -208,7 +242,7 @@
                 <div x-show="open" x-collapse class="space-y-3 pt-2">
                     @foreach ($types as $type)
                         <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                            <input type="radio" name="tipe-filter-mobile" x-model="localTipe" value="{{ $type->id }}" @change="$wire.set('tipe', localTipe)"
+                            <input type="radio" name="tipe-filter-mobile" :checked="localTipe == {{ $type->id }}" @click="toggleTipe({{ $type->id }})"
                                 class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                             <span class="ml-2">{{ $type->tipe_ac }}</span>
                         </label>
@@ -227,7 +261,7 @@
                 <div x-show="open" x-collapse class="space-y-3 pt-2">
                     @foreach ($brands as $brand)
                         <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                            <input type="radio" name="merk-filter-mobile" x-model="localMerk" value="{{ $brand->id }}" @change="$wire.set('merk', localMerk)"
+                            <input type="radio" name="merk-filter-mobile" :checked="currentMerk == {{ $brand->id }}" @click="setMerk({{ $brand->id }})"
                                 class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                             <span class="ml-2">{{ $brand->merk }}</span>
                         </label>
@@ -237,10 +271,10 @@
 
             {{-- Harga --}}
             <div x-data="{
-                tempMinPrice: @entangle('tempMinPrice'),
-                tempMaxPrice: @entangle('tempMaxPrice'),
-                priceLimitMax: @js($priceLimitMax),
-                priceLimitMin: @js($priceLimitMin),
+                tempMinPrice: @entangle('tempMinPrice').live,
+                tempMaxPrice: @entangle('tempMaxPrice').live,
+                priceLimitMax: @entangle('priceLimitMax').live,
+                priceLimitMin: @entangle('priceLimitMin').live,
                 formatPrice(price) {
                     if (this.priceLimitMax <= 10000000) {
                         // For sparepart (max 10 juta), show in ribu (Rb)

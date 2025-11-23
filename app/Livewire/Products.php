@@ -9,6 +9,7 @@ use App\Models\TipeAC;
 use App\Models\UnitAC;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -27,7 +28,10 @@ class Products extends Component
     public $category = 'all';
 
     #[Url(except: null)]
-    public $merk = null;
+    public $merkUnit = null;  // For Unit AC brands
+
+    #[Url(except: null)]
+    public $merkSparepart = null;  // For Sparepart brands
 
     #[Url(except: null)]
     public $minPrice;
@@ -72,6 +76,22 @@ class Products extends Component
     /** ─────────────────────────────
      *  Computed Properties
      *  ───────────────────────────── */
+    #[Computed]
+    public function priceLimitMin()
+    {
+        return $this->category === 'sparepart'
+            ? $this->priceLimitMinSparepart
+            : $this->priceLimitMinUnit;
+    }
+
+    #[Computed]
+    public function priceLimitMax()
+    {
+        return $this->category === 'sparepart'
+            ? $this->priceLimitMaxSparepart
+            : $this->priceLimitMaxUnit;
+    }
+
     public function getPriceLimitMin()
     {
         return $this->category === 'sparepart'
@@ -91,19 +111,14 @@ class Products extends Component
      *  ───────────────────────────── */
     public function updated($property): void
     {
-        // Reset filters and price range when category changes
+        // Reset filters when category changes
         if ($property === 'category') {
             $this->tipe = null;
-            $this->merk = null;
-
-            // Reset price to new category limits
-            $this->minPrice = $this->getPriceLimitMin();
-            $this->maxPrice = $this->getPriceLimitMax();
-            $this->tempMinPrice = $this->minPrice;
-            $this->tempMaxPrice = $this->maxPrice;
+            $this->merkUnit = null;
+            $this->merkSparepart = null;
         }
 
-        if (in_array($property, ['tipe', 'merk', 'sortBy', 'category'])) {
+        if (in_array($property, ['tipe', 'merkUnit', 'merkSparepart', 'sortBy', 'category'])) {
             $this->resetPage();
         }
     }
@@ -129,7 +144,8 @@ class Products extends Component
         $this->reset([
             'searchTerm',
             'tipe',
-            'merk',
+            'merkUnit',
+            'merkSparepart',
             'sortBy',
             'category',
         ]);
@@ -180,12 +196,12 @@ class Products extends Component
                     $q->where('unit_ac.tipe_ac_id', $this->tipe);
                 }
             })
-            ->when($this->merk !== null, function ($q) {
-                if ($this->merk == 0) {
+            ->when($this->merkUnit !== null, function ($q) {
+                if ($this->merkUnit == 0) {
                     // Filter untuk "Lainnya" - unit yang tidak punya merk_id
                     $q->whereNull('unit_ac.merk_id');
                 } else {
-                    $q->where('unit_ac.merk_id', $this->merk);
+                    $q->where('unit_ac.merk_id', $this->merkUnit);
                 }
             })
             ->whereBetween(
@@ -216,19 +232,19 @@ class Products extends Component
                         ->orWhere('merk_spareparts.merk_spareparts', 'like', $term);
                 });
             })
-            ->when($this->merk !== null && $this->category === 'sparepart', function ($q) {
-                if ($this->merk == 0) {
+            ->when($this->merkSparepart !== null, function ($q) {
+                if ($this->merkSparepart == 0) {
                     // Filter untuk "Lainnya" - sparepart yang tidak punya merk
                     $q->whereNull('spareparts.merk_spareparts_id');
                 } else {
-                    $q->where('spareparts.merk_spareparts_id', $this->merk);
+                    $q->where('spareparts.merk_spareparts_id', $this->merkSparepart);
                 }
             })
             ->whereBetween('spareparts.harga_ecommerce', [$this->minPrice, $this->maxPrice]);
 
         // If filters for AC Type or AC Brand are active, we might want to exclude spareparts
         // because they don't belong to those AC Types/Brands (they have their own).
-        if ($this->tipe || $this->merk || $this->category === 'unit') {
+        if ($this->tipe || $this->merkUnit || $this->category === 'unit') {
             // Return only units
             $query = $units;
         } elseif ($this->category === 'sparepart') {
@@ -276,10 +292,10 @@ class Products extends Component
                 ->select('id', 'merk_spareparts as merk')
                 ->get();
 
-            // Add "Lainnya" option for spareparts without merk
+            // Add "Lainnya" option for spareparts without merk at the END
             $hasUnbranded = Sparepart::whereNull('merk_spareparts_id')->exists();
             if ($hasUnbranded) {
-                $brands->prepend((object) ['id' => 0, 'merk' => 'Lainnya']);
+                $brands->push((object) ['id' => 0, 'merk' => 'Lainnya']);
             }
         } else {
             // For 'unit' or 'all' category, show AC unit brands
@@ -287,20 +303,20 @@ class Products extends Component
                 ->select('id', 'merk')
                 ->get();
 
-            // Add "Lainnya" option for units without merk
+            // Add "Lainnya" option for units without merk at the END
             $hasUnbranded = UnitAC::whereNull('merk_id')->exists();
             if ($hasUnbranded) {
-                $brands->prepend((object) ['id' => 0, 'merk' => 'Lainnya']);
+                $brands->push((object) ['id' => 0, 'merk' => 'Lainnya']);
             }
         }
 
         // Get types with "Lainnya" option
         $types = TipeAC::whereHas('unitAC')->select('id', 'tipe_ac')->get();
 
-        // Add "Lainnya" option for units without tipe_ac
+        // Add "Lainnya" option for units without tipe_ac at the END
         $hasUntypedUnits = UnitAC::whereNull('tipe_ac_id')->exists();
         if ($hasUntypedUnits) {
-            $types->prepend((object) ['id' => 0, 'tipe_ac' => 'Lainnya']);
+            $types->push((object) ['id' => 0, 'tipe_ac' => 'Lainnya']);
         }
 
         return view('pages.products', [
@@ -308,6 +324,8 @@ class Products extends Component
             'types' => $types,
             'brands' => $brands,
             'category' => $this->category,
+            'merkUnit' => $this->merkUnit,
+            'merkSparepart' => $this->merkSparepart,
             'priceLimitMin' => $this->getPriceLimitMin(),
             'priceLimitMax' => $this->getPriceLimitMax(),
         ])->extends('layouts.app');
