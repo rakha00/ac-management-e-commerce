@@ -121,6 +121,7 @@
                                 <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->tipeAC->tipe_ac }}</span>
                             </div>
                             @endif
+                            @if($product->pk)
                             <div class="flex items-center p-3 bg-gray-50 rounded">
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">Daya Watt</span>
                                 <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->pk }} PK</span>
@@ -129,6 +130,7 @@
                                 <span class="w-1/3 text-sm font-semibold text-gray-600">BTU</span>
                                 <span class="w-2/3 text-sm text-gray-800 font-medium">{{ $product->pk * 9000 }} BTU</span>
                             </div>
+                            @endif
                         </div>
                     </div>
 
