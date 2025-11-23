@@ -1,5 +1,9 @@
 {{-- Filter Component --}}
-<aside class="w-full md:w-1/4 lg:w-1/5 flex-shrink-0 hidden md:block">
+<aside class="w-full md:w-1/4 lg:w-1/5 flex-shrink-0 hidden md:block" x-data="{
+    localCategory: @entangle('category').defer,
+    localTipe: @entangle('tipe').defer,
+    localMerk: @entangle('merk').defer
+}">
     <div class="space-y-6">
 
         {{-- === Filter Kategori === --}}
@@ -11,41 +15,41 @@
             </button>
             <div x-show="open" x-collapse class="space-y-3 pt-2">
                 <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                    <input type="radio" wire:model.live="category" value="all"
+                    <input type="radio" name="category-filter" x-model="localCategory" value="all" @change="$wire.set('category', localCategory)"
                         class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                     <span class="ml-2">Semua</span>
                 </label>
                 <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                    <input type="radio" wire:model.live="category" value="unit"
+                    <input type="radio" name="category-filter" x-model="localCategory" value="unit" @change="$wire.set('category', localCategory)"
                         class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                     <span class="ml-2">Unit AC</span>
                 </label>
                 <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                    <input type="radio" wire:model.live="category" value="sparepart"
+                    <input type="radio" name="category-filter" x-model="localCategory" value="sparepart" @change="$wire.set('category', localCategory)"
                         class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                     <span class="ml-2">Sparepart</span>
                 </label>
             </div>
         </div>
 
-        @if ($category !== 'sparepart')
-            {{-- === Filter Tipe AC === --}}
-            <div x-data="{ open: true }" class="bg-white p-4 rounded-lg shadow-sm">
-                <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
-                    <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
-                    <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
-                        x-bind:class="open ? 'rotate-180' : ''" />
-                </button>
-                <div x-show="open" x-collapse class="space-y-3 pt-2">
-                    @foreach ($types as $type)
-                        <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                            <input type="radio" wire:model.live="tipe" value="{{ $type->id }}"
-                                class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
-                            <span class="ml-2">{{ $type->tipe_ac }}</span>
-                        </label>
-                    @endforeach
-                </div>
+        {{-- === Filter Tipe AC === --}}
+        @if($category !== 'sparepart')
+        <div x-data="{ open: true }" class="bg-white p-4 rounded-lg shadow-sm">
+            <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
+                <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
+                <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
+                    x-bind:class="open ? 'rotate-180' : ''" />
+            </button>
+            <div x-show="open" x-collapse class="space-y-3 pt-2">
+                @foreach ($types as $type)
+                    <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
+                        <input type="radio" name="tipe-filter" x-model="localTipe" value="{{ $type->id }}" @change="$wire.set('tipe', localTipe)"
+                            class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
+                        <span class="ml-2">{{ $type->tipe_ac }}</span>
+                    </label>
+                @endforeach
             </div>
+        </div>
         @endif
 
         {{-- === Filter Merek === --}}
@@ -58,7 +62,7 @@
             <div x-show="open" x-collapse class="space-y-3 pt-2">
                 @foreach ($brands as $brand)
                     <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" wire:model.live="merk" value="{{ $brand->id }}"
+                        <input type="radio" name="merk-filter" x-model="localMerk" value="{{ $brand->id }}" @change="$wire.set('merk', localMerk)"
                             class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                         <span class="ml-2">{{ $brand->merk }}</span>
                     </label>
@@ -128,7 +132,11 @@
 </aside>
 
 {{-- === Mobile Filter === --}}
-<div x-show="filtersOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+<div x-data="{
+    localCategory: @entangle('category').defer,
+    localTipe: @entangle('tipe').defer,
+    localMerk: @entangle('merk').defer
+}" x-show="filtersOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
     x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
     class="fixed inset-0 bg-black/50 z-50 md:hidden" aria-modal="true">
@@ -157,41 +165,41 @@
                 </button>
                 <div x-show="open" x-collapse class="space-y-3 pt-2">
                     <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" wire:model.live="category" value="all"
+                        <input type="radio" name="category-filter-mobile" x-model="localCategory" value="all" @change="$wire.set('category', localCategory)"
                             class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                         <span class="ml-2">Semua</span>
                     </label>
                     <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" wire:model.live="category" value="unit"
+                        <input type="radio" name="category-filter-mobile" x-model="localCategory" value="unit" @change="$wire.set('category', localCategory)"
                             class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                         <span class="ml-2">Unit AC</span>
                     </label>
                     <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" wire:model.live="category" value="sparepart"
+                        <input type="radio" name="category-filter-mobile" x-model="localCategory" value="sparepart" @change="$wire.set('category', localCategory)"
                             class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                         <span class="ml-2">Sparepart</span>
                     </label>
                 </div>
             </div>
 
-            @if ($category !== 'sparepart')
-                {{-- Tipe AC --}}
-                <div x-data="{ open: true }" class="bg-gray-50 p-4 rounded-lg">
-                    <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
-                        <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
-                        <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
-                            x-bind:class="open ? 'rotate-180' : ''" />
-                    </button>
-                    <div x-show="open" x-collapse class="space-y-3 pt-2">
-                        @foreach ($types as $type)
-                            <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                                <input type="radio" wire:model.live="tipe" value="{{ $type->id }}"
-                                    class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
-                                <span class="ml-2">{{ $type->tipe_ac }}</span>
-                            </label>
-                        @endforeach
-                    </div>
+            {{-- Tipe AC --}}
+            @if($category !== 'sparepart')
+            <div x-data="{ open: true }" class="bg-gray-50 p-4 rounded-lg">
+                <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
+                    <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
+                        x-bind:class="open ? 'rotate-180' : ''" />
+                </button>
+                <div x-show="open" x-collapse class="space-y-3 pt-2">
+                    @foreach ($types as $type)
+                        <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
+                            <input type="radio" name="tipe-filter-mobile" x-model="localTipe" value="{{ $type->id }}" @change="$wire.set('tipe', localTipe)"
+                                class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
+                            <span class="ml-2">{{ $type->tipe_ac }}</span>
+                        </label>
+                    @endforeach
                 </div>
+            </div>
             @endif
 
             {{-- Merek --}}
@@ -204,7 +212,7 @@
                 <div x-show="open" x-collapse class="space-y-3 pt-2">
                     @foreach ($brands as $brand)
                         <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                            <input type="radio" wire:model.live="merk" value="{{ $brand->id }}"
+                            <input type="radio" name="merk-filter-mobile" x-model="localMerk" value="{{ $brand->id }}" @change="$wire.set('merk', localMerk)"
                                 class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
                             <span class="ml-2">{{ $brand->merk }}</span>
                         </label>

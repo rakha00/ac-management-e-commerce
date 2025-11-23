@@ -12,8 +12,8 @@
     <div class="container mx-auto px-4 md:px-6 py-6 md:py-8 flex flex-col md:flex-row gap-6 md:gap-8">
 
         {{-- Filter --}}
-        <x-filter-products :types="$types" :brands="$brands" :minPrice="$minPrice" :maxPrice="$maxPrice" :priceLimitMin="$priceLimitMin"
-            :priceLimitMax="$priceLimitMax" :tempMinPrice="$tempMinPrice" :tempMaxPrice="$tempMaxPrice" :category="$category" />
+        <x-filter-products :types="$types" :brands="$brands" :category="$category" :minPrice="$minPrice" :maxPrice="$maxPrice" :priceLimitMin="$priceLimitMin"
+            :priceLimitMax="$priceLimitMax" :tempMinPrice="$tempMinPrice" :tempMaxPrice="$tempMaxPrice" />
 
         {{-- Content --}}
         <main class="w-full md:w-3/4 lg:w-4/5">
