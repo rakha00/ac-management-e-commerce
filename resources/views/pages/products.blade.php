@@ -13,7 +13,7 @@
 
         {{-- Filter --}}
         <x-filter-products :types="$types" :brands="$brands" :minPrice="$minPrice" :maxPrice="$maxPrice" :priceLimitMin="$priceLimitMin"
-            :priceLimitMax="$priceLimitMax" :tempMinPrice="$tempMinPrice" :tempMaxPrice="$tempMaxPrice" />
+            :priceLimitMax="$priceLimitMax" :tempMinPrice="$tempMinPrice" :tempMaxPrice="$tempMaxPrice" :category="$category" />
 
         {{-- Content --}}
         <main class="w-full md:w-3/4 lg:w-4/5">

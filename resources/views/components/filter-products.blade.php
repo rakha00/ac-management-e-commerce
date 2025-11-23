@@ -28,23 +28,25 @@
             </div>
         </div>
 
-        {{-- === Filter Tipe AC === --}}
-        <div x-data="{ open: true }" class="bg-white p-4 rounded-lg shadow-sm">
-            <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
-                <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
-                <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
-                    x-bind:class="open ? 'rotate-180' : ''" />
-            </button>
-            <div x-show="open" x-collapse class="space-y-3 pt-2">
-                @foreach ($types as $type)
-                    <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                        <input type="radio" wire:model.live="tipe" value="{{ $type->id }}"
-                            class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
-                        <span class="ml-2">{{ $type->tipe_ac }}</span>
-                    </label>
-                @endforeach
+        @if ($category !== 'sparepart')
+            {{-- === Filter Tipe AC === --}}
+            <div x-data="{ open: true }" class="bg-white p-4 rounded-lg shadow-sm">
+                <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
+                    <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
+                        x-bind:class="open ? 'rotate-180' : ''" />
+                </button>
+                <div x-show="open" x-collapse class="space-y-3 pt-2">
+                    @foreach ($types as $type)
+                        <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
+                            <input type="radio" wire:model.live="tipe" value="{{ $type->id }}"
+                                class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
+                            <span class="ml-2">{{ $type->tipe_ac }}</span>
+                        </label>
+                    @endforeach
+                </div>
             </div>
-        </div>
+        @endif
 
         {{-- === Filter Merek === --}}
         <div x-data="{ open: true }" class="bg-white p-4 rounded-lg shadow-sm">
@@ -172,23 +174,25 @@
                 </div>
             </div>
 
-            {{-- Tipe AC --}}
-            <div x-data="{ open: true }" class="bg-gray-50 p-4 rounded-lg">
-                <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
-                    <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
-                    <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
-                        x-bind:class="open ? 'rotate-180' : ''" />
-                </button>
-                <div x-show="open" x-collapse class="space-y-3 pt-2">
-                    @foreach ($types as $type)
-                        <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
-                            <input type="radio" wire:model.live="tipe" value="{{ $type->id }}"
-                                class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
-                            <span class="ml-2">{{ $type->tipe_ac }}</span>
-                        </label>
-                    @endforeach
+            @if ($category !== 'sparepart')
+                {{-- Tipe AC --}}
+                <div x-data="{ open: true }" class="bg-gray-50 p-4 rounded-lg">
+                    <button @click="open = !open" class="flex justify-between items-center w-full mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Tipe AC</h3>
+                        <x-heroicon-s-chevron-down class="w-5 h-5 transition-transform"
+                            x-bind:class="open ? 'rotate-180' : ''" />
+                    </button>
+                    <div x-show="open" x-collapse class="space-y-3 pt-2">
+                        @foreach ($types as $type)
+                            <label class="flex items-center text-sm text-gray-600 hover:text-gsi-red cursor-pointer">
+                                <input type="radio" wire:model.live="tipe" value="{{ $type->id }}"
+                                    class="h-4 w-4 text-gsi-red focus:ring-gsi-red/50">
+                                <span class="ml-2">{{ $type->tipe_ac }}</span>
+                            </label>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
+            @endif
 
             {{-- Merek --}}
             <div x-data="{ open: true }" class="bg-gray-50 p-4 rounded-lg">
