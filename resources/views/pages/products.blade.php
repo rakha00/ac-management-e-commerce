@@ -87,8 +87,8 @@
                         $image = $image ? asset('storage/' . $image) : asset('img/produk/placeholder.png');
                         
                         $href = $product->type === 'sparepart' 
-                            ? route('detail-sparepart', $product->id) 
-                            : route('detail-products', $product->id);
+                            ? \App\Helpers\PriceHelper::url('/produk/sparepart/' . $product->id) 
+                            : \App\Helpers\PriceHelper::url('/produk/' . $product->id);
                     @endphp
                     <x-product-card 
                         :id="$product->id" 

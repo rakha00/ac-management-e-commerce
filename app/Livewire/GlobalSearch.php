@@ -18,7 +18,7 @@ class GlobalSearch extends Component
 
     public function selectProduct($id)
     {
-        return redirect()->route('detail-products', $id);
+        return redirect()->to(\App\Helpers\PriceHelper::url('/produk/' . $id));
     }
 
     public function render()
@@ -27,12 +27,12 @@ class GlobalSearch extends Component
 
         if ($this->showResults && strlen($this->query) > 0) {
             $results = UnitAC::with(['merk', 'tipeAC'])
-                ->where('nama_unit', 'like', '%'.$this->query.'%')
+                ->where('nama_unit', 'like', '%' . $this->query . '%')
                 ->orWhereHas('merk', function ($q) {
-                    $q->where('merk', 'like', '%'.$this->query.'%');
+                    $q->where('merk', 'like', '%' . $this->query . '%');
                 })
                 ->orWhereHas('tipeAC', function ($q) {
-                    $q->where('tipe_ac', 'like', '%'.$this->query.'%');
+                    $q->where('tipe_ac', 'like', '%' . $this->query . '%');
                 })
                 ->take(5)
                 ->get();

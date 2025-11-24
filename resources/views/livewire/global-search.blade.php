@@ -1,5 +1,5 @@
 <div class="relative">
-    <form action="/produk" method="GET" class="relative group">
+    <form action="{{ \App\Helpers\PriceHelper::url('/produk') }}" method="GET" class="relative group">
         <input type="text" name="q" wire:model.live.debounce.500ms="query"
             placeholder="Cari AC Daikin, Servis, Spare Part..."
             class="w-full pl-5 pr-28 py-3 text-sm text-gray-700 bg-gray-100 border border-gray-200 rounded-lg
@@ -16,7 +16,7 @@
         <div
             class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
             @foreach ($results as $product)
-                <a href="#" wire:click.prevent="selectProduct({{ $product->id }})"
+                <a href="{{ \App\Helpers\PriceHelper::url('/produk/' . $product->id) }}"
                     class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
                     <div class="flex items-center space-x-3">
                         <div class="flex-shrink-0">
@@ -47,7 +47,7 @@
                             </div>
                         </div>
                         <div class="text-sm font-semibold text-gsi-red">
-                            Rp {{ number_format($product->harga_ecommerce, 0, ',', '.') }}
+                            Rp {{ number_format($product->display_price, 0, ',', '.') }}
                         </div>
                     </div>
                 </a>

@@ -15,16 +15,27 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [FrontendController::class, 'home'])->name('home');
-Route::get('/servis', [FrontendController::class, 'services'])->name('services');
+$publicRoutes = function () {
+    Route::get('/', [FrontendController::class, 'home'])->name('home');
+    Route::get('/servis', [FrontendController::class, 'services'])->name('services');
 
-// Product Routes
-Route::get('/produk', Products::class)->name('products');
-Route::get('/produk/{id}', [FrontendController::class, 'detailProducts'])->name('detail-products');
-Route::get('/produk/sparepart/{id}', [FrontendController::class, 'detailSparepart'])->name('detail-sparepart');
+    // Product Routes
+    Route::get('/produk', Products::class)->name('products');
+    Route::get('/produk/{id}', [FrontendController::class, 'detailProducts'])->name('detail-products');
+    Route::get('/produk/sparepart/{id}', [FrontendController::class, 'detailSparepart'])->name('detail-sparepart');
 
-// Cart Routes
-Route::get('/cart', Cart::class)->name('cart');
+    // Cart Routes
+    Route::get('/cart', Cart::class)->name('cart');
+};
+
+// Default Routes (Ecommerce)
+Route::group([], $publicRoutes);
+
+// Retail Routes
+Route::prefix('retail')->name('retail.')->group($publicRoutes);
+
+// Dealer Routes
+Route::prefix('dealer')->name('dealer.')->group($publicRoutes);
 
 /*
 |--------------------------------------------------------------------------
@@ -34,7 +45,7 @@ Route::get('/cart', Cart::class)->name('cart');
 
 Route::middleware(['auth'])->group(function () {
     // Absensi Routes
-    Route::get('/scan-absensi', fn () => redirect(ScanAbsensi::getUrl()))->name('absensi.scan.page');
+    Route::get('/scan-absensi', fn() => redirect(ScanAbsensi::getUrl()))->name('absensi.scan.page');
 
     Route::get('/absensi/foto-bukti', function () {
         $token = request()->query('token');
@@ -56,8 +67,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Private Storage Route
     Route::get('/storage/private/{path}', function ($path) {
-        $fullPath = storage_path('app/private/'.$path);
-        if (! file_exists($fullPath)) {
+        $fullPath = storage_path('app/private/' . $path);
+        if (!file_exists($fullPath)) {
             abort(404);
         }
 

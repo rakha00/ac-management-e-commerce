@@ -13,7 +13,7 @@
                 </h1>
                 <span class="text-sm text-gray-500 mt-1">Kategori: 
                     @if($product->tipeAC)
-                        <a href="/produk?tipe={{ $product->tipeAC->id }}" class="text-gsi-red hover:underline">{{ $product->tipeAC->tipe_ac }}</a>
+                        <a href="{{ \App\Helpers\PriceHelper::url('/produk?tipe=' . $product->tipeAC->id) }}" class="text-gsi-red hover:underline">{{ $product->tipeAC->tipe_ac }}</a>
                     @else
                         <span class="text-gray-400">-</span>
                     @endif
@@ -64,7 +64,7 @@
                 <div>
                     <div class="mb-5">
                         <span class="text-4xl font-bold text-gsi-red">
-                            Rp {{ number_format($product->harga_ecommerce, 0, ',', '.') }}
+                            Rp {{ number_format($product->display_price, 0, ',', '.') }}
                         </span>
                     </div>
 

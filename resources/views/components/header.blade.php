@@ -17,7 +17,7 @@
         <div class="flex justify-between items-center gap-4">
 
             <!-- Logo -->
-            <a href="/" class="flex-shrink-0">
+            <a href="{{ \App\Helpers\PriceHelper::url('/') }}" class="flex-shrink-0">
                 <img class="h-10 md:h-12 w-auto" src="/img/GSI-landscape.png" alt="Logo Global Servis Int.">
             </a>
 
@@ -49,16 +49,16 @@
     <!-- Desktop Navigation -->
     <nav class="bg-white border-t border-gray-100 hidden md:block">
         <div class="container mx-auto px-4 md:px-6 py-2.5 flex items-center space-x-6">
-            <a href="/" class="text-gray-800 hover:text-gsi-red font-semibold">Home</a>
+            <a href="{{ \App\Helpers\PriceHelper::url('/') }}" class="text-gray-800 hover:text-gsi-red font-semibold">Home</a>
 
             @foreach ($tipeAC as $tipe)
-                <a href="/produk?tipe={{ $tipe->id }}" class="text-gray-700 hover:text-gsi-red font-medium">
+                <a href="{{ \App\Helpers\PriceHelper::url('/produk?tipe=' . $tipe->id) }}" class="text-gray-700 hover:text-gsi-red font-medium">
                     {{ $tipe->tipe_ac }}
                 </a>
             @endforeach
 
-            <a href="/servis" class="text-gray-700 hover:text-gsi-red font-medium">Pesan Servis</a>
-            <a href="/produk?promo=true" class="text-gsi-red hover:text-red-700 font-semibold">Promo Spesial</a>
+            <a href="{{ \App\Helpers\PriceHelper::url('/servis') }}" class="text-gray-700 hover:text-gsi-red font-medium">Pesan Servis</a>
+            <a href="{{ \App\Helpers\PriceHelper::url('/produk?promo=true') }}" class="text-gsi-red hover:text-red-700 font-semibold">Promo Spesial</a>
         </div>
     </nav>
 
@@ -72,24 +72,24 @@
             <!-- Mobile Navigation Links -->
             <div class="space-y-2">
 
-                <a href="/"
+                <a href="{{ \App\Helpers\PriceHelper::url('/') }}"
                     class="block text-gray-800 hover:text-gsi-red font-semibold py-2 border-b border-gray-100">
                     Home
                 </a>
 
                 @foreach ($tipeAC as $tipe)
-                    <a href="/produk?tipe={{ $tipe->id }}"
+                    <a href="{{ \App\Helpers\PriceHelper::url('/produk?tipe=' . $tipe->id) }}"
                         class="block text-gray-700 hover:text-gsi-red font-medium py-2 border-b border-gray-100">
                         {{ $tipe->tipe_ac }}
                     </a>
                 @endforeach
 
-                <a href="/servis"
+                <a href="{{ \App\Helpers\PriceHelper::url('/servis') }}"
                     class="block text-gray-700 hover:text-gsi-red font-medium py-2 border-b border-gray-100">
                     Pesan Servis
                 </a>
 
-                <a href="/produk?promo=true"
+                <a href="{{ \App\Helpers\PriceHelper::url('/produk?promo=true') }}"
                     class="block text-gsi-red hover:text-red-700 font-semibold py-2 border-b border-gray-100">
                     Promo Spesial
                 </a>

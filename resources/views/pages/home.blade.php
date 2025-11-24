@@ -67,7 +67,7 @@
                 <section class="mb-6 md:mb-8 bg-white p-6 rounded-lg shadow-sm">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-2xl font-semibold text-gray-900">Produk Terlaris</h2>
-                        <a href="/produk" class="text-sm font-semibold text-gsi-red hover:underline">Lihat
+                        <a href="{{ \App\Helpers\PriceHelper::url('/produk') }}" class="text-sm font-semibold text-gsi-red hover:underline">Lihat
                             Semua</a>
                     </div>
 
@@ -75,15 +75,15 @@
                         @foreach ($popularProducts as $product)
                             <x-product-card :id="$product->id" category="{{ $product->tipeAC->tipe_ac ?? 'AC' }}"
                                 title="{{ $product->nama_unit }}"
-                                price="Rp {{ number_format($product->harga_ecommerce, 0, ',', '.') }}"
+                                price="Rp {{ number_format($product->display_price, 0, ',', '.') }}"
                                 image="{{ !empty($product->path_foto_produk) && is_array($product->path_foto_produk) && count($product->path_foto_produk) > 0 ? asset('storage/' . $product->path_foto_produk[0]) : asset('img/produk/placeholder.png') }}"
-                                href="/produk/{{ $product->id }}" />
+                                href="{{ \App\Helpers\PriceHelper::url('/produk/' . $product->id) }}" />
                         @endforeach
                     </div>
                 </section>
 
                 <!-- Banner Servis -->
-                <a href="/servis" class="block mb-6 md:mb-8 rounded-lg overflow-hidden shadow-lg group">
+                <a href="{{ \App\Helpers\PriceHelper::url('/servis') }}" class="block mb-6 md:mb-8 rounded-lg overflow-hidden shadow-lg group">
                     <img src="/img/banner-slider/servis.png" alt="Banner Servis"
                         class="w-full h-40 md:h-70 lg:h-80 object-cover transition-transform duration-300 group-hover:scale-105">
                 </a>

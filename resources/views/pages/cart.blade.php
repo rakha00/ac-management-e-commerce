@@ -14,7 +14,7 @@
                                 <div class="flex gap-4 md:gap-6 items-center">
                                     {{-- Image --}}
                                     <div class="flex-shrink-0">
-                                        <a href="{{ $item['type'] === 'sparepart' ? route('detail-sparepart', $item['id']) : route('detail-products', $item['id']) }}">
+                                        <a href="{{ $item['type'] === 'sparepart' ? \App\Helpers\PriceHelper::url('/produk/sparepart/' . $item['id']) : \App\Helpers\PriceHelper::url('/produk/' . $item['id']) }}">
                                             <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" 
                                                 class="w-20 h-20 md:w-24 md:h-24 object-cover rounded-lg border border-gray-200 hover:opacity-90 transition-opacity">
                                         </a>
@@ -26,7 +26,7 @@
                                         {{-- Product Info --}}
                                         <div class="flex-1 min-w-0 mr-4">
                                             <h3 class="text-sm md:text-base font-semibold text-gray-900 line-clamp-2 mb-1" title="{{ $item['name'] }}">
-                                                <a href="{{ $item['type'] === 'sparepart' ? route('detail-sparepart', $item['id']) : route('detail-products', $item['id']) }}" class="hover:text-gsi-red transition-colors">
+                                                <a href="{{ $item['type'] === 'sparepart' ? \App\Helpers\PriceHelper::url('/produk/sparepart/' . $item['id']) : \App\Helpers\PriceHelper::url('/produk/' . $item['id']) }}" class="hover:text-gsi-red transition-colors">
                                                     {{ $item['name'] }}
                                                 </a>
                                             </h3>
@@ -121,7 +121,7 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-2">Keranjang Anda kosong</h3>
             <p class="text-gray-500 mb-8 max-w-md mx-auto">Sepertinya Anda belum menambahkan produk apapun. Yuk, cari produk kebutuhan AC Anda sekarang!</p>
-            <a href="/produk" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl text-white bg-gsi-red hover:bg-red-700 transition-all shadow-lg shadow-red-200">
+            <a href="{{ \App\Helpers\PriceHelper::url('/produk') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl text-white bg-gsi-red hover:bg-red-700 transition-all shadow-lg shadow-red-200">
                 Mulai Belanja
             </a>
         </div>

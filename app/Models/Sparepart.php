@@ -118,11 +118,11 @@ class Sparepart extends Model
         $query = SparepartMasukDetail::where('sparepart_id', $this->id)
             ->join('sparepart_masuk', 'sparepart_masuk.id', '=', 'sparepart_masuk_detail.sparepart_masuk_id');
 
-        if (! empty($tanggalAwal)) {
+        if (!empty($tanggalAwal)) {
             $query->whereDate('sparepart_masuk.tanggal_masuk', '>=', $tanggalAwal);
         }
 
-        if (! empty($tanggalAkhir)) {
+        if (!empty($tanggalAkhir)) {
             $query->whereDate('sparepart_masuk.tanggal_masuk', '<=', $tanggalAkhir);
         }
 
@@ -134,11 +134,11 @@ class Sparepart extends Model
         $query = SparepartKeluarDetail::where('sparepart_id', $this->id)
             ->join('sparepart_keluar', 'sparepart_keluar.id', '=', 'sparepart_keluar_detail.sparepart_keluar_id');
 
-        if (! empty($tanggalAwal)) {
+        if (!empty($tanggalAwal)) {
             $query->whereDate('sparepart_keluar.tanggal_keluar', '>=', $tanggalAwal);
         }
 
-        if (! empty($tanggalAkhir)) {
+        if (!empty($tanggalAkhir)) {
             $query->whereDate('sparepart_keluar.tanggal_keluar', '<=', $tanggalAkhir);
         }
 
@@ -152,5 +152,10 @@ class Sparepart extends Model
         $stokKeluar = $this->getTotalStokKeluar($tanggalAwal, $tanggalAkhir);
 
         return $stokAwal + $stokMasuk - $stokKeluar;
+    }
+
+    public function getDisplayPriceAttribute(): int
+    {
+        return $this->harga_ecommerce ?? 0;
     }
 }

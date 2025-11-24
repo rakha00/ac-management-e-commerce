@@ -127,13 +127,14 @@ class Products extends Component
     private function getFilteredProducts()
     {
         $term = '%' . $this->searchTerm . '%';
+        $priceColumn = \App\Helpers\PriceHelper::getPriceColumn();
 
         // Query for UnitAC
         $units = UnitAC::query()
             ->select([
                 'unit_ac.id',
                 'unit_ac.nama_unit as name',
-                DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail) as price'),
+                DB::raw("unit_ac.{$priceColumn} as price"),
                 'unit_ac.path_foto_produk as image_path',
                 DB::raw("'unit' as type"),
                 DB::raw('COALESCE(tipe_ac.tipe_ac, "Lainnya") as category'),
@@ -168,13 +169,13 @@ class Products extends Component
                 }
             })
             ->whereBetween(
-                DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'),
+                "unit_ac.{$priceColumn}",
                 [$this->minPrice, $this->maxPrice]
             )
-            ->where(function ($q) {
+            ->where(function ($q) use ($priceColumn) {
                 // Ensure we don't exclude products with valid prices
-                $q->whereNotNull(DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'))
-                    ->where(DB::raw('COALESCE(NULLIF(unit_ac.harga_ecommerce, 0), unit_ac.harga_retail)'), '>', 0);
+                $q->whereNotNull("unit_ac.{$priceColumn}")
+                    ->where("unit_ac.{$priceColumn}", '>', 0);
             });
 
         // Query for Sparepart

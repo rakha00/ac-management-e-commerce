@@ -1,4 +1,4 @@
-<a href="{{ route('cart') }}" class="flex items-center text-gray-600 hover:text-gsi-red relative">
+<a href="{{ \App\Helpers\PriceHelper::url('/cart') }}" class="flex items-center text-gray-600 hover:text-gsi-red relative">
     <x-heroicon-o-shopping-cart class="w-7 h-7" />
     <span class="ml-2 text-sm font-medium hidden lg:block">Keranjang</span>
     @if($count > 0)

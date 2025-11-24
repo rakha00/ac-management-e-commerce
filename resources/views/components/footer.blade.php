@@ -10,9 +10,9 @@
             <div>
                 <h5 class="text-lg font-semibold text-white mb-4">Navigasi</h5>
                 <ul class="space-y-2">
-                    <li><a href="/" class="hover:text-gsi-red transition-colors">Home</a></li>
-                    <li><a href="/produk" class="hover:text-gsi-red transition-colors">Produk AC</a></li>
-                    <li><a href="/servis" class="hover:text-gsi-red transition-colors">Pesan Servis</a></li>
+                    <li><a href="{{ \App\Helpers\PriceHelper::url('/') }}" class="hover:text-gsi-red transition-colors">Home</a></li>
+                    <li><a href="{{ \App\Helpers\PriceHelper::url('/produk') }}" class="hover:text-gsi-red transition-colors">Produk AC</a></li>
+                    <li><a href="{{ \App\Helpers\PriceHelper::url('/servis') }}" class="hover:text-gsi-red transition-colors">Pesan Servis</a></li>
                 </ul>
             </div>
             <div>

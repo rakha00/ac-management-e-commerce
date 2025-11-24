@@ -4,9 +4,9 @@
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-semibold text-gray-900">{{ $title }}</h2>
         @if($categoryId === 'sparepart')
-            <a href="/produk?category=sparepart" class="text-sm font-semibold text-gsi-red hover:underline">Lihat Semua</a>
+            <a href="{{ \App\Helpers\PriceHelper::url('/produk?category=sparepart') }}" class="text-sm font-semibold text-gsi-red hover:underline">Lihat Semua</a>
         @else
-            <a href="/produk?tipe={{ $categoryId }}" class="text-sm font-semibold text-gsi-red hover:underline">Lihat Semua</a>
+            <a href="{{ \App\Helpers\PriceHelper::url('/produk?tipe=' . $categoryId) }}" class="text-sm font-semibold text-gsi-red hover:underline">Lihat Semua</a>
         @endif
     </div>
 
@@ -16,7 +16,7 @@
                 $isSparepart = isset($product->nama_sparepart);
                 $productName = $isSparepart ? $product->nama_sparepart : $product->nama_unit;
                 $productType = $isSparepart ? 'sparepart' : 'unit';
-                $productPrice = $product->harga_ecommerce;
+                $productPrice = $product->display_price;
                 
                 $productImage = null;
                 if ($isSparepart) {
@@ -31,7 +31,9 @@
                 
                 $productImage = $productImage ?? asset('img/produk/placeholder.png');
                 
-                $href = $isSparepart ? route('detail-sparepart', $product->id) : route('detail-products', $product->id);
+                $href = $isSparepart 
+                    ? \App\Helpers\PriceHelper::url('/produk/sparepart/' . $product->id) 
+                    : \App\Helpers\PriceHelper::url('/produk/' . $product->id);
             @endphp
             <x-product-card :id="$product->id" :type="$productType" category="{{ $category }}" title="{{ $productName }}"
                 price="Rp {{ number_format($productPrice, 0, ',', '.') }}" image="{{ $productImage }}"

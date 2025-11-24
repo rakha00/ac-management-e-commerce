@@ -11,7 +11,7 @@
                 <h1 class="text-2xl lg:text-3xl font-semibold text-gray-900">
                     {{ $product->nama_sparepart }}
                 </h1>
-                <span class="text-sm text-gray-500 mt-1">Kategori: <a href="/produk?category=sparepart" class="text-gsi-red hover:underline">Sparepart</a></span>
+                <span class="text-sm text-gray-500 mt-1">Kategori: <a href="{{ \App\Helpers\PriceHelper::url('/produk?category=sparepart') }}" class="text-gsi-red hover:underline">Sparepart</a></span>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
 
@@ -58,7 +58,7 @@
                 <div>
                     <div class="mb-5">
                         <span class="text-4xl font-bold text-gsi-red">
-                            Rp {{ number_format($product->harga_ecommerce, 0, ',', '.') }}
+                            Rp {{ number_format($product->display_price, 0, ',', '.') }}
                         </span>
                     </div>
 
