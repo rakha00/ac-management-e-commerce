@@ -50,19 +50,19 @@ class TransaksiProdukTable
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->getStateUsing(fn (TransaksiProduk $record): string => $record->transaksiProdukDetail->sum(fn ($detail) => $detail->harga_modal * $detail->jumlah_keluar))
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(false),
                 TextColumn::make('sub_total_penjualan')
                     ->label('Total Penjualan')
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->getStateUsing(fn (TransaksiProduk $record): string => $record->transaksiProdukDetail->sum(fn ($detail) => $detail->harga_jual * $detail->jumlah_keluar))
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(false),
                 TextColumn::make('sub_total_keuntungan')
                     ->label('Total Keuntungan')
                     ->money(currency: 'IDR', decimalPlaces: 0, locale: 'id_ID')
                     ->getStateUsing(fn (TransaksiProduk $record): string => $record->transaksiProdukDetail->sum(fn ($detail) => ($detail->harga_jual - $detail->harga_modal) * $detail->jumlah_keluar))
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(false),
                 TextColumn::make('createdBy.name')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

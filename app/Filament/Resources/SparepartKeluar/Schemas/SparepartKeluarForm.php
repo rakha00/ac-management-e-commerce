@@ -19,25 +19,40 @@ class SparepartKeluarForm
                 Section::make('Data Sparepart Keluar')
                     ->columns(3)
                     ->schema([
+
                         DatePicker::make('tanggal_keluar')
                             ->label('Tanggal Keluar')
                             ->required()
                             ->live()
-                            ->afterStateUpdated(fn (callable $set, $state) => $set('nomor_invoice', SparepartKeluar::generateSequentialNumber((string) $state))),
+                            ->disabled(fn (string $operation) => $operation === 'edit')
+                            ->afterStateUpdated(function (callable $set, $state) {
+                                if (!$state) {
+                                    $set('nomor_invoice', null);
+                                    return;
+                                }
+
+                                $set('nomor_invoice', SparepartKeluar::generateSequentialNumber((string) $state));
+                            }),
+
                         TextInput::make('nomor_invoice')
                             ->label('Nomor Invoice')
-                            ->disabled()
+                            ->disabled(fn (string $operation) => $operation === 'edit')
                             ->dehydrated(),
+
                         Select::make('konsumen_id')
                             ->label('Konsumen')
                             ->relationship('konsumen', 'nama')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->disabled(fn (string $operation) => $operation === 'edit'),
+
                         Textarea::make('keterangan')
                             ->label('Keterangan')
                             ->nullable()
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->disabled(fn (string $operation) => $operation === 'edit'),
+
                     ])
                     ->columnSpanFull(),
             ]);

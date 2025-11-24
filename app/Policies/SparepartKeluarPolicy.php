@@ -49,7 +49,7 @@ class SparepartKeluarPolicy
     {
         $jabatan = $this->getJabatan($user);
 
-        return $jabatan === 'admin';
+        return $jabatan === 'admin' || $jabatan === 'staff';
     }
 
     /**

@@ -6,7 +6,7 @@
     <title>Transaksi Produk Invoice - PT Global Servis Int</title>
 </head>
 
-<body style="font-family: Arial, sans-serif; font-size: 11pt; margin: 0; padding: 30px 40px; color: #000;">
+<body style="font-family: Arial, sans-serif; font-size: 11pt; margin: 0; padding: 10px 40px; color: #000;">
 
     <table style="width: 100%; border-collapse: collapse;">
         <tr>

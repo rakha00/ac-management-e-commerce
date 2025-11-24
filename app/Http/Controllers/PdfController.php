@@ -33,7 +33,7 @@ class PdfController extends Controller
         ];
 
         if ($format_type === 'a4') {
-            $pdf = Pdf::loadView('pdf.transaksi-produk.transaksi-produk-suratjalan', $data);
+            $pdf = Pdf::loadView('pdf.transaksi-produk.transaksi-produk-surat-jalan', $data);
         } else {
             $pdf = Pdf::loadView('pdf.transaksi-produk.transaksi-produk-surat-jalan-small', $data);
         }

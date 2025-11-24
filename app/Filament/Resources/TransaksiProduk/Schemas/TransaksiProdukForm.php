@@ -18,38 +18,54 @@ class TransaksiProdukForm
             ->components([
                 Section::make('Informasi Transaksi Produk')
                     ->schema([
+
                         DatePicker::make('tanggal_transaksi')
                             ->label('Tanggal Transaksi')
                             ->live()
                             ->disabled(fn (string $operation) => $operation === 'edit')
                             ->afterStateUpdated(function ($state, callable $set) {
-                                $set('nomor_invoice', $state ? TransaksiProduk::generateNomorInvoice((string) $state) : null);
-                                $set('nomor_surat_jalan', $state ? TransaksiProduk::generateNomorSuratJalan((string) $state) : null);
+                                if (! $state) {
+                                    $set('nomor_invoice', null);
+                                    $set('nomor_surat_jalan', null);
+                                    return;
+                                }
+
+                                $set('nomor_invoice', TransaksiProduk::generateNomorInvoice($state));
+                                $set('nomor_surat_jalan', TransaksiProduk::generateNomorSuratJalan($state));
                             })
                             ->required(),
+
                         TextInput::make('nomor_invoice')
                             ->label('Nomor Invoice')
-                            ->disabled()
+                            ->disabled(fn (string $operation) => $operation === 'edit')
                             ->dehydrated(),
+
                         TextInput::make('nomor_surat_jalan')
                             ->label('Nomor Surat Jalan')
-                            ->disabled()
+                            ->disabled(fn (string $operation) => $operation === 'edit')
                             ->dehydrated(),
+
                         Select::make('sales_karyawan_id')
                             ->label('Sales')
                             ->relationship('salesKaryawan', 'nama')
                             ->preload()
                             ->searchable()
-                            ->required(),
+                            ->required()
+                            ->disabled(fn (string $operation) => $operation === 'edit'),
+
                         Select::make('konsumen_id')
                             ->label('Toko/Konsumen')
                             ->relationship('konsumen', 'nama')
                             ->preload()
                             ->searchable()
-                            ->required(),
+                            ->required()
+                            ->disabled(fn (string $operation) => $operation === 'edit'),
+
                         Textarea::make('keterangan')
                             ->label('Keterangan')
-                            ->nullable(),
+                            ->nullable()
+                            ->disabled(fn (string $operation) => $operation === 'edit'),
+
                     ])
                     ->columnSpanFull(),
             ]);

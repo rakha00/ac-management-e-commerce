@@ -49,7 +49,7 @@ class TransaksiProdukPolicy
     {
         $jabatan = $this->getJabatan($user);
 
-        return $jabatan === 'admin';
+        return $jabatan === 'admin' || $jabatan === 'staff';
     }
 
     /**
