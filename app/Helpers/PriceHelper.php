@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Request;
 class PriceHelper
 {
     public const MODE_ECOMMERCE = 'ecommerce';
+
     public const MODE_RETAIL = 'retail';
+
     public const MODE_DEALER = 'dealer';
 
     public static function getMode(): string
@@ -61,6 +63,6 @@ class PriceHelper
             return url($path);
         }
 
-        return url($mode . '/' . $path);
+        return url($mode.'/'.$path);
     }
 }

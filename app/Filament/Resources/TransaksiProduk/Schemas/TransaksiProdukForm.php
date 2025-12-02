@@ -27,6 +27,7 @@ class TransaksiProdukForm
                                 if (! $state) {
                                     $set('nomor_invoice', null);
                                     $set('nomor_surat_jalan', null);
+
                                     return;
                                 }
 

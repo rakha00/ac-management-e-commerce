@@ -45,7 +45,7 @@ Route::prefix('dealer')->name('dealer.')->group($publicRoutes);
 
 Route::middleware(['auth'])->group(function () {
     // Absensi Routes
-    Route::get('/scan-absensi', fn() => redirect(ScanAbsensi::getUrl()))->name('absensi.scan.page');
+    Route::get('/scan-absensi', fn () => redirect(ScanAbsensi::getUrl()))->name('absensi.scan.page');
 
     Route::get('/absensi/foto-bukti', function () {
         $token = request()->query('token');
@@ -67,8 +67,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Private Storage Route
     Route::get('/storage/private/{path}', function ($path) {
-        $fullPath = storage_path('app/private/' . $path);
-        if (!file_exists($fullPath)) {
+        $fullPath = storage_path('app/private/'.$path);
+        if (! file_exists($fullPath)) {
             abort(404);
         }
 

@@ -27,8 +27,9 @@ class SparepartMasukForm
                             ->live()
                             ->disabled(fn (string $operation) => $operation === 'edit')
                             ->afterStateUpdated(function ($state, Set $set) {
-                                if (!$state) {
+                                if (! $state) {
                                     $set('nomor_sparepart_masuk', null);
+
                                     return;
                                 }
 

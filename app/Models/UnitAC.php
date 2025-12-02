@@ -124,11 +124,11 @@ class UnitAC extends Model
         $query = $this->hasMany(BarangMasukDetail::class, 'unit_ac_id')
             ->join('barang_masuk', 'barang_masuk.id', '=', 'barang_masuk_detail.barang_masuk_id');
 
-        if (!empty($tanggalAwal)) {
+        if (! empty($tanggalAwal)) {
             $query->whereDate('barang_masuk.tanggal', '>=', $tanggalAwal);
         }
 
-        if (!empty($tanggalAkhir)) {
+        if (! empty($tanggalAkhir)) {
             $query->whereDate('barang_masuk.tanggal', '<=', $tanggalAkhir);
         }
 
@@ -140,11 +140,11 @@ class UnitAC extends Model
         $query = $this->hasMany(TransaksiProdukDetail::class, 'unit_ac_id')
             ->join('transaksi_produk', 'transaksi_produk.id', '=', 'transaksi_produk_detail.transaksi_produk_id');
 
-        if (!empty($tanggalAwal)) {
+        if (! empty($tanggalAwal)) {
             $query->whereDate('transaksi_produk.tanggal_transaksi', '>=', $tanggalAwal);
         }
 
-        if (!empty($tanggalAkhir)) {
+        if (! empty($tanggalAkhir)) {
             $query->whereDate('transaksi_produk.tanggal_transaksi', '<=', $tanggalAkhir);
         }
 

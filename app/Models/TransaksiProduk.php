@@ -103,7 +103,8 @@ class TransaksiProduk extends Model
         $tanggal = Carbon::parse($date);
         $ymd = $tanggal->format('Ymd');
 
-        $lastInvoice = self::whereDate('tanggal_transaksi', $tanggal)
+        $lastInvoice = self::withTrashed()
+            ->where('nomor_invoice', 'like', "INV-{$ymd}-%")
             ->get()
             ->map(function ($item) {
                 if (preg_match('/INV-(\d{8})-(\d{2})$/', $item->nomor_invoice, $matches)) {
@@ -124,7 +125,8 @@ class TransaksiProduk extends Model
         $tanggal = Carbon::parse($date);
         $ymd = $tanggal->format('Ymd');
 
-        $lastSuratJalan = self::whereDate('tanggal_transaksi', $tanggal)
+        $lastSuratJalan = self::withTrashed()
+            ->where('nomor_surat_jalan', 'like', "SJ-{$ymd}-%")
             ->get()
             ->map(function ($item) {
                 if (preg_match('/SJ-(\d{8})-(\d{2})$/', $item->nomor_surat_jalan, $matches)) {

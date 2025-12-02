@@ -26,8 +26,9 @@ class SparepartKeluarForm
                             ->live()
                             ->disabled(fn (string $operation) => $operation === 'edit')
                             ->afterStateUpdated(function (callable $set, $state) {
-                                if (!$state) {
+                                if (! $state) {
                                     $set('nomor_invoice', null);
+
                                     return;
                                 }
 

@@ -9,7 +9,6 @@ use App\Models\TipeAC;
 use App\Models\UnitAC;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -126,7 +125,7 @@ class Products extends Component
      *  ───────────────────────────── */
     private function getFilteredProducts()
     {
-        $term = '%' . $this->searchTerm . '%';
+        $term = '%'.$this->searchTerm.'%';
         $priceColumn = \App\Helpers\PriceHelper::getPriceColumn();
 
         // Query for UnitAC
@@ -251,7 +250,7 @@ class Products extends Component
      *  ───────────────────────────── */
     public function formatPrice($price): string
     {
-        return 'Rp ' . number_format($price, 0, ',', '.');
+        return 'Rp '.number_format($price, 0, ',', '.');
     }
 
     /** ─────────────────────────────
