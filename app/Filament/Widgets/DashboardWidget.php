@@ -341,22 +341,6 @@ class DashboardWidget extends BaseWidget
                 ])
                 ->columnSpanFull(),
 
-            // KELOMPOK STOK & TRANSAKSI
-            Section::make('Stok & Transaksi')
-                ->description('Stok dan transaksi dari berbagai transaksi')
-                ->columns(2)
-                ->schema([
-                    // Barang Masuk
-                    Stat::make('Total Barang Masuk', $totalBarangMasuk)
-                        ->description('Unit AC')
-                        ->descriptionIcon('heroicon-m-arrow-down-tray'),
-                    // Sparepart Masuk
-                    Stat::make('Total Sparepart Masuk', $totalSparepartMasuk)
-                        ->description('Sparepart')
-                        ->descriptionIcon('heroicon-m-arrow-down-tray'),
-                ])
-                ->columnSpanFull(),
-
             // KELOMPOK PIUTANG & HUTANG
             Section::make('Piutang & Hutang')
                 ->description('Piutang dan hutang dari berbagai transaksi')
