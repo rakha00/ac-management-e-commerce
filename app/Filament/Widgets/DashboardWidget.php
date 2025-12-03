@@ -306,18 +306,18 @@ class DashboardWidget extends BaseWidget
                 ->columns(3)
                 ->schema([
                     // Subtotal Penjualan Transaksi Produk
-                    Stat::make('Penjualan Produk', 'Rp ' . number_format($transaksiProdukData->subtotal_penjualan ?? 0, 0, ',', '.'))
+                    Stat::make('Penjualan Produk', 'Rp '.number_format($transaksiProdukData->subtotal_penjualan ?? 0, 0, ',', '.'))
                         ->description('Pendapatan Produk')
                         ->descriptionIcon('heroicon-m-shopping-cart')
                         ->chart($transaksiProdukChart),
                     // Subtotal Penjualan Sparepart Keluar
-                    Stat::make('Penjualan Sparepart', 'Rp ' . number_format($sparepartKeluarData->subtotal_penjualan ?? 0, 0, ',', '.'))
+                    Stat::make('Penjualan Sparepart', 'Rp '.number_format($sparepartKeluarData->subtotal_penjualan ?? 0, 0, ',', '.'))
                         ->description('Pendapatan Sparepart')
                         ->descriptionIcon('heroicon-m-shopping-cart')
                         ->chart($sparepartKeluarChart),
 
                     // Total Pendapatan Transaksi Jasa
-                    Stat::make('Pendapatan Jasa', 'Rp ' . number_format($transaksiJasaData->total_pendapatan ?? 0, 0, ',', '.'))
+                    Stat::make('Pendapatan Jasa', 'Rp '.number_format($transaksiJasaData->total_pendapatan ?? 0, 0, ',', '.'))
                         ->description('Pendapatan Jasa')
                         ->descriptionIcon('heroicon-m-currency-dollar')
                         ->chart($transaksiJasaChart),
@@ -328,15 +328,15 @@ class DashboardWidget extends BaseWidget
                         ->columns(3)
                         ->schema([
                             // Subtotal Modal Transaksi Produk
-                            Stat::make('Modal Produk', 'Rp ' . number_format($transaksiProdukData->subtotal_modal ?? 0, 0, ',', '.'))
+                            Stat::make('Modal Produk', 'Rp '.number_format($transaksiProdukData->subtotal_modal ?? 0, 0, ',', '.'))
                                 ->description('Biaya Produk')
                                 ->descriptionIcon('heroicon-m-currency-dollar'),
                             // Subtotal Modal Sparepart Keluar
-                            Stat::make('Modal Sparepart', 'Rp ' . number_format($sparepartKeluarData->subtotal_modal ?? 0, 0, ',', '.'))
+                            Stat::make('Modal Sparepart', 'Rp '.number_format($sparepartKeluarData->subtotal_modal ?? 0, 0, ',', '.'))
                                 ->description('Biaya Sparepart')
                                 ->descriptionIcon('heroicon-m-currency-dollar'),
                             // Total Pengeluaran Transaksi Jasa
-                            Stat::make('Pengeluaran Jasa', 'Rp ' . number_format($transaksiJasaData->total_pengeluaran ?? 0, 0, ',', '.'))
+                            Stat::make('Pengeluaran Jasa', 'Rp '.number_format($transaksiJasaData->total_pengeluaran ?? 0, 0, ',', '.'))
                                 ->description('Biaya Jasa')
                                 ->descriptionIcon('heroicon-m-currency-bangladeshi'),
                         ])
@@ -348,15 +348,15 @@ class DashboardWidget extends BaseWidget
                         ->columns(3)
                         ->schema([
                             // Subtotal Keuntungan Transaksi Produk
-                            Stat::make('Keuntungan Produk', 'Rp ' . number_format($transaksiProdukData->subtotal_keuntungan ?? 0, 0, ',', '.'))
+                            Stat::make('Keuntungan Produk', 'Rp '.number_format($transaksiProdukData->subtotal_keuntungan ?? 0, 0, ',', '.'))
                                 ->description('Laba Produk')
                                 ->descriptionIcon('heroicon-m-arrow-trending-up'),
                             // Subtotal Keuntungan Sparepart Keluar
-                            Stat::make('Keuntungan Sparepart', 'Rp ' . number_format($sparepartKeluarData->subtotal_keuntungan ?? 0, 0, ',', '.'))
+                            Stat::make('Keuntungan Sparepart', 'Rp '.number_format($sparepartKeluarData->subtotal_keuntungan ?? 0, 0, ',', '.'))
                                 ->description('Laba Sparepart')
                                 ->descriptionIcon('heroicon-m-arrow-trending-up'),
                             // Subtotal Keuntungan Transaksi Jasa
-                            Stat::make('Keuntungan Jasa', 'Rp ' . number_format($transaksiJasaData->subtotal_keuntungan ?? 0, 0, ',', '.'))
+                            Stat::make('Keuntungan Jasa', 'Rp '.number_format($transaksiJasaData->subtotal_keuntungan ?? 0, 0, ',', '.'))
                                 ->description('Laba Jasa')
                                 ->descriptionIcon('heroicon-m-arrow-trending-up'),
                         ])
@@ -370,11 +370,11 @@ class DashboardWidget extends BaseWidget
                 ->columns(2)
                 ->schema([
                     // Total Gaji Karyawan
-                    Stat::make('Total Gaji Karyawan', 'Rp ' . number_format($totalGajiKaryawan, 0, ',', '.'))
-                        ->description('Karyawan Aktif: ' . Karyawan::where('status_aktif', true)->count())
+                    Stat::make('Total Gaji Karyawan', 'Rp '.number_format($totalGajiKaryawan, 0, ',', '.'))
+                        ->description('Karyawan Aktif: '.Karyawan::where('status_aktif', true)->count())
                         ->descriptionIcon('heroicon-m-user'),
                     // Pengeluaran Kantor
-                    Stat::make('Pengeluaran Kantor', 'Rp ' . number_format($totalPengeluaranKantor, 0, ',', '.'))
+                    Stat::make('Pengeluaran Kantor', 'Rp '.number_format($totalPengeluaranKantor, 0, ',', '.'))
                         ->description('Biaya Operasional')
                         ->descriptionIcon('heroicon-m-building-office'),
                 ])
@@ -384,7 +384,7 @@ class DashboardWidget extends BaseWidget
             Section::make('Keuntungan Bersih')
                 ->description('Total keuntungan bersih setelah dikurangi biaya operasional')
                 ->schema([
-                    Stat::make('Total Keuntungan Bersih', 'Rp ' . number_format($totalKeuntunganBersih, 0, ',', '.'))
+                    Stat::make('Total Keuntungan Bersih', 'Rp '.number_format($totalKeuntunganBersih, 0, ',', '.'))
                         ->description('Laba Bersih')
                         ->descriptionIcon('heroicon-m-banknotes')
                         ->color($totalKeuntunganBersih >= 0 ? 'success' : 'danger'),
@@ -397,17 +397,17 @@ class DashboardWidget extends BaseWidget
                 ->columns(3)
                 ->schema([
                     // Hutang Produk
-                    Stat::make('Total Hutang Produk', 'Rp ' . number_format($totalHutangProduk, 0, ',', '.'))
+                    Stat::make('Total Hutang Produk', 'Rp '.number_format($totalHutangProduk, 0, ',', '.'))
                         ->description('Kewajiban Produk')
                         ->descriptionIcon('heroicon-m-banknotes'),
 
                     // Piutang Produk
-                    Stat::make('Total Piutang Produk', 'Rp ' . number_format($totalPiutangProduk, 0, ',', '.'))
+                    Stat::make('Total Piutang Produk', 'Rp '.number_format($totalPiutangProduk, 0, ',', '.'))
                         ->description('Hutang Produk')
                         ->descriptionIcon('heroicon-m-banknotes'),
 
                     // Piutang Jasa
-                    Stat::make('Total Piutang Jasa', 'Rp ' . number_format($totalPiutangJasa, 0, ',', '.'))
+                    Stat::make('Total Piutang Jasa', 'Rp '.number_format($totalPiutangJasa, 0, ',', '.'))
                         ->description('Hutang Jasa')
                         ->descriptionIcon('heroicon-m-banknotes'),
                 ])
