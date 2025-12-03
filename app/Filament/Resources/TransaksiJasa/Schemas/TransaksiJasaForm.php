@@ -35,21 +35,24 @@ class TransaksiJasaForm
 
                         TextInput::make('kode_jasa')
                             ->label('Kode Jasa')
-                            ->disabled(fn (string $context) => $context === 'edit'
+                            ->disabled(
+                                fn (string $context) => $context === 'edit'
                                 && auth()->user()->karyawan->jabatan !== 'admin'
                             )
                             ->dehydrated(),
 
                         TextInput::make('nomor_invoice_jasa')
                             ->label('Nomor Invoice Jasa')
-                            ->disabled(fn (string $context) => $context === 'edit'
+                            ->disabled(
+                                fn (string $context) => $context === 'edit'
                                 && auth()->user()->karyawan->jabatan !== 'admin'
                             )
                             ->dehydrated(),
 
                         TextInput::make('nomor_surat_jalan_jasa')
                             ->label('Nomor Surat Jalan Jasa')
-                            ->disabled(fn (string $context) => $context === 'edit'
+                            ->disabled(
+                                fn (string $context) => $context === 'edit'
                                 && auth()->user()->karyawan->jabatan !== 'admin'
                             )
                             ->dehydrated(),
@@ -60,7 +63,8 @@ class TransaksiJasaForm
                             ->preload()
                             ->searchable()
                             ->required()
-                            ->disabled(fn (string $context) => $context === 'edit'
+                            ->disabled(
+                                fn (string $context) => $context === 'edit'
                                 && auth()->user()->karyawan->jabatan !== 'admin'
                             ),
 
@@ -69,8 +73,8 @@ class TransaksiJasaForm
                             ->relationship('helper', 'nama')
                             ->preload()
                             ->searchable()
-                            ->required()
-                            ->disabled(fn (string $context) => $context === 'edit'
+                            ->disabled(
+                                fn (string $context) => $context === 'edit'
                                 && auth()->user()->karyawan->jabatan !== 'admin'
                             ),
 
@@ -80,7 +84,8 @@ class TransaksiJasaForm
                             ->preload()
                             ->searchable()
                             ->required()
-                            ->disabled(fn (string $context) => $context === 'edit'
+                            ->disabled(
+                                fn (string $context) => $context === 'edit'
                                 && auth()->user()->karyawan->jabatan !== 'admin'
                             ),
 
@@ -91,13 +96,15 @@ class TransaksiJasaForm
                         TextInput::make('garansi_hari')
                             ->label('Garansi (hari)')
                             ->numeric()
-                            ->disabled(fn (string $context) => $context === 'edit'
+                            ->disabled(
+                                fn (string $context) => $context === 'edit'
                                 && auth()->user()->karyawan->jabatan !== 'admin'
                             ),
 
                         Textarea::make('keterangan')
                             ->label('Keterangan')
-                            ->disabled(fn (string $context) => $context === 'edit'
+                            ->disabled(
+                                fn (string $context) => $context === 'edit'
                                 && auth()->user()->karyawan->jabatan !== 'admin'
                             ),
 
