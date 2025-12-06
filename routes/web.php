@@ -63,6 +63,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sparepart-keluar/{record}/invoice/{format_type?}', 'generateSparepartKeluarInvoice')->name('sparepart-keluar.invoice');
         Route::get('/transaksi-jasa/{record}/invoice/{format_type?}', 'generateTransaksiJasaInvoice')->name('transaksi-jasa.invoice');
         Route::get('/transaksi-jasa/{record}/surat-jalan/{format_type?}', 'generateTransaksiJasaSuratJalan')->name('transaksi-jasa.surat-jalan');
+        Route::get('/karyawan/{record}/slip-gaji', 'generateSlipGaji')->name('karyawan.slip-gaji');
+        Route::get('/karyawan/bulk-slip-gaji-zip', 'generateBulkSlipGajiZip')->name('karyawan.bulk-slip-gaji-zip');
     });
 
     // Private Storage Route

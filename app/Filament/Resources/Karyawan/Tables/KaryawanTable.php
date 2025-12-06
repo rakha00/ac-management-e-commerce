@@ -5,8 +5,11 @@ namespace App\Filament\Resources\Karyawan\Tables;
 use App\Filament\Resources\Karyawan\KaryawanResource;
 use App\Models\Karyawan;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Support\Enums\Size;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
@@ -137,11 +140,53 @@ class KaryawanTable
                     }),
             ])
             ->recordActions([
-                Action::make('penghasilan')
+                ActionGroup::make([
+                    Action::make('penghasilan')
+                        ->label('Detail Pengahasilan')
+                        ->url(fn ($record) => KaryawanResource::getUrl('penghasilan', ['record' => $record])),
+                    Action::make('slip_gaji')
+                        ->label('Slip Gaji')
+                        ->form([
+                            Select::make('bulan')
+                                ->options([
+                                    1 => 'Januari',
+                                    2 => 'Februari',
+                                    3 => 'Maret',
+                                    4 => 'April',
+                                    5 => 'Mei',
+                                    6 => 'Juni',
+                                    7 => 'Juli',
+                                    8 => 'Agustus',
+                                    9 => 'September',
+                                    10 => 'Oktober',
+                                    11 => 'November',
+                                    12 => 'Desember',
+                                ])
+                                ->default(now()->month)
+                                ->required(),
+                            Select::make('tahun')
+                                ->options(function () {
+                                    $currentYear = now()->year;
+                                    $years = range($currentYear - 5, $currentYear + 1);
+
+                                    return array_combine($years, $years);
+                                })
+                                ->default(now()->year)
+                                ->required(),
+                        ])
+                        ->action(function (Karyawan $record, array $data) {
+                            return redirect()->route('karyawan.slip-gaji', [
+                                'record' => $record,
+                                'bulan' => $data['bulan'],
+                                'tahun' => $data['tahun'],
+                            ]);
+                        }),
+                ])
                     ->label('Penghasilan')
                     ->icon('heroicon-o-document-text')
                     ->color('info')
-                    ->url(fn ($record) => KaryawanResource::getUrl('penghasilan', ['record' => $record])),
+                    ->size(Size::Small)
+                    ->link(),
                 EditAction::make(),
             ])
             ->toolbarActions([
@@ -172,6 +217,43 @@ class KaryawanTable
                             ->withFilename(fn () => 'karyawan_'.now()->format('Ymd_His'))
                             ->fromTable(),
                     ]),
+                Action::make('download_zip_slip_gaji')
+                    ->label('Slip Gaji')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->form([
+                        Select::make('bulan')
+                            ->options([
+                                1 => 'Januari',
+                                2 => 'Februari',
+                                3 => 'Maret',
+                                4 => 'April',
+                                5 => 'Mei',
+                                6 => 'Juni',
+                                7 => 'Juli',
+                                8 => 'Agustus',
+                                9 => 'September',
+                                10 => 'Oktober',
+                                11 => 'November',
+                                12 => 'Desember',
+                            ])
+                            ->default(now()->month)
+                            ->required(),
+                        Select::make('tahun')
+                            ->options(function () {
+                                $currentYear = now()->year;
+                                $years = range($currentYear - 5, $currentYear + 1);
+
+                                return array_combine($years, $years);
+                            })
+                            ->default(now()->year)
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        return redirect()->route('karyawan.bulk-slip-gaji-zip', [
+                            'bulan' => $data['bulan'],
+                            'tahun' => $data['tahun'],
+                        ]);
+                    }),
             ]);
     }
 }
